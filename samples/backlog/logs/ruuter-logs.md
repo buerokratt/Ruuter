@@ -1,0 +1,38 @@
+# Sample service
+
+```
+- step_1:
+    call: http.post
+    args:
+      url: https://example.com/A
+      body:
+        some_val: "Hello World"
+        another_val: 123
+    result: the_message
+
+- step_2:
+    skip: true
+    call: http.get
+    args:
+      url: https://example.com/B
+
+- step_3:
+    call: http.get
+    args:
+      url: https://example.com/C
+    result: the_message
+
+- return_value:
+    return: ${the_message.body}
+```
+
+## Output in logs
+
+```
+timestamp      component_version log_level request_author_IP   request_type       forwarded_id       request_id       request_to             request_content response_content    response_code   response_in_ms
+1646220981982  2.0.1             INFO      0.0.0.0             incoming_request   NBZKMWMMMwm72Mvm   -                -                      -               -                   200             1
+1646220981983  2.0.1             INFO      0.0.0.0             http.post          NBZKMWMMMwm72Mvm   VXpQqgQ3GzzS3cXs https://example.com/A  -               -                   200             6
+1646220981989  2.0.1             INFO      0.0.0.0             skip               NBZKMWMMMwm72Mvm   -                -                      -               -                   -               1
+1646220981990  2.0.1             ERROR     0.0.0.0             http.get           NBZKMWMMMwm72Mvm   zdpLqW7fRFAb98G9 https://example.com/C  -               -                   418             2
+1646220981992  2.0.1             INFO      0.0.0.0             final_response     NBZKMWMMMwm72Mvm   -                -                      -               -                   200             3
+```
