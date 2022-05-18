@@ -1,4 +1,4 @@
-# Passing custom headers with a POST request
+# Passing custom headers with a request
 
 *The same goes for GET and other request types as well.*
 
