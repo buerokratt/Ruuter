@@ -1,4 +1,4 @@
-package ee.ria.ruuter;
+package ee.buerokratt.ruuter;
 
 import ee.ria.ruuter.configuration.routing.Configuration;
 import org.springframework.boot.SpringApplication;
