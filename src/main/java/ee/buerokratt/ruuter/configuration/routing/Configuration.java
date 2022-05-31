@@ -1,16 +1,18 @@
-package ee.ria.ruuter.configuration.routing;
+package ee.buerokratt.ruuter.configuration.routing;
 
-import ee.ria.ruuter.model.ConfigurationNode;
-import ee.ria.ruuter.service.ConfigurationNodeService;
+import ee.buerokratt.ruuter.model.ConfigurationNode;
+import ee.buerokratt.ruuter.service.ConfigurationNodeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import static ee.ria.ruuter.util.FileUtils.readFile;
+
+import static ee.buerokratt.ruuter.util.FileUtils.readFile;
 
 @Slf4j
 @Component

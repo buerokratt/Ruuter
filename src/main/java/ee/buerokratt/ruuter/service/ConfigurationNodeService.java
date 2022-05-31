@@ -1,9 +1,10 @@
-package ee.ria.ruuter.service;
+package ee.buerokratt.ruuter.service;
 
-import ee.ria.ruuter.model.ConfigurationNode;
+import ee.buerokratt.ruuter.model.ConfigurationNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.Map;
 

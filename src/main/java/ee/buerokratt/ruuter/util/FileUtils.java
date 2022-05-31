@@ -1,4 +1,4 @@
-package ee.ria.ruuter.util;
+package ee.buerokratt.ruuter.util;
 
 import lombok.extern.slf4j.Slf4j;
 

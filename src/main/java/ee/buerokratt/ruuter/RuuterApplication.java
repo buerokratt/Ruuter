@@ -1,6 +1,6 @@
 package ee.buerokratt.ruuter;
 
-import ee.ria.ruuter.configuration.routing.Configuration;
+import ee.buerokratt.ruuter.configuration.routing.Configuration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
