@@ -1,12 +1,12 @@
 # #1
 
 ```
-- step_1:
+- step: step_1
     assign:
         - stringValue: "Bürokratt"
         - integerValue: 2021
         
-- step_2:
+- step: step_2
     assign:
         - doubleNumber: 2.0
 
@@ -20,16 +20,16 @@ Bürokratt v2.0 since 2021
 # #2
 
 ```
-- step_1:
+- step: step_1
     assign:
         - stringValue: "Bürokratt"
         - integerValue: 2021
         
-- step_2:
+- step: step_2
     assign:
         - doubleNumber: 2.0
 
-- step_3:
+- step: step_3
     assign:
         - concatenated: " v" + ${doubleNumber + " since " + integerValue}
 
@@ -49,7 +49,7 @@ https://ruuter/passing-get-parameters?passedVariable=passedValue
 `passing-get-parameters.yaml`
 
 ```
-- first_step:
+- step: first_step
     call: http.get
     args:
         url: https://ruuter/custom-get-endpoint
@@ -73,7 +73,7 @@ curl https://ruuter/passing-post-parameters \
 `passing-post-parameters.yaml`
 
 ```
-- first_step:
+- step: first_step
     call: http.post
     args:
         url: https://example.com/post-endpoint
