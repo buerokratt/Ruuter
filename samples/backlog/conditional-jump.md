@@ -3,13 +3,13 @@
 [https://cloud.google.com/workflows/docs/samples/workflows-step-conditional-weekend](https://cloud.google.com/workflows/docs/samples/workflows-step-conditional-weekend)
 
 ```
-- getCurrentTime:
+- step: getCurrentTime
     call: http.get
     args:
       url: https://us-central1-workflowsample.cloudfunctions.net/datetime
     result: currentTime
 
-- conditionalSwitch:
+- step: conditionalSwitch
     switch:
       - condition: ${currentTime.body.dayOfTheWeek == "Friday"}
         next: friday
@@ -17,12 +17,12 @@
         next: weekend
     next: workWeek
 
-- friday:
+- step: friday
     return: "It's Friday! Almost the weekend!"
 
-- weekend:
+- step: weekend
     return: "It's the weekend!"
 
-- workWeek:
+- step: workWeek
     return: "It's the work week."
 ```
