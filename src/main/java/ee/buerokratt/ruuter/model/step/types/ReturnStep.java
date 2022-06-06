@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.model.step.types;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import ee.buerokratt.ruuter.model.Step;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 @NoArgsConstructor
 public class ReturnStep extends Step {
 
+    @JsonAlias({"return"})
     private String returnValue;
 
     @Override

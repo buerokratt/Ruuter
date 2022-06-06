@@ -17,10 +17,10 @@ import org.springframework.stereotype.Service;
 @NoArgsConstructor
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
-    property = "type")
+    property = "call")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = HttpStep.class, name = "get"),
-    @JsonSubTypes.Type(value = HttpStep.class, name = "post"),
+    @JsonSubTypes.Type(value = HttpStep.class, name = "http.get"),
+    @JsonSubTypes.Type(value = HttpStep.class, name = "http.post"),
     @JsonSubTypes.Type(value = ReturnStep.class, name = "return"),
     @JsonSubTypes.Type(value = AssignStep.class, name = "assign"),
 })
