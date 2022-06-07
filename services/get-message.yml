@@ -1,4 +1,4 @@
-- step: get_message
+get_message:
   call: http.get
   args:
     url: https://example.com/endpoint
@@ -7,7 +7,7 @@
       another_val: 123
   result: the_response
 
-- step: post_message
+post_message:
   call: http.post
   args:
     url: https://example.com/endpoint
@@ -16,12 +16,10 @@
       another_val: 123
   result: the_message
 
-- step: assign
-  call: assign
+assign_value:
   assign:
     stringValue: "Bürokratt"
     integerValue: 2021
 
-- step: return_value
-  call: return
+return_value:
   return: ${the_message.body}

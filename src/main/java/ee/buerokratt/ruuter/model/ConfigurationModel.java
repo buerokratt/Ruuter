@@ -4,8 +4,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -13,5 +14,5 @@ import java.util.List;
 @NoArgsConstructor
 public class ConfigurationModel {
 
-    private HashMap<String, List<Step>> configurations = new HashMap<>();
+    private HashMap<String, Map<String, Step>> configurations = new HashMap<>();
 }
