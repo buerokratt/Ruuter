@@ -1,14 +1,10 @@
 package ee.buerokratt.ruuter.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.stereotype.Service;
 
-@Getter
-@Setter
-@Service
+@Data
 @NoArgsConstructor
 public class Step {
 
