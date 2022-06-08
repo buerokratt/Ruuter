@@ -1,7 +1,10 @@
 package ee.buerokratt.ruuter.domain;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

@@ -1,6 +1,9 @@
 package ee.buerokratt.ruuter.domain;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.HashMap;
 
