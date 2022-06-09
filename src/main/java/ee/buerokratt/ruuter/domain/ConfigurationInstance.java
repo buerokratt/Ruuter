@@ -8,13 +8,9 @@ import java.util.Map;
 @Data
 public class ConfigurationInstance {
     private Map<String, ConfigurationStep> steps;
-
     private Map<String, String> requestBody;
-
     private Map<String, String> requestParams;
-
-    private HashMap<String, String> context;
-
+    private HashMap<String, Object> context;
     private Object returnValue;
 
     public ConfigurationInstance(Map<String, ConfigurationStep> steps, Map<String, String> requestBody, Map<String, String> requestParams) {

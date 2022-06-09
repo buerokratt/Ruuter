@@ -1,12 +1,9 @@
 package ee.buerokratt.ruuter.util;
 
-import lombok.extern.slf4j.Slf4j;
+import ee.buerokratt.ruuter.service.exception.InvalidConfigurationDirectoryException;
 
 import java.io.File;
 
-import static java.lang.String.format;
-
-@Slf4j
 public class FileUtils {
 
     private FileUtils() {
@@ -19,7 +16,7 @@ public class FileUtils {
                 return folder;
             }
         }
-        throw new RuntimeException(format("Failed to resolve directory: %s", path));
+        throw new InvalidConfigurationDirectoryException(path, new IllegalArgumentException());
     }
 
     public static boolean isYmlFile(File file) {

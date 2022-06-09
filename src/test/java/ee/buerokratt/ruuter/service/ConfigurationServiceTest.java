@@ -25,26 +25,26 @@ class ConfigurationServiceTest extends BaseIntegrationTest {
 
     @Test
     void getConfigurations_shouldReturnConfigurationsMap() {
-        HttpStepArgs<Object> expectedGetArgs = new HttpStepArgs<>() {{
+        HttpStepArgs expectedGetArgs = new HttpStepArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");
                 put("another_val", 123);
             }});
             setUrl("https://example.com/endpoint");
         }};
-        HttpStepArgs<Object> expectedPostArgs = new HttpStepArgs<>() {{
+        HttpStepArgs expectedPostArgs = new HttpStepArgs() {{
             setBody(new HashMap<>() {{
                 put("some_val", "Hello World");
                 put("another_val", 123);
             }});
             setUrl("https://example.com/endpoint");
         }};
-        HttpStep<Object> expectedGetStep = new HttpStep<>() {{
+        HttpStep expectedGetStep = new HttpStep() {{
             setName("get_message");
             setArgs(expectedGetArgs);
             setResult("the_response");
         }};
-        HttpStep<Object> expectedPostStep = new HttpStep<>() {{
+        HttpStep expectedPostStep = new HttpStep() {{
             setName("post_message");
             setArgs(expectedPostArgs);
             setResult("the_message");

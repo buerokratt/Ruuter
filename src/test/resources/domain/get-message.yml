@@ -1,0 +1,22 @@
+get_message:
+  call: http.get
+  args:
+    url: https://example.com/endpoint
+  result: the_response
+
+post_message:
+  call: http.post
+  args:
+    url: https://example.com/endpoint
+    body:
+      some_val: "HelloWorld"
+      another_val: 123
+  result: the_message
+
+assign_value:
+  assign:
+    stringValue: "Bürokratt"
+    integerValue: 2021
+
+return_value:
+  return: "return_value"
