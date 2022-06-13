@@ -1,12 +1,9 @@
 package ee.buerokratt.ruuter.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 
 import static java.lang.String.format;
 
-@Slf4j
 public class FileUtils {
 
     private FileUtils() {

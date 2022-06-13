@@ -1,6 +1,7 @@
 package ee.buerokratt.ruuter.domain;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,15 @@ public class ReturnStep extends ConfigurationStep {
 
     @Override
     public void execute(ConfigurationInstance configurationInstance) {
-        configurationInstance.setReturnValue(returnValue);
+        ScriptingHelper scriptingHelper = configurationInstance.getScriptingHelper();
+
+        if (Boolean.TRUE.equals(scriptingHelper.containsScript(returnValue))) {
+            Object evaluatedValue = scriptingHelper.evaluateScripts(returnValue, configurationInstance.getContext());
+            configurationInstance.setReturnValue(evaluatedValue);
+        } else {
+            configurationInstance.setReturnValue(returnValue);
+        }
+
         super.execute(configurationInstance);
     }
 }
