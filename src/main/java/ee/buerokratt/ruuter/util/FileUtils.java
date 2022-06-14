@@ -1,33 +1,39 @@
 package ee.buerokratt.ruuter.util;
 
-import java.io.File;
 
-import static java.lang.String.format;
+import org.springframework.util.StringUtils;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
 
 public class FileUtils {
+
+    public static final String SUFFIX_YAML = ".yaml";
+    public static final String SUFFIX_YML = ".yml";
 
     private FileUtils() {
     }
 
-    public static File getFolder(String path) {
-        if (path != null) {
-            File folder = new File(path);
-            if (folder.exists() && folder.isDirectory()) {
-                return folder;
+    public static Path getFolderPath(String pathString) {
+        if (StringUtils.hasLength(pathString)) {
+            Path path = Paths.get(pathString);
+            if (exists(path) && isDirectory(path)) {
+                return path;
             }
         }
-        throw new RuntimeException(format("Failed to resolve directory: %s", path));
+        throw new IllegalArgumentException("Failed to resolve directory: %s".formatted(pathString));
     }
 
-    public static boolean isYmlFile(File file) {
-        return !file.isDirectory() && file.getName().endsWith(".yml");
+    public static boolean isYmlFile(Path path) {
+        String pathString = path.toString();
+        return !isDirectory(path) && (pathString.endsWith(SUFFIX_YML) || pathString.endsWith(SUFFIX_YAML));
     }
 
-    public static String getFileNameWithoutYmlSuffix(File file) {
-        String name = file.getName();
-        if (isYmlFile(file)) {
-            return name.substring(0, name.length() - 4);
-        }
-        return file.getName();
+    public static String getFileNameWithoutSuffix(Path path) {
+        String nameWithSuffix = path.getFileName().toString();
+        return nameWithSuffix.substring(0, nameWithSuffix.lastIndexOf('.'));
     }
 }

@@ -12,12 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static ee.buerokratt.ruuter.util.FileUtils.getFolder;
+import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
@@ -26,27 +24,27 @@ public class ConfigurationService {
     private final ConfigurationMappingHelper configurationMappingHelper;
     private final ScriptingHelper scriptingHelper;
 
-    private final HashMap<String, Map<String, ConfigurationStep>> configurations;
+    private final Map<String, Map<String, ConfigurationStep>> configurations;
 
     public ConfigurationService(ApplicationProperties properties, ConfigurationMappingHelper configurationMappingHelper, ScriptingHelper scriptingHelper) {
         this.configurationMappingHelper = configurationMappingHelper;
-        this.configurations = new HashMap<>(getConfigurations(properties.getConfigPath()));
         this.scriptingHelper = scriptingHelper;
+        this.configurations = getConfigurations(properties.getConfigPath());
     }
 
     public Map<String, Map<String, ConfigurationStep>> getConfigurations(String configPath) {
-        Path servicesAbsPath = Paths.get(getFolder(configPath).getAbsolutePath());
-        try (Stream<Path> paths = Files.walk(servicesAbsPath).filter(Files::isRegularFile)) {
+        try (Stream<Path> paths = Files.walk(getFolderPath(configPath))) {
             return paths
-                .map(Path::toFile)
-                .collect(toMap(FileUtils::getFileNameWithoutYmlSuffix, configurationMappingHelper::getConfigurationSteps));
+                .filter(Files::isRegularFile)
+                .collect(toMap(FileUtils::getFileNameWithoutSuffix, configurationMappingHelper::getConfigurationSteps));
         } catch (Exception e) {
             throw new LoadConfigurationsException(e);
         }
     }
 
-    public Object executeConfiguration(String configurationName, Map<String, String> requestBody, Map<String, String> requestParams) {
-        ConfigurationInstance configurationInstance = new ConfigurationInstance(configurations.get(configurationName), requestBody, requestParams, scriptingHelper);
+    public Object execute(String configuration, Map<String, String> requestBody, Map<String, String> requestParams) {
+        Map<String, ConfigurationStep> steps = configurations.get(configuration);
+        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, steps, requestBody, requestParams);
         configurationInstance.execute();
         return configurationInstance.getReturnValue();
     }

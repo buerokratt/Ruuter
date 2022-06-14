@@ -2,34 +2,39 @@ package ee.buerokratt.ruuter.utils;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import static ee.buerokratt.ruuter.util.FileUtils.getFolder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FileUtilsTest {
 
     @Test
     void getFolder_shouldThrowWhenPathIsEmpty() {
-        assertThrows(RuntimeException.class, () -> getFolder(null));
-        assertThrows(RuntimeException.class, () -> getFolder(""));
+        assertThrows(IllegalArgumentException.class, () -> getFolderPath(null));
+        assertThrows(IllegalArgumentException.class, () -> getFolderPath(""));
     }
 
     @Test
     void getFolder_shouldThrowOnInvalidPath() {
-        assertThrows(RuntimeException.class, () -> getFolder("/fake/path"));
+        assertThrows(RuntimeException.class, () -> getFolderPath("/fake/path"));
     }
 
     @Test
     void getFolder_shouldThrowWhenNoDirectory() {
         String path = FileUtilsTest.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "ConfigurationServiceTest.java";
-        assertThrows(RuntimeException.class, () -> getFolder(path));
+        assertThrows(RuntimeException.class, () -> getFolderPath(path));
     }
 
     @Test
-    void getFolder_shouldReturnFolder() {
+    void getFolderPath_shouldReturnFolderPath() {
         String path = "src/test/resources/services";
-        assertEquals(getFolder(path), new File(path));
+
+        Path folderPath = getFolderPath(path);
+
+        assertEquals(folderPath, Paths.get(path));
+        assertTrue(Files.isDirectory(folderPath));
     }
 }

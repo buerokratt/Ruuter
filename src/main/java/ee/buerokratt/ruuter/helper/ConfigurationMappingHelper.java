@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -30,16 +30,16 @@ public class ConfigurationMappingHelper {
         this.mapper = mapper;
     }
 
-    public Map<String, ConfigurationStep> getConfigurationSteps(File file) {
+    public Map<String, ConfigurationStep> getConfigurationSteps(Path path) {
         try {
-            if (FileUtils.isYmlFile(file)) {
-                Map<String, JsonNode> nodeMap = mapper.readValue(file, new TypeReference<>() {});
+            if (FileUtils.isYmlFile(path)) {
+                Map<String, JsonNode> nodeMap = mapper.readValue(path.toFile(), new TypeReference<>() {});
                 return convertNodeMapToStepMap(nodeMap);
             } else {
                 throw new IllegalArgumentException("Config not yml file");
             }
         } catch (Exception e) {
-            throw new InvalidConfigurationException(file.getName(), e);
+            throw new InvalidConfigurationException(path.toString(), e);
         }
     }
 
