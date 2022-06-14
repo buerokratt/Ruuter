@@ -5,7 +5,6 @@ import ee.buerokratt.ruuter.service.exception.InvalidConfigurationDirectoryExcep
 import java.io.File;
 
 public class FileUtils {
-
     private FileUtils() {
     }
 

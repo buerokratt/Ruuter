@@ -1,6 +1,7 @@
-package ee.buerokratt.ruuter.domain;
+package ee.buerokratt.ruuter.domain.steps;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ public class ReturnStep extends ConfigurationStep {
 
     @Override
     public void execute(ConfigurationInstance configurationInstance) {
-        configurationInstance.setReturnValue(returnValue);
         super.execute(configurationInstance);
+        configurationInstance.setReturnValue(returnValue);
     }
 }

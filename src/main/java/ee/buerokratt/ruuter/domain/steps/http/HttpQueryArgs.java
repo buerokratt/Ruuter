@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.domain;
+package ee.buerokratt.ruuter.domain.steps.http;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 @Data
 @NoArgsConstructor
-public class HttpStepArgs {
+public class HttpQueryArgs {
     private String url;
     private HashMap<String, Object> query;
     private HashMap<String, String> headers;

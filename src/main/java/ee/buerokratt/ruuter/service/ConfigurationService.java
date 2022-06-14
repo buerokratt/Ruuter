@@ -2,7 +2,7 @@ package ee.buerokratt.ruuter.service;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
-import ee.buerokratt.ruuter.domain.ConfigurationStep;
+import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.service.exception.LoadConfigurationsException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
