@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.domain;
+package ee.buerokratt.ruuter.domain.steps.http;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -9,8 +9,5 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
-public class HttpStep<T> extends ConfigurationStep {
-    private HttpStepArgs<T> args;
-
-    private String result;
+public class HttpPostStep extends HttpStep {
 }

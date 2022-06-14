@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.domain;
+package ee.buerokratt.ruuter.domain.steps;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

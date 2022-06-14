@@ -29,7 +29,7 @@ class FileUtilsTest {
 
     @Test
     void getFolder_shouldReturnFolder() {
-        String path = "src/test/resources/services";
+        String path = "src/test/resources/service";
         assertEquals(getFolder(path), new File(path));
     }
 }
