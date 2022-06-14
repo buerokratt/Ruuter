@@ -1,7 +1,11 @@
 package ee.buerokratt.ruuter.service;
 
 import ee.buerokratt.ruuter.BaseIntegrationTest;
-import ee.buerokratt.ruuter.domain.*;
+import ee.buerokratt.ruuter.domain.steps.*;
+import ee.buerokratt.ruuter.domain.steps.http.HttpGetStep;
+import ee.buerokratt.ruuter.domain.steps.http.HttpPostStep;
+import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
+import ee.buerokratt.ruuter.domain.steps.http.HttpQueryArgs;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +18,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@TestPropertySource(properties = { "application.config-path=${user.dir}/src/test/resources/services" })
+@TestPropertySource(properties = { "application.config-path=${user.dir}/src/test/resources/service" })
 class ConfigurationServiceTest extends BaseIntegrationTest {
 
     @Autowired
@@ -25,29 +29,29 @@ class ConfigurationServiceTest extends BaseIntegrationTest {
 
     @Test
     void getConfigurations_shouldReturnConfigurationsMap() {
-        HttpStepArgs<Object> expectedGetArgs = new HttpStepArgs<>() {{
+        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");
                 put("another_val", 123);
             }});
             setUrl("https://example.com/endpoint");
         }};
-        HttpStepArgs<Object> expectedPostArgs = new HttpStepArgs<>() {{
+        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
             setBody(new HashMap<>() {{
                 put("some_val", "Hello World");
                 put("another_val", 123);
             }});
             setUrl("https://example.com/endpoint");
         }};
-        HttpStep<Object> expectedGetStep = new HttpStep<>() {{
+        HttpStep expectedGetStep = new HttpGetStep() {{
             setName("get_message");
             setArgs(expectedGetArgs);
-            setResult("the_response");
+            setResultName("the_response");
         }};
-        HttpStep<Object> expectedPostStep = new HttpStep<>() {{
+        HttpStep expectedPostStep = new HttpPostStep() {{
             setName("post_message");
             setArgs(expectedPostArgs);
-            setResult("the_message");
+            setResultName("the_message");
         }};
         AssignStep<Object> expectedAssignStep = new AssignStep<>() {{
             setName("assign_value");
@@ -62,16 +66,16 @@ class ConfigurationServiceTest extends BaseIntegrationTest {
         }};
 
         Map<String, Map<String, ConfigurationStep>> configurations = configurationService.getConfigurations(configPath);
-        List<String> stepNames = new ArrayList<>(configurations.get("get-message").keySet());
+        List<String> stepNames = new ArrayList<>(configurations.get("test-conf").keySet());
 
         assertEquals(1, configurations.size());
         assertEquals("get_message", stepNames.get(0));
         assertEquals("post_message", stepNames.get(1));
         assertEquals("assign_value", stepNames.get(2));
         assertEquals("return_value", stepNames.get(3));
-        assertEquals(expectedGetStep, configurations.get("get-message").get("get_message"));
-        assertEquals(expectedPostStep, configurations.get("get-message").get("post_message"));
-        assertEquals(expectedAssignStep, configurations.get("get-message").get("assign_value"));
-        assertEquals(expectedReturnStep, configurations.get("get-message").get("return_value"));
+        assertEquals(expectedGetStep, configurations.get("test-conf").get("get_message"));
+        assertEquals(expectedPostStep, configurations.get("test-conf").get("post_message"));
+        assertEquals(expectedAssignStep, configurations.get("test-conf").get("assign_value"));
+        assertEquals(expectedReturnStep, configurations.get("test-conf").get("return_value"));
     }
 }

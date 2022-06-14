@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.domain;
+package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;

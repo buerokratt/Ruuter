@@ -1,6 +1,7 @@
-package ee.buerokratt.ruuter.domain;
+package ee.buerokratt.ruuter.domain.steps;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
