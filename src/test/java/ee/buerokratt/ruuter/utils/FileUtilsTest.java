@@ -30,7 +30,7 @@ class FileUtilsTest {
 
     @Test
     void getFolderPath_shouldReturnFolderPath() {
-        String path = "src/test/resources/services";
+        String path = "src/test/resources/service";
 
         Path folderPath = getFolderPath(path);
 

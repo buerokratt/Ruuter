@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.domain.steps;
 
+import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -15,10 +15,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ConfigurationInstance {
     private final ScriptingHelper scriptingHelper;
-    private Map<String, ConfigurationStep> steps;
-    private Map<String, String> requestBody;
-    private Map<String, String> requestParams;
-    private HashMap<String, Object> context;
+    private final Map<String, ConfigurationStep> steps;
+    private final Map<String, String> requestBody;
+    private final Map<String, String> requestParams;
+    private final HashMap<String, Object> context = new HashMap<>();
     private Object returnValue;
 
     public void execute() {

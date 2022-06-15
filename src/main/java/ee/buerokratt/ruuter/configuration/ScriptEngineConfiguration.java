@@ -8,7 +8,6 @@ import javax.script.ScriptEngineManager;
 
 @Configuration
 public class ScriptEngineConfiguration {
-
     public ScriptEngineConfiguration() {
         System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
     }

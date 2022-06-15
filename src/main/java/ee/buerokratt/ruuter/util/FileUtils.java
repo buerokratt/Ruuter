@@ -10,7 +10,6 @@ import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
 
 public class FileUtils {
-
     public static final String SUFFIX_YAML = ".yaml";
     public static final String SUFFIX_YML = ".yml";
 
