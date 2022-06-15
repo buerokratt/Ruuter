@@ -4,9 +4,11 @@ Use reflected requests to imitate to-be API calls that do not yet exist.
 
 ```
 - step_1:
-    call: reflect.http.post
+    call: reflect.mock
     args:
-        body:
+        request:
+            some: "request"
+        response:
             project: "Bürokratt"
             website: "www.kratid.ee"
     result: reflected_request
@@ -21,7 +23,12 @@ return: ${reflected_request.body.project}
 curl https://ruuter/reflected-request
 
 {
-	"project": "Bürokratt",
-	"website": "www.kratid.ee"
+	"request": {
+		"some": "request"
+	},
+	"response": {
+		"project": "Bürokratt",
+		"website": "www.kratid.ee"
+	}
 }
 ```
