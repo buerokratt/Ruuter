@@ -23,12 +23,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    implementation 'org.graalvm.js:js:22.1.0.1'
+    implementation 'org.graalvm.js:js-scriptengine:22.1.0.1'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.mockito:mockito-core:4.6.1'
+    testImplementation "com.github.tomakehurst:wiremock-jre8:2.33.2"
 }
 
 tasks.named('test') {

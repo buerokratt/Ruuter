@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.service.exception;
+package ee.buerokratt.ruuter.helper.exception;
 
 import static java.lang.String.format;
 

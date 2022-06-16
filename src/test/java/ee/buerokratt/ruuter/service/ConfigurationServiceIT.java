@@ -19,7 +19,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestPropertySource(properties = { "application.config-path=${user.dir}/src/test/resources/service" })
-class ConfigurationServiceTest extends BaseIntegrationTest {
+class ConfigurationServiceIT extends BaseIntegrationTest {
 
     @Autowired
     private ConfigurationService configurationService;

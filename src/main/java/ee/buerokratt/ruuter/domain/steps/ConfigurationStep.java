@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConfigurationStep {
+public abstract class ConfigurationStep {
     @JsonAlias({"step"})
     private String name;
     @JsonAlias({"next"})

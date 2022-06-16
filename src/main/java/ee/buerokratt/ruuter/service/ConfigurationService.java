@@ -3,46 +3,48 @@ package ee.buerokratt.ruuter.service;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
-import ee.buerokratt.ruuter.service.exception.LoadConfigurationsException;
+import ee.buerokratt.ruuter.helper.ConfigurationMappingHelper;
+import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import ee.buerokratt.ruuter.helper.exception.LoadConfigurationsException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ee.buerokratt.ruuter.util.FileUtils.getFolder;
+import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
+import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Service
 public class ConfigurationService {
-    private final HashMap<String, Map<String, ConfigurationStep>> configurations;
+    private final ConfigurationMappingHelper configurationMappingHelper;
+    private final ScriptingHelper scriptingHelper;
 
-    private final ConfigurationMappingService configurationMappingService;
+    private final Map<String, Map<String, ConfigurationStep>> configurations;
 
-    public ConfigurationService(ConfigurationMappingService configurationMappingService, ApplicationProperties properties) {
-        this.configurationMappingService = configurationMappingService;
-        this.configurations = new HashMap<>(getConfigurations(properties.getConfigPath()));
+    public ConfigurationService(ApplicationProperties properties, ConfigurationMappingHelper configurationMappingHelper, ScriptingHelper scriptingHelper) {
+        this.configurationMappingHelper = configurationMappingHelper;
+        this.scriptingHelper = scriptingHelper;
+        this.configurations = getConfigurations(properties.getConfigPath());
     }
 
     public Map<String, Map<String, ConfigurationStep>> getConfigurations(String configPath) {
-        Path servicesAbsPath = Paths.get(getFolder(configPath).getAbsolutePath());
-        try (Stream<Path> paths = Files.walk(servicesAbsPath).filter(Files::isRegularFile)) {
+        try (Stream<Path> paths = Files.walk(getFolderPath(configPath))) {
             return paths
-                .map(Path::toFile)
-                .collect(Collectors.toMap(FileUtils::getFileNameWithoutYmlSuffix, configurationMappingService::getConfigurationSteps));
+                .filter(Files::isRegularFile)
+                .collect(toMap(FileUtils::getFileNameWithoutSuffix, configurationMappingHelper::getConfigurationSteps));
         } catch (Exception e) {
             throw new LoadConfigurationsException(e);
         }
     }
 
-    public Object executeConfiguration(String configurationName, Map<String, String> requestBody, Map<String, String> requestParams) {
-        ConfigurationInstance configurationInstance = new ConfigurationInstance(configurations.get(configurationName), requestBody, requestParams);
+    public Object execute(String configuration, Map<String, String> requestBody, Map<String, String> requestParams) {
+        Map<String, ConfigurationStep> steps = configurations.get(configuration);
+        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, steps, requestBody, requestParams);
         configurationInstance.execute();
         return configurationInstance.getReturnValue();
     }

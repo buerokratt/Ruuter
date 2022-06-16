@@ -1,7 +1,9 @@
 package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -10,19 +12,14 @@ import java.util.Map;
 
 @Slf4j
 @Data
+@RequiredArgsConstructor
 public class ConfigurationInstance {
-    private Map<String, ConfigurationStep> steps;
-    private Map<String, String> requestBody;
-    private Map<String, String> requestParams;
-    private HashMap<String, Object> context;
+    private final ScriptingHelper scriptingHelper;
+    private final Map<String, ConfigurationStep> steps;
+    private final Map<String, String> requestBody;
+    private final Map<String, String> requestParams;
+    private final HashMap<String, Object> context = new HashMap<>();
     private Object returnValue;
-
-    public ConfigurationInstance(Map<String, ConfigurationStep> steps, Map<String, String> requestBody, Map<String, String> requestParams) {
-        this.steps = steps;
-        this.requestBody = requestBody;
-        this.requestParams = requestParams;
-        this.context = new HashMap<>();
-    }
 
     public void execute() {
         List<String> configurationNames = steps.keySet().stream().toList();

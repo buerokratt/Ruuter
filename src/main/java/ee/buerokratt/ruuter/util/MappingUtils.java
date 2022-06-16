@@ -15,4 +15,12 @@ public class MappingUtils {
             throw new IllegalArgumentException(e);
         }
     }
+
+    public static String convertObjectToJson(Object o) {
+        try {
+            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(o);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/controller"})
-class ConfigurationControllerTest extends BaseIntegrationTest {
+class ConfigurationControllerIT extends BaseIntegrationTest {
 
     @Test
     void getRoute_shouldGet() {

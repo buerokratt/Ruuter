@@ -1,1 +1,2 @@
-application.config-path: ${user.dir}/services
+application:
+  config-path: ${user.dir}/services
