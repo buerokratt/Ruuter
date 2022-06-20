@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.domain.steps.http.HttpQueryArgs;
 import ee.buerokratt.ruuter.service.exception.InvalidHttpRequestException;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -23,7 +24,25 @@ public class HttpUtils {
     private HttpUtils() {
     }
 
-    public static HttpResponse<String> makeHttpRequest(HttpQueryArgs args) {
+    public static HttpResponse<String> makeHttpPostRequest(HttpQueryArgs args) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            HttpRequest.Builder request = HttpRequest.newBuilder()
+                .uri(new URI(getUriFromArgs(args)))
+                .timeout(Duration.of(10, SECONDS))
+                .headers("Content-Type", "text/plain;charset=UTF-8")
+                .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(args.getBody())));
+            if (args.getHeaders() != null) {
+                request.headers(convertHeadersMapToList(args.getHeaders()));
+            }
+            return sendHttpRequest(request);
+        } catch (URISyntaxException | IOException e) {
+            Thread.currentThread().interrupt();
+            throw new InvalidHttpRequestException(e);
+        }
+    }
+
+    public static HttpResponse<String> makeHttpGetRequest(HttpQueryArgs args) {
         try {
             HttpRequest.Builder request = HttpRequest.newBuilder()
                 .uri(new URI(getUriFromArgs(args)))
@@ -32,12 +51,20 @@ public class HttpUtils {
             if (args.getHeaders() != null) {
                 request.headers(convertHeadersMapToList(args.getHeaders()));
             }
+            return sendHttpRequest(request);
+        } catch (URISyntaxException e) {
+            throw new InvalidHttpRequestException(e);
+        }
+    }
+
+    public static HttpResponse<String> sendHttpRequest(HttpRequest.Builder request) {
+        try {
             return HttpClient
                 .newBuilder()
                 .proxy(ProxySelector.getDefault())
                 .build()
                 .send(request.build(), HttpResponse.BodyHandlers.ofString());
-        } catch (URISyntaxException | IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new InvalidHttpRequestException(e);
         }
