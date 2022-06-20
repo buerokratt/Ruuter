@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.domain.steps.AssignStep;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
+import ee.buerokratt.ruuter.domain.steps.http.HttpMockStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import ee.buerokratt.ruuter.helper.exception.InvalidConfigurationException;
 import ee.buerokratt.ruuter.helper.exception.InvalidConfigurationStepException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -57,6 +59,9 @@ public class ConfigurationMappingHelper {
 
     private ConfigurationStep convertJsonNodeToConfigurationStep(JsonNode jsonNode) throws JsonProcessingException {
         if (jsonNode.get("call") != null) {
+            if (Objects.equals(mapper.convertValue(jsonNode.get("call"), String.class), "reflect.mock")) {
+                return mapper.treeToValue(jsonNode, HttpMockStep.class);
+            }
             return mapper.treeToValue(jsonNode, HttpStep.class);
         }
         if (jsonNode.get("assign") != null) {

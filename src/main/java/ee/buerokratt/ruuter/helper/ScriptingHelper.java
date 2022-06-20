@@ -69,7 +69,7 @@ public class ScriptingHelper {
             return possibleObject;
         }
         String objectName = possibleObject.substring(0, possibleObject.indexOf('.', 0));
-        bindings.put(objectName, MappingUtils.convertObjectToJson(evalContext.get(objectName)));
+        bindings.put(objectName, MappingUtils.convertObjectToString(evalContext.get(objectName)));
         return "JSON.parse(" + possibleObject.replaceFirst("\\.", ").");
     }
 

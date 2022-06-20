@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Map;
+
 public class MappingUtils {
     private MappingUtils() {
     }
@@ -16,11 +18,16 @@ public class MappingUtils {
         }
     }
 
-    public static String convertObjectToJson(Object o) {
+    public static String convertObjectToString(Object o) {
         try {
             return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(o);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    public static JsonNode convertMapToNode(Map<String, Object> response) {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.convertValue(response, JsonNode.class);
     }
 }

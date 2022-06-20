@@ -11,9 +11,7 @@ import java.util.HashMap;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
-public class HttpQueryArgs extends HttpArgs {
-    private String url;
-    private HashMap<String, Object> query;
-    private HashMap<String, String> headers;
-    private HashMap<String, Object> body;
+public class HttpMockArgs extends HttpArgs {
+    private HashMap<String, Object> request;
+    private HashMap<String, Object> response;
 }
