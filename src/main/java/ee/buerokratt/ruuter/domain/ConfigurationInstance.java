@@ -2,9 +2,11 @@ package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.sleuth.Tracer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +21,16 @@ public class ConfigurationInstance {
     private final Map<String, String> requestBody;
     private final Map<String, String> requestParams;
     private final HashMap<String, Object> context = new HashMap<>();
+    private final String requestOrigin;
+    private final Tracer tracer;
     private Object returnValue;
 
-    public void execute() {
-        List<String> configurationNames = steps.keySet().stream().toList();
+    public void execute(String configurationName) {
+        List<String> stepNames = steps.keySet().stream().toList();
         try {
-            executeStep(configurationNames.get(0), configurationNames);
+            LoggingUtils.logIncomingRequest(log, configurationName, requestOrigin);
+            executeStep(stepNames.get(0), stepNames);
+            LoggingUtils.logRequestProcessed(log, configurationName, requestOrigin);
         } catch (Exception e) {
             log.error("encountered error when executing configurationInstance", e);
         }
@@ -32,11 +38,7 @@ public class ConfigurationInstance {
 
     private void executeStep(String stepName, List<String> configurationNames) {
         ConfigurationStep stepToExecute = steps.get(stepName);
-        if (Boolean.TRUE.equals(stepToExecute.getSkip())) {
-            log.info("Skipping step: %s".formatted(stepName));
-        } else {
-            stepToExecute.execute(this);
-        }
+        stepToExecute.execute(this);
         executeNextStep(stepToExecute, configurationNames);
     }
 

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -20,7 +21,8 @@ public class ConfigurationController {
     @RequestMapping(value = "/{configuration}", method = {GET, POST})
     public ResponseEntity<RuuterResponse> queryConfiguration(@PathVariable String configuration,
                                                              @RequestBody(required = false) Map<String, String> requestBody,
-                                                             @RequestParam(required = false) Map<String, String> requestParams) {
-        return ok(new RuuterResponse(configurationService.execute(configuration, requestBody, requestParams)));
+                                                             @RequestParam(required = false) Map<String, String> requestParams,
+                                                             HttpServletRequest request) {
+        return ok(new RuuterResponse(configurationService.execute(configuration, requestBody, requestParams, request.getRemoteAddr())));
     }
 }

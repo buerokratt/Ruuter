@@ -2,6 +2,7 @@ package ee.buerokratt.ruuter.domain.steps.http;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import ee.buerokratt.ruuter.BaseTest;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import org.junit.jupiter.api.Test;
@@ -13,12 +14,12 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @WireMockTest
-class HttpGetStepTest {
+class HttpGetStepTest extends BaseTest {
     private final ScriptingHelper scriptingHelper = Mockito.mock(ScriptingHelper.class);
 
     @Test
     void execute_shouldQueryEndpointAndStoreResponse(WireMockRuntimeInfo wmRuntimeInfo) {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>());
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>(), "", tracer);
         HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");

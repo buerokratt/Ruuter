@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.domain.steps;
 
+import ee.buerokratt.ruuter.BaseTest;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import org.junit.jupiter.api.Test;
@@ -12,12 +13,12 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-class AssignStepTest {
+class AssignStepTest extends BaseTest {
     private final ScriptingHelper scriptingHelper = Mockito.mock(ScriptingHelper.class);
 
     @Test
     void execute_shouldAssignVariableToContext() {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>());
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>(), "", tracer);
         String expectedResult = "VALUE";
         AssignStep<String> assignStep = new AssignStep<>() {{
             setAssign(new HashMap<>() {{
@@ -34,7 +35,7 @@ class AssignStepTest {
     @Test
     void execute_shouldCallScriptingHelperWhenScriptFound() {
         String expectedResult = "EVALUATED";
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>());
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>(), "", tracer);
         AssignStep<String> assignStep = new AssignStep<>() {{
             setAssign(new HashMap<>() {{
                 put("key", "${value}");

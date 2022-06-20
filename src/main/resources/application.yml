@@ -1,2 +1,10 @@
 application:
   config-path: ${user.dir}/services
+
+spring:
+  application:
+    name: ruuter
+
+logging:
+  level:
+    root: INFO
