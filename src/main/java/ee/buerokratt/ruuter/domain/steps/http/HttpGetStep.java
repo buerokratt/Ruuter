@@ -10,7 +10,7 @@ import lombok.ToString;
 
 import java.net.http.HttpResponse;
 
-import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpRequest;
+import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpGetRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -20,7 +20,7 @@ public class HttpGetStep extends HttpStep {
     @Override
     public void execute(ConfigurationInstance configurationInstance) {
         super.execute(configurationInstance);
-        HttpResponse<String> response = makeHttpRequest(args);
+        HttpResponse<String> response = makeHttpGetRequest(args);
         JsonNode responseBody = response.body().isEmpty() ? null : MappingUtils.convertStringToNode(response.body());
         HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode());
         configurationInstance.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
