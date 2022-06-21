@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.domain;
+package ee.buerokratt.ruuter.domain.steps.conditional;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;

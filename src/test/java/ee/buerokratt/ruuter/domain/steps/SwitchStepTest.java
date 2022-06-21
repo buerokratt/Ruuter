@@ -1,8 +1,8 @@
 package ee.buerokratt.ruuter.domain.steps;
 
-import ee.buerokratt.ruuter.BaseIntegrationTest;
-import ee.buerokratt.ruuter.domain.Condition;
+import ee.buerokratt.ruuter.domain.steps.conditional.Condition;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-class SwitchStepTest extends BaseIntegrationTest {
+class SwitchStepTest {
     private final ScriptingHelper scriptingHelper = Mockito.mock(ScriptingHelper.class);
 
     @Test

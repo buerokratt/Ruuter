@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.domain.steps.AssignStep;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
-import ee.buerokratt.ruuter.domain.steps.SwitchStep;
+import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import ee.buerokratt.ruuter.helper.exception.InvalidConfigurationException;
 import ee.buerokratt.ruuter.helper.exception.InvalidConfigurationStepException;
