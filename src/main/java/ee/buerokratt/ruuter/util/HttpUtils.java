@@ -23,13 +23,13 @@ public class HttpUtils {
     private HttpUtils() {
     }
 
-    public static HttpResponse<String> makeHttpPostRequest(HttpQueryArgs args) {
+    public static HttpResponse<String> makeHttpPostRequest(HttpQueryArgs args, String body) {
         try {
             HttpRequest.Builder request = HttpRequest.newBuilder()
                 .uri(new URI(getUriFromArgs(args)))
                 .timeout(Duration.of(10, SECONDS))
                 .headers("Content-Type", "text/plain;charset=UTF-8")
-                .POST(HttpRequest.BodyPublishers.ofString(MappingUtils.convertObjectToJson(args.getBody())));
+                .POST(HttpRequest.BodyPublishers.ofString(body));
             if (args.getHeaders() != null) {
                 request.headers(convertHeadersMapToList(args.getHeaders()));
             }
