@@ -1,6 +1,5 @@
 package ee.buerokratt.ruuter.helper;
 
-import ee.buerokratt.ruuter.util.MappingUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +18,7 @@ import static java.util.stream.Collectors.toList;
 public class ScriptingHelper {
     public static final String OBJECT_REGEX = "([a-zA-Z0-9_. \"]+\\.[a-zA-Z0-9_. \"]+)";
     public static final String SCRIPT_REGEX = "(\\$\\{[^}]+})";
+    private final MappingHelper mappingHelper;
 
     private final ScriptEngine engine;
 
@@ -69,7 +69,7 @@ public class ScriptingHelper {
             return possibleObject;
         }
         String objectName = possibleObject.substring(0, possibleObject.indexOf('.', 0));
-        bindings.put(objectName, MappingUtils.convertObjectToString(evalContext.get(objectName)));
+        bindings.put(objectName, mappingHelper.convertObjectToString(evalContext.get(objectName)));
         return "JSON.parse(" + possibleObject.replaceFirst("\\.", ").");
     }
 

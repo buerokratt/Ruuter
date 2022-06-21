@@ -20,7 +20,10 @@ reflect:
   call: reflect.mock
   args:
     request:
-      some: "request"
+      url: https://example.com/endpoint
+      body:
+        some_val: "Hello World"
+        another_val: 123
     response:
       project: "Bürokratt"
       website: "www.kratid.ee"

@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HttpStepResult {
-    private HttpArgs request;
+    private HttpQueryArgs request;
     private HttpQueryResponse response;
 }

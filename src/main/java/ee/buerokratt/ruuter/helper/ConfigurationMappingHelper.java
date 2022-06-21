@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -59,7 +58,7 @@ public class ConfigurationMappingHelper {
 
     private ConfigurationStep convertJsonNodeToConfigurationStep(JsonNode jsonNode) throws JsonProcessingException {
         if (jsonNode.get("call") != null) {
-            if (Objects.equals(mapper.convertValue(jsonNode.get("call"), String.class), "reflect.mock")) {
+            if (jsonNode.get("call").asText().equals("reflect.mock")) {
                 return mapper.treeToValue(jsonNode, HttpMockStep.class);
             }
             return mapper.treeToValue(jsonNode, HttpStep.class);
