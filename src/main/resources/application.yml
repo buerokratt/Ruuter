@@ -1,5 +1,8 @@
 application:
   config-path: ${user.dir}/services
+  logging:
+    displayRequestContent: false
+    displayResponseContent: false
 
 spring:
   application:
