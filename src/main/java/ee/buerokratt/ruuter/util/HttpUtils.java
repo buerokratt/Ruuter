@@ -1,6 +1,5 @@
 package ee.buerokratt.ruuter.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.domain.steps.http.HttpQueryArgs;
 import ee.buerokratt.ruuter.service.exception.InvalidHttpRequestException;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -26,17 +25,16 @@ public class HttpUtils {
 
     public static HttpResponse<String> makeHttpPostRequest(HttpQueryArgs args) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
             HttpRequest.Builder request = HttpRequest.newBuilder()
                 .uri(new URI(getUriFromArgs(args)))
                 .timeout(Duration.of(10, SECONDS))
                 .headers("Content-Type", "text/plain;charset=UTF-8")
-                .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(args.getBody())));
+                .POST(HttpRequest.BodyPublishers.ofString(MappingUtils.convertObjectToJson(args.getBody())));
             if (args.getHeaders() != null) {
                 request.headers(convertHeadersMapToList(args.getHeaders()));
             }
             return sendHttpRequest(request);
-        } catch (URISyntaxException | IOException e) {
+        } catch (URISyntaxException e) {
             Thread.currentThread().interrupt();
             throw new InvalidHttpRequestException(e);
         }
