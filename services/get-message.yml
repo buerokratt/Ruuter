@@ -1,3 +1,17 @@
+getCurrentTime:
+  assign:
+    currentTime: "Saturday"
+
+conditionalSwitch:
+  switch:
+    - condition: ${currentTime == "Friday"}
+      next: get_message
+    - condition: ${currentTime == "sgsg" || currentTime == "Sunday"}
+      next: post_message
+    - condition: ${currentTime == "dsgsdgsd"}
+      next: return_value
+  next: assign_value
+
 get_message:
   call: http.get
   args:
@@ -22,4 +36,4 @@ assign_value:
     integerValue: 2021
 
 return_value:
-  return: ${the_message.body}
+  return: the_message.body
