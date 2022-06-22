@@ -1,10 +1,10 @@
-package ee.buerokratt.ruuter.controller;
+package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/controller"})
+@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain"})
 class ExecutionOrderIT extends BaseIntegrationTest {
 
     public static final String EXPECTED_RESULT = "expected_result";

@@ -27,6 +27,7 @@ public class ConfigurationInstance {
             executeStep(configurationNames.get(0), configurationNames);
         } catch (Exception e) {
             log.error("encountered error when executing configurationInstance", e);
+            setReturnValue(null);
         }
     }
 
