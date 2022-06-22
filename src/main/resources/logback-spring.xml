@@ -11,7 +11,7 @@
     <property name="LOG_LOCATION" value="./logs"/>
     <property name="C_LOG_PATTERN" value="${C_LOG_PATTERN:-%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSSXXX}} %clr(%5p) %clr([%X{traceId:-},%X{spanId:-}]){magenta} %clr(-&#45;&#45;){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %clr([%17X{stepType}]){blue} %X{requestTo:-} %X{requestContent:-} %X{responseContent:-} %X{responseCode:-} %X{responseInMs:-} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
     <property name="C_LOG_CHARSET" value="${C_LOG_CHARSET:-${file.encoding:-UTF-8}}"/>
-    <property name="F_LOG_PATTERN" value="${F_LOG_PATTERN:-%timeStamp ${build.version} %5p %X{requestAuthorIp:-} [%17X{stepType}] [%X{traceId:-},%X{spanId:-}] %X{requestTo:-} %X{requestContent:-} %X{responseContent:-} %X{responseCode:-} %X{responseInMs:-} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <property name="F_LOG_PATTERN" value="${F_LOG_PATTERN:-%timeStamp&#009;${build.version}&#009;%5p&#009;%X{requestAuthorIp:-}&#009;%X{stepType}&#009;[%X{traceId:-},%X{spanId:-}]&#009;%X{requestTo:-}&#009;%X{requestContent:-}&#009;%X{responseContent:-}&#009;%X{responseCode:-}&#009;%X{responseInMs:-}&#009;:&#009;%m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
     <property name="F_LOG_CHARSET" value="${F_LOG_CHARSET:-${file.encoding:-UTF-8}}"/>
 
     <logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR"/>
