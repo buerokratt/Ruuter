@@ -32,10 +32,24 @@ public class LoggingUtils {
         clearLogContext();
     }
 
+    public static void logStepError(Logger log, String stepType, String requestOrigin, String stepName) {
+        setLogContext(requestOrigin, stepType, "-", "-", "-", "-", "-");
+        String message = "Error: %s".formatted(stepName);
+        log.error(message);
+        clearLogContext();
+    }
+
     public static void logRequestProcessed(Logger log, String configurationName, String requestOrigin) {
         setLogContext(requestOrigin, "incoming.response", "-", "-", "-", "-", "-");
         String message = "Request processed for configuration: %s".formatted(configurationName);
         log.info(message);
+        clearLogContext();
+    }
+
+    public static void logRequestError(Logger log, String configurationName, String requestOrigin, Throwable e) {
+        setLogContext(requestOrigin, "incoming.response", "-", "-", "-", "-", "-");
+        String message = "Error executing configuration: %s".formatted(configurationName);
+        log.error(message, e);
         clearLogContext();
     }
 

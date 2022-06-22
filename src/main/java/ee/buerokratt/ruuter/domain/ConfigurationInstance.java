@@ -34,7 +34,7 @@ public class ConfigurationInstance {
             executeStep(stepNames.get(0), stepNames);
             LoggingUtils.logRequestProcessed(log, configurationName, requestOrigin);
         } catch (Exception e) {
-            log.error("encountered error when executing configurationInstance", e);
+            LoggingUtils.logRequestError(log, configurationName, requestOrigin, e);
         }
     }
 
