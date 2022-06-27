@@ -11,7 +11,8 @@ import org.mockito.Mockito;
 import java.util.HashMap;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @WireMockTest
 class HttpPostStepTest {
@@ -35,6 +36,11 @@ class HttpPostStepTest {
            setResultName("the_response");
         }};
 
+        when(mappingHelper.convertObjectToString(expectedPostArgs.getBody())).thenReturn("""
+            {
+              "some_val" : "Hello World",
+              "another_val" : 123
+            }""");
         stubFor(post("/endpoint").willReturn(ok()));
         expectedPostStep.execute(instance);
 
