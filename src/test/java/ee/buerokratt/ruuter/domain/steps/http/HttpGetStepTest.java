@@ -4,7 +4,9 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.buerokratt.ruuter.BaseTest;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.helper.MappingHelper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.util.HashMap;
 
@@ -14,9 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @WireMockTest
 class HttpGetStepTest extends BaseTest {
 
+    @Mock
+    private MappingHelper mappingHelper;
+
     @Test
     void execute_shouldQueryEndpointAndStoreResponse(WireMockRuntimeInfo wmRuntimeInfo) {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), "", tracer);
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
         HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");

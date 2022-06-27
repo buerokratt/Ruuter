@@ -2,6 +2,7 @@ package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class ConfigurationInstance {
     private final Map<String, ConfigurationStep> steps;
     private final Map<String, String> requestBody;
     private final Map<String, String> requestParams;
+    private final MappingHelper mappingHelper;
     private final HashMap<String, Object> context = new HashMap<>();
     private final String requestOrigin;
     private final Tracer tracer;

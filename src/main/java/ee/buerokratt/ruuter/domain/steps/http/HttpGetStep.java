@@ -2,7 +2,6 @@ package ee.buerokratt.ruuter.domain.steps.http;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
-import ee.buerokratt.ruuter.util.MappingUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,7 @@ import lombok.ToString;
 
 import java.net.http.HttpResponse;
 
-import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpRequest;
+import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpGetRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -18,11 +17,11 @@ import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpRequest;
 @NoArgsConstructor
 public class HttpGetStep extends HttpStep {
     @Override
-    protected void executeStepAction(ConfigurationInstance configurationInstance) {
-        HttpResponse<String> response = makeHttpRequest(args);
-        JsonNode responseBody = response.body().isEmpty() ? null : MappingUtils.convertStringToNode(response.body());
+    protected void executeStepAction(ConfigurationInstance ci) {
+        HttpResponse<String> response = makeHttpGetRequest(args);
+        JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
         HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode());
-        configurationInstance.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
+        ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
     }
 
     @Override

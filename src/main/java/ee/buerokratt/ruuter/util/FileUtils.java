@@ -1,6 +1,5 @@
 package ee.buerokratt.ruuter.util;
 
-
 import org.springframework.util.StringUtils;
 
 import java.nio.file.Path;

@@ -16,10 +16,23 @@ post_message:
       another_val: 123
   result: the_message
 
+reflect:
+  call: reflect.mock
+  args:
+    request:
+      url: https://example.com/endpoint
+      body:
+        some_val: "Hello World"
+        another_val: 123
+    response:
+      project: "Bürokratt"
+      website: "www.kratid.ee"
+  result: reflected_request
+
 assign_value:
   assign:
     stringValue: "Bürokratt"
     integerValue: 2021
 
 return_value:
-  return: ${the_message.body}
+  return: the_message.body
