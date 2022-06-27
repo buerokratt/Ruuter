@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @WireMockTest
 class HttpGetStepTest extends BaseTest {
@@ -21,7 +22,7 @@ class HttpGetStepTest extends BaseTest {
 
     @Test
     void execute_shouldQueryEndpointAndStoreResponse(WireMockRuntimeInfo wmRuntimeInfo) {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer, true);
         HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");
@@ -39,5 +40,22 @@ class HttpGetStepTest extends BaseTest {
         expectedGetStep.execute(instance);
 
         assertEquals(200, ((HttpStepResult) instance.getContext().get("the_response")).getResponse().getStatus());
+    }
+
+    @Test
+    void execute_shouldThrowErrorWhenRequestFailsAndStopProcessingUnRespondingStepsIsTrue() {
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer, true);
+        String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
+        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
+            setUrl(getWrongRequestUrl);
+        }};
+        HttpStep expectedGetStep = new HttpGetStep() {{
+            setName("get_message");
+            setArgs(expectedGetArgs);
+            setResultName("the_response");
+        }};
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedGetStep.execute(instance));
+        assertEquals("Error executing: %s".formatted(expectedGetStep.getName()), exception.getMessage());
     }
 }

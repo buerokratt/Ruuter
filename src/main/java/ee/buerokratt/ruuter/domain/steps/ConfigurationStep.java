@@ -32,8 +32,12 @@ public abstract class ConfigurationStep {
             }
             logStep(System.currentTimeMillis() - startTime, configurationInstance);
         } catch (Exception e) {
-            LoggingUtils.logStepError(log, getType(), configurationInstance.getRequestOrigin(), name);
-            throw new StepExecutionException(name, e);
+            if (configurationInstance.isStopProcessingUnRespondingSteps()) {
+                LoggingUtils.logStepError(log, getType(), configurationInstance.getRequestOrigin(), name);
+                throw new StepExecutionException(name, e);
+            } else {
+                LoggingUtils.logSkippedStep(log, getType(), configurationInstance.getRequestOrigin(), name);
+            }
         } finally {
             newSpan.end();
         }

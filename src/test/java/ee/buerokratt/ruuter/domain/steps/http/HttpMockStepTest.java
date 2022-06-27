@@ -18,7 +18,7 @@ class HttpMockStepTest extends BaseTest {
 
     @Test
     void execute_shouldStoreResponse() {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer, true);
         String resultName = "result";
         HashMap<String, Object> mockStepResponse = new HashMap<>() {{
             put("key", "value");

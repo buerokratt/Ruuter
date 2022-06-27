@@ -19,7 +19,7 @@ class ReturnStepTest extends BaseTest {
 
     @Test
     void execute_shouldAssignReturnValue() {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer, true);
         String expectedResult = "VALUE";
         ReturnStep assignStep = new ReturnStep() {{
             setReturnValue(expectedResult);
@@ -33,7 +33,7 @@ class ReturnStepTest extends BaseTest {
 
     @Test
     void execute_shouldCallScriptingHelperWhenScriptFound() {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer, true);
         String expectedResult = "VALUE";
         ReturnStep assignStep = new ReturnStep() {{
             setReturnValue("${value}");
