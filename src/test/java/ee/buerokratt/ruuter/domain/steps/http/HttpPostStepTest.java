@@ -12,31 +12,37 @@ import java.util.HashMap;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @WireMockTest
-class HttpGetStepTest extends BaseTest {
-
+class HttpPostStepTest extends BaseTest {
     @Mock
     private MappingHelper mappingHelper;
 
     @Test
-    void execute_shouldQueryEndpointAndStoreResponse(WireMockRuntimeInfo wmRuntimeInfo) {
+    void execute_shouldSendPostRequestAndStoreResponse(WireMockRuntimeInfo wireMockRuntimeInfo) {
         ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
-        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
-            setQuery(new HashMap<>() {{
+        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
+            setBody(new HashMap<>() {{
                 put("some_val", "Hello World");
                 put("another_val", 123);
             }});
-            setUrl("http://localhost:%s/endpoint".formatted(wmRuntimeInfo.getHttpPort()));
-        }};
-        HttpStep expectedGetStep = new HttpGetStep() {{
-            setName("get_message");
-            setArgs(expectedGetArgs);
-            setResultName("the_response");
+            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
         }};
 
-        stubFor(get("/endpoint?some_val=Hello+World&another_val=123").willReturn(ok()));
-        expectedGetStep.execute(instance);
+        HttpStep expectedPostStep = new HttpPostStep() {{
+           setName("post_message");
+           setArgs(expectedPostArgs);
+           setResultName("the_response");
+        }};
+
+        when(mappingHelper.convertObjectToString(expectedPostArgs.getBody())).thenReturn("""
+            {
+              "some_val" : "Hello World",
+              "another_val" : 123
+            }""");
+        stubFor(post("/endpoint").willReturn(ok()));
+        expectedPostStep.execute(instance);
 
         assertEquals(200, ((HttpStepResult) instance.getContext().get("the_response")).getResponse().getStatus());
     }
