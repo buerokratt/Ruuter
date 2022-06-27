@@ -4,6 +4,7 @@ import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.helper.ConfigurationMappingHelper;
+import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.helper.exception.LoadConfigurationsException;
 import ee.buerokratt.ruuter.util.FileUtils;
@@ -23,13 +24,15 @@ import static java.util.stream.Collectors.toMap;
 public class ConfigurationService {
     private final ConfigurationMappingHelper configurationMappingHelper;
     private final ScriptingHelper scriptingHelper;
+    private final MappingHelper mappingHelper;
 
     private final Map<String, Map<String, ConfigurationStep>> configurations;
 
-    public ConfigurationService(ApplicationProperties properties, ConfigurationMappingHelper configurationMappingHelper, ScriptingHelper scriptingHelper) {
+    public ConfigurationService(ApplicationProperties properties, ConfigurationMappingHelper configurationMappingHelper, ScriptingHelper scriptingHelper, MappingHelper mappingHelper) {
         this.configurationMappingHelper = configurationMappingHelper;
         this.scriptingHelper = scriptingHelper;
         this.configurations = getConfigurations(properties.getConfigPath());
+        this.mappingHelper = mappingHelper;
     }
 
     public Map<String, Map<String, ConfigurationStep>> getConfigurations(String configPath) {
@@ -44,7 +47,7 @@ public class ConfigurationService {
 
     public Object execute(String configuration, Map<String, String> requestBody, Map<String, String> requestParams) {
         Map<String, ConfigurationStep> steps = configurations.get(configuration);
-        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, steps, requestBody, requestParams);
+        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, steps, requestBody, requestParams, mappingHelper);
         configurationInstance.execute();
         return configurationInstance.getReturnValue();
     }

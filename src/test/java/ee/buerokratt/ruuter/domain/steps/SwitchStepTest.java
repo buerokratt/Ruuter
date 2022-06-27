@@ -3,6 +3,7 @@ package ee.buerokratt.ruuter.domain.steps;
 import ee.buerokratt.ruuter.domain.steps.conditional.Condition;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
+import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,10 +17,11 @@ import static org.mockito.Mockito.when;
 
 class SwitchStepTest {
     private final ScriptingHelper scriptingHelper = Mockito.mock(ScriptingHelper.class);
+    private final MappingHelper mappingHelper = Mockito.mock(MappingHelper.class);
 
     @Test
     void execute_shouldJumpToCorrectStep() {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>());
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper);
         Condition firstCondition = new Condition() {{
             setNextStepName("second_step");
             setConditionStatement("${currentTime == \"Friday\"}");
