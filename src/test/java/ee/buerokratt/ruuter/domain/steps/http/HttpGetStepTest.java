@@ -40,4 +40,28 @@ class HttpGetStepTest extends BaseTest {
 
         assertEquals(200, ((HttpStepResult) instance.getContext().get("the_response")).getResponse().getStatus());
     }
+
+    @Test
+    void execute_shouldPassDefinedHeadersToRequest(WireMockRuntimeInfo wmRuntimeInfo) {
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
+        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
+            setQuery(new HashMap<>() {{
+                put("some_val", "Hello World");
+                put("another_val", 123);
+            }});
+            setUrl("http://localhost:%s/endpoint".formatted(wmRuntimeInfo.getHttpPort()));
+            setHeaders(new HashMap<>(){{
+                put("X-Custom-Header", "Some custom header value");
+            }});
+        }};
+        HttpStep expectedGetStep = new HttpGetStep() {{
+            setName("get_message");
+            setArgs(expectedGetArgs);
+            setResultName("the_response");
+        }};
+
+        expectedGetStep.execute(instance);
+        verify(getRequestedFor(urlEqualTo("/endpoint?some_val=Hello+World&another_val=123"))
+            .withHeader("X-Custom-Header", equalTo("Some custom header value")));
+    }
 }

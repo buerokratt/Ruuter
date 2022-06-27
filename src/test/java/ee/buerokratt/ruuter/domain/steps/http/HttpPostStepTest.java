@@ -46,4 +46,28 @@ class HttpPostStepTest extends BaseTest {
 
         assertEquals(200, ((HttpStepResult) instance.getContext().get("the_response")).getResponse().getStatus());
     }
+
+    @Test
+    void execute_shouldPassDefinedHeadersToRequest(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
+        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
+            setBody(new HashMap<>() {{
+                put("some_val", "Hello World");
+                put("another_val", 123);
+            }});
+            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
+            setHeaders(new HashMap<>(){{
+                put("Cache-Control", "no-cache");
+            }});
+        }};
+        HttpStep expectedPostStep = new HttpGetStep() {{
+            setName("post_message");
+            setArgs(expectedPostArgs);
+            setResultName("the_response");
+        }};
+
+        expectedPostStep.execute(instance);
+        verify(postRequestedFor(urlEqualTo("/endpoint"))
+            .withHeader("Cache-Control", equalTo("no-cache")));
+    }
 }
