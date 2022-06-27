@@ -17,7 +17,7 @@ public class AssignStep<T> extends ConfigurationStep {
     private HashMap<String, T> assign;
 
     @Override
-    public void execute(ConfigurationInstance configurationInstance) {
+    protected void executeStepAction(ConfigurationInstance configurationInstance) {
         assign.forEach((k, v) -> {
             ScriptingHelper scriptingHelper = configurationInstance.getScriptingHelper();
             if (v instanceof String && scriptingHelper.containsScript(v.toString())) {
@@ -26,6 +26,10 @@ public class AssignStep<T> extends ConfigurationStep {
                 configurationInstance.getContext().put(k, v);
             }
         });
-        super.execute(configurationInstance);
+    }
+
+    @Override
+    public String getType() {
+        return "assign";
     }
 }

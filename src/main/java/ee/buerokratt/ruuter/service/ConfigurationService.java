@@ -9,6 +9,7 @@ import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.helper.exception.LoadConfigurationsException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
@@ -23,15 +24,19 @@ import static java.util.stream.Collectors.toMap;
 @Service
 public class ConfigurationService {
     private final ConfigurationMappingHelper configurationMappingHelper;
+    private final ApplicationProperties properties;
     private final ScriptingHelper scriptingHelper;
+    private final Tracer tracer;
     private final MappingHelper mappingHelper;
 
     private final Map<String, Map<String, ConfigurationStep>> configurations;
 
-    public ConfigurationService(ApplicationProperties properties, ConfigurationMappingHelper configurationMappingHelper, ScriptingHelper scriptingHelper, MappingHelper mappingHelper) {
+    public ConfigurationService(ApplicationProperties properties, ConfigurationMappingHelper configurationMappingHelper, ScriptingHelper scriptingHelper, Tracer tracer, MappingHelper mappingHelper) {
         this.configurationMappingHelper = configurationMappingHelper;
+        this.properties = properties;
         this.scriptingHelper = scriptingHelper;
         this.configurations = getConfigurations(properties.getConfigPath());
+        this.tracer = tracer;
         this.mappingHelper = mappingHelper;
     }
 
@@ -45,10 +50,10 @@ public class ConfigurationService {
         }
     }
 
-    public Object execute(String configuration, Map<String, String> requestBody, Map<String, String> requestParams) {
+    public Object execute(String configuration, Map<String, String> requestBody, Map<String, String> requestParams, String requestOrigin) {
         Map<String, ConfigurationStep> steps = configurations.get(configuration);
-        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, steps, requestBody, requestParams, mappingHelper);
-        configurationInstance.execute();
+        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, properties, steps, requestBody, requestParams, mappingHelper, requestOrigin, tracer);
+        configurationInstance.execute(configuration);
         return configurationInstance.getReturnValue();
     }
 }

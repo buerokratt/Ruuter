@@ -17,11 +17,15 @@ import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpGetRequest;
 @NoArgsConstructor
 public class HttpGetStep extends HttpStep {
     @Override
-    public void execute(ConfigurationInstance ci) {
-        super.execute(ci);
+    protected void executeStepAction(ConfigurationInstance ci) {
         HttpResponse<String> response = makeHttpGetRequest(args);
         JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
         HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode());
         ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
+    }
+
+    @Override
+    public String getType() {
+        return "http.get";
     }
 }

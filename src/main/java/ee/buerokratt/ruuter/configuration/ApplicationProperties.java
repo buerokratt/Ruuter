@@ -9,4 +9,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
 public class ApplicationProperties {
     private String configPath;
+    private Logging logging = new Logging();
+
+    @Setter
+    @Getter
+    public static class Logging {
+        private Boolean displayRequestContent;
+        private Boolean displayResponseContent;
+    }
 }

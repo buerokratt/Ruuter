@@ -17,7 +17,7 @@ public class ReturnStep extends ConfigurationStep {
     private String returnValue;
 
     @Override
-    public void execute(ConfigurationInstance configurationInstance) {
+    protected void executeStepAction(ConfigurationInstance configurationInstance) {
         ScriptingHelper scriptingHelper = configurationInstance.getScriptingHelper();
 
         if (Boolean.TRUE.equals(scriptingHelper.containsScript(returnValue))) {
@@ -26,7 +26,10 @@ public class ReturnStep extends ConfigurationStep {
         } else {
             configurationInstance.setReturnValue(returnValue);
         }
+    }
 
-        super.execute(configurationInstance);
+    @Override
+    public String getType() {
+        return "return";
     }
 }

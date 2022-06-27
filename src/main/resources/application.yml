@@ -1,2 +1,13 @@
 application:
   config-path: ${user.dir}/services
+  logging:
+    displayRequestContent: false
+    displayResponseContent: false
+
+spring:
+  application:
+    name: ruuter
+
+logging:
+  level:
+    root: INFO
