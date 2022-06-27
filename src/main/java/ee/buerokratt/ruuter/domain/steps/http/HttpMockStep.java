@@ -19,9 +19,13 @@ public class HttpMockStep extends ConfigurationStep {
     private String resultName;
 
     @Override
-    public void execute(ConfigurationInstance ci) {
-        super.execute(ci);
+    public void executeStepAction(ConfigurationInstance ci) {
         HttpQueryResponse httpQueryResponse = new HttpQueryResponse(ci.getMappingHelper().convertMapToNode(args.getResponse()), null, 200);
         ci.getContext().put(resultName, new HttpStepResult(args.getRequest(), httpQueryResponse));
+    }
+
+    @Override
+    public String getType() {
+        return "reflect.mock";
     }
 }

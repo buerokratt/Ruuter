@@ -2,25 +2,25 @@ package ee.buerokratt.ruuter.domain.steps.http;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import ee.buerokratt.ruuter.BaseTest;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.helper.MappingHelper;
-import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 
 import java.util.HashMap;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @WireMockTest
-class HttpPostStepTest {
-    private final ScriptingHelper scriptingHelper = Mockito.mock(ScriptingHelper.class);
-    private final MappingHelper mappingHelper = Mockito.mock(MappingHelper.class);
+class HttpPostStepTest extends BaseTest {
+    @Mock
+    private MappingHelper mappingHelper;
 
     @Test
     void execute_shouldSendPostRequestAndStoreResponse(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper);
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
         HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
             setBody(new HashMap<>() {{
                 put("some_val", "Hello World");
