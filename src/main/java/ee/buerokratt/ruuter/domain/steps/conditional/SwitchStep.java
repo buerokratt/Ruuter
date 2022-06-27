@@ -31,6 +31,6 @@ public class SwitchStep extends ConfigurationStep {
 
     @Override
     public String getType() {
-        return null;
+        return "switch";
     }
 }

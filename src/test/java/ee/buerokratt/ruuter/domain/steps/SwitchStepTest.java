@@ -1,8 +1,8 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.BaseTest;
-import ee.buerokratt.ruuter.domain.steps.conditional.Condition;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.steps.conditional.Condition;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import org.junit.jupiter.api.Test;
@@ -16,13 +16,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class SwitchStepTest extends BaseTest {
-
     @Mock
     private MappingHelper mappingHelper;
 
     @Test
     void execute_shouldJumpToCorrectStep() {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper,"", tracer);
+        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
         Condition firstCondition = new Condition() {{
             setNextStepName("second_step");
             setConditionStatement("${currentTime == \"Friday\"}");
