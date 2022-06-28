@@ -51,7 +51,6 @@ class HttpPostStepTest extends BaseStepTest {
         }};
         ApplicationProperties.Logging logging = new ApplicationProperties.Logging();
         logging.setDisplayRequestContent(false);
-        logging.setDisplayRequestContent(false);
 
         when(ci.getContext()).thenReturn(testContext);
         when(properties.getLogging()).thenReturn(logging);
@@ -60,6 +59,37 @@ class HttpPostStepTest extends BaseStepTest {
         expectedPostStep.execute(ci);
 
         assertEquals(200, ((HttpStepResult) ci.getContext().get("the_response")).getResponse().getStatus());
+    }
+
+    @Test
+    void execute_shouldPassDefinedHeadersToRequest(WireMockRuntimeInfo wireMockRuntimeInfo) throws JsonProcessingException {
+        HashMap<String, Object> testContext = new HashMap<>();
+        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
+            setBody(new HashMap<>() {{
+                put("some_val", "Hello World");
+                put("another_val", 123);
+            }});
+            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
+            setHeaders(new HashMap<>(){{
+                put("Cache-Control", "no-cache");
+            }});
+        }};
+        HttpStep expectedPostStep = new HttpPostStep() {{
+            setName("post_message");
+            setArgs(expectedPostArgs);
+            setResultName("the_response");
+        }};
+        ApplicationProperties.Logging logging = new ApplicationProperties.Logging();
+        logging.setDisplayRequestContent(false);
+
+        when(ci.getContext()).thenReturn(testContext);
+        when(properties.getLogging()).thenReturn(logging);
+        when(mappingHelper.convertObjectToString(anyMap())).thenReturn(new ObjectMapper().writeValueAsString(expectedPostArgs.getBody()));
+        stubFor(post("/endpoint").willReturn(ok()));
+        expectedPostStep.execute(ci);
+
+        verify(postRequestedFor(urlEqualTo("/endpoint"))
+            .withHeader("Cache-Control", equalTo("no-cache")));
     }
 
     @Test
