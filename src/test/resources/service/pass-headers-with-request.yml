@@ -1,0 +1,21 @@
+get_message:
+  call: http.get
+  args:
+    url: https://example.com/endpoint
+    query:
+      some_val: "Hello World"
+      another_val: 123
+    headers:
+      Connection: keep-alive
+  result: the_response
+
+post_message:
+  call: http.post
+  args:
+    url: https://example.com/endpoint
+    body:
+      some_val: "Hello World"
+      another_val: 123
+    headers:
+      Cache-Control: no-cache
+  result: the_message

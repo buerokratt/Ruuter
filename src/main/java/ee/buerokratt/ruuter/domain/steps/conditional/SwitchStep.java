@@ -21,7 +21,7 @@ public class SwitchStep extends ConfigurationStep {
     private List<Condition> conditions;
 
     @Override
-    public void executeStepAction(ConfigurationInstance configurationInstance) {
+    protected void executeStepAction(ConfigurationInstance configurationInstance) {
         ScriptingHelper scriptingHelper = configurationInstance.getScriptingHelper();
         Optional<Condition> correctStatement = conditions.stream()
             .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), configurationInstance.getContext())))

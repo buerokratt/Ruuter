@@ -65,7 +65,7 @@ class ConfigurationServiceIT extends BaseIntegrationTest {
             setReturnValue("return_value");
         }};
 
-        Map<String, Map<String, ConfigurationStep>> configurations = configurationService.getConfigurations(configPath);
+        Map<String, Map<String, ConfigurationStep>> configurations = configurationService.getConfigurations(configPath + "/configurations");
         List<String> stepNames = new ArrayList<>(configurations.get("test-conf").keySet());
 
         assertEquals(1, configurations.size());
@@ -77,5 +77,24 @@ class ConfigurationServiceIT extends BaseIntegrationTest {
         assertEquals(expectedPostStep, configurations.get("test-conf").get("post_message"));
         assertEquals(expectedAssignStep, configurations.get("test-conf").get("assign_value"));
         assertEquals(expectedReturnStep, configurations.get("test-conf").get("return_value"));
+    }
+
+    @Test
+    void getConfigurations_shouldAddDefinedHeadersToHttpSteps() {
+        Map<String, Map<String, ConfigurationStep>> configurations = configurationService.getConfigurations(configPath);
+        Map<String, ConfigurationStep> steps = new HashMap<>(configurations.get("pass-headers-with-request"));
+
+        HttpGetStep httpGetStep = (HttpGetStep) steps.get("get_message");
+        HttpPostStep httpPostStep = (HttpPostStep) steps.get("post_message");
+
+        HashMap<String, String> httpGetStepHeaders = new HashMap<>() {{
+            put("Connection", "keep-alive");
+        }};
+        HashMap<String, String> httpPostStepHeaders = new HashMap<>() {{
+            put("Cache-Control", "no-cache");
+        }};
+
+        assertEquals(httpGetStepHeaders, httpGetStep.getArgs().getHeaders());
+        assertEquals(httpPostStepHeaders, httpPostStep.getArgs().getHeaders());
     }
 }
