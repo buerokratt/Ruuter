@@ -1,10 +1,11 @@
 package ee.buerokratt.ruuter.domain.steps;
 
-import ee.buerokratt.ruuter.BaseTest;
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+
+import ee.buerokratt.ruuter.BaseStepTest;
 import ee.buerokratt.ruuter.domain.steps.conditional.Condition;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
-import ee.buerokratt.ruuter.helper.MappingHelper;
+import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -12,16 +13,23 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-class SwitchStepTest extends BaseTest {
+class SwitchStepTest extends BaseStepTest {
+
     @Mock
-    private MappingHelper mappingHelper;
+    private ScriptingHelper scriptingHelper;
+
+    @BeforeEach
+    protected void mockScriptingHelper() {
+        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+    }
 
     @Test
     void execute_shouldJumpToCorrectStep() {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
+        HashMap<String, Object> testContext = new HashMap<>() {{
+            put("currentTime", "Sunday");
+        }};
         Condition firstCondition = new Condition() {{
             setNextStepName("second_step");
             setConditionStatement("${currentTime == \"Friday\"}");
@@ -41,11 +49,13 @@ class SwitchStepTest extends BaseTest {
             setName("switch");
         }};
 
-        instance.getContext().put("currentTime", "Sunday");
-        when(scriptingHelper.containsScript(anyString())).thenReturn(true);
-        when(scriptingHelper.evaluateScripts("${currentTime == \"Sunday\"}", instance.getContext())).thenReturn(true);
-        switchStep.execute(instance);
+        when(ci.getContext()).thenReturn(testContext);
+        when(scriptingHelper.evaluateScripts("${currentTime == \"Sunday\"}", testContext)).thenReturn(true);
+        when(scriptingHelper.evaluateScripts("${currentTime == \"Saturday\"}", testContext)).thenReturn(false);
+        when(scriptingHelper.evaluateScripts("${currentTime == \"Friday\"}", testContext)).thenReturn(false);
+        switchStep.execute(ci);
 
         assertEquals("fourth_step", switchStep.getNextStepName());
     }
+
 }

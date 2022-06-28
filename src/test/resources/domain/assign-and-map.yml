@@ -1,0 +1,11 @@
+step_1:
+  assign:
+    stringValue: "Bürokratt"
+    integerValue: 2021
+
+step_2:
+  assign:
+    doubleNumber: "2.0"
+
+step_3:
+  return: ${stringValue} v${doubleNumber + " since " + integerValue}
