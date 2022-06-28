@@ -27,7 +27,6 @@ public class ConfigurationInstance {
     private final HashMap<String, Object> context = new HashMap<>();
     private final String requestOrigin;
     private final Tracer tracer;
-    private final boolean stopProcessingUnRespondingSteps;
     private Object returnValue;
 
     public void execute(String configurationName) {
@@ -38,6 +37,7 @@ public class ConfigurationInstance {
             LoggingUtils.logRequestProcessed(log, configurationName, requestOrigin);
         } catch (Exception e) {
             LoggingUtils.logRequestError(log, configurationName, requestOrigin, e);
+            setReturnValue(null);
         }
     }
 
@@ -54,7 +54,7 @@ public class ConfigurationInstance {
                 return;
             }
             executeStep(stepNames.get(nextStepIndex), stepNames);
-        } else {
+        } else if (!previousStep.getNextStepName().equals("end")) {
             executeStep(previousStep.getNextStepName(), stepNames);
         }
     }

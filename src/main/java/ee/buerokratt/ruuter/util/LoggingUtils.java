@@ -39,13 +39,6 @@ public class LoggingUtils {
         clearLogContext();
     }
 
-    public static void logSkippedStep(Logger log, String stepType, String requestOrigin, String stepName) {
-        setLogContext(requestOrigin, stepType, "-", "-", "-", "-", "-");
-        String message = "Warning: skipped %s step".formatted(stepName);
-        log.warn(message);
-        clearLogContext();
-    }
-
     public static void logRequestProcessed(Logger log, String configurationName, String requestOrigin) {
         setLogContext(requestOrigin, "incoming.response", "-", "-", "-", "-", "-");
         String message = "Request processed for configuration: %s".formatted(configurationName);

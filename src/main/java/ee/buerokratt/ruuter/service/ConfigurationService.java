@@ -30,7 +30,6 @@ public class ConfigurationService {
     private final MappingHelper mappingHelper;
 
     private final Map<String, Map<String, ConfigurationStep>> configurations;
-    private final boolean stopProcessingUnRespondingSteps;
 
     public ConfigurationService(ApplicationProperties properties, ConfigurationMappingHelper configurationMappingHelper, ScriptingHelper scriptingHelper, Tracer tracer, MappingHelper mappingHelper) {
         this.configurationMappingHelper = configurationMappingHelper;
@@ -39,7 +38,6 @@ public class ConfigurationService {
         this.configurations = getConfigurations(properties.getConfigPath());
         this.tracer = tracer;
         this.mappingHelper = mappingHelper;
-        this.stopProcessingUnRespondingSteps = properties.isStopProcessingUnRespondingSteps();
     }
 
     public Map<String, Map<String, ConfigurationStep>> getConfigurations(String configPath) {
@@ -54,7 +52,7 @@ public class ConfigurationService {
 
     public Object execute(String configuration, Map<String, String> requestBody, Map<String, String> requestParams, String requestOrigin) {
         Map<String, ConfigurationStep> steps = configurations.get(configuration);
-        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, properties, steps, requestBody, requestParams, mappingHelper, requestOrigin, tracer, stopProcessingUnRespondingSteps);
+        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, properties, steps, requestBody, requestParams, mappingHelper, requestOrigin, tracer);
         configurationInstance.execute(configuration);
         return configurationInstance.getReturnValue();
     }
