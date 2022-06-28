@@ -1,0 +1,8 @@
+get_message:
+  call: http.get
+  args:
+    url: http://localhost:8090/endpoint
+  result: the_response
+
+return_value:
+  return: ${the_response}

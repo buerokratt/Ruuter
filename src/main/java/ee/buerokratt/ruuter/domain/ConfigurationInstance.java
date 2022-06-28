@@ -37,6 +37,7 @@ public class ConfigurationInstance {
             LoggingUtils.logRequestProcessed(log, configurationName, requestOrigin);
         } catch (Exception e) {
             LoggingUtils.logRequestError(log, configurationName, requestOrigin, e);
+            setReturnValue(null);
         }
     }
 
@@ -53,7 +54,7 @@ public class ConfigurationInstance {
                 return;
             }
             executeStep(configurationNames.get(nextStepIndex), configurationNames);
-        } else {
+        } else if (!previousStep.getNextStepName().equals("end")) {
             executeStep(previousStep.getNextStepName(), configurationNames);
         }
     }
