@@ -3,6 +3,8 @@ application:
   logging:
     displayRequestContent: false
     displayResponseContent: false
+  incomingRequests:
+    allowedMethodTypes: [ POST, GET ]
 
 spring:
   application:

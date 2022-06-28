@@ -26,4 +26,12 @@ class ConfigurationControllerIT extends BaseIntegrationTest {
             .jsonPath("$.response")
             .isEqualTo("return_value");
     }
+
+    @Test
+    void getRoute_shouldGetInternalServerErrorWhenInvalidMethodType() {
+        client.put()
+            .uri("/test-call")
+            .exchange().expectStatus().isEqualTo(500);
+    }
+
 }
