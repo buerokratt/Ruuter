@@ -8,6 +8,7 @@ import ee.buerokratt.ruuter.domain.steps.AssignStep;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpMockStep;
+import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import ee.buerokratt.ruuter.helper.exception.InvalidConfigurationException;
 import ee.buerokratt.ruuter.helper.exception.InvalidConfigurationStepException;
@@ -68,6 +69,9 @@ public class ConfigurationMappingHelper {
         }
         if (jsonNode.get("return") != null) {
             return mapper.treeToValue(jsonNode, ReturnStep.class);
+        }
+        if (jsonNode.get("switch") != null) {
+            return mapper.treeToValue(jsonNode, SwitchStep.class);
         }
         throw new IllegalArgumentException("No valid step recognised");
     }

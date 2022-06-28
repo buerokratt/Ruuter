@@ -1,0 +1,14 @@
+first_step:
+  return: "expected_result"
+  next: third_step
+
+second_step:
+  return: "incorrect_final_result"
+
+third_step:
+  assign:
+    stringValue: "test"
+
+fourth_step:
+  assign:
+    stringValue2: "test"
