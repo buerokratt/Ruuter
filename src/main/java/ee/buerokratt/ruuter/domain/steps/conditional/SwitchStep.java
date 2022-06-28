@@ -21,12 +21,16 @@ public class SwitchStep extends ConfigurationStep {
     private List<Condition> conditions;
 
     @Override
-    public void execute(ConfigurationInstance configurationInstance) {
-        super.execute(configurationInstance);
+    public void executeStepAction(ConfigurationInstance configurationInstance) {
         ScriptingHelper scriptingHelper = configurationInstance.getScriptingHelper();
         Optional<Condition> correctStatement = conditions.stream()
             .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), configurationInstance.getContext())))
             .findFirst();
         correctStatement.ifPresent(condition -> this.setNextStepName(condition.getNextStepName()));
+    }
+
+    @Override
+    public String getType() {
+        return "switch";
     }
 }
