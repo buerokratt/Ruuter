@@ -1,0 +1,7 @@
+concatenateStrings:
+  assign:
+    var1: true
+    var2: false
+
+return_value:
+  return: ${var1 || var2}
