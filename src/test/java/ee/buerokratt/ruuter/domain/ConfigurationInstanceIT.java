@@ -11,6 +11,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 @TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain"})
 class ConfigurationInstanceIT extends BaseIntegrationTest {
 
+    public static final String EXPECTED_RESULT = "expected_result";
+
     @Test
     void execute_shouldReturnNullWhenExceptionEncountered() {
         client.get()
@@ -34,11 +36,21 @@ class ConfigurationInstanceIT extends BaseIntegrationTest {
     @Test
     void execute_shouldSkipStepsWhereSkipIsTrue() {
         client.get()
-            .uri("/skip")
+            .uri("/skip-true")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
-            .isEqualTo("expected_result");
+            .isEqualTo(EXPECTED_RESULT);
+    }
+
+    @Test
+    void execute_shouldNotSkipStepsWhereSkipIsFalse() {
+        client.get()
+            .uri("/skip-false")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo(EXPECTED_RESULT);
     }
 
     @Test
