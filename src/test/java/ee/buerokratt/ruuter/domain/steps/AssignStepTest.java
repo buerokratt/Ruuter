@@ -1,8 +1,8 @@
 package ee.buerokratt.ruuter.domain.steps;
 
-import ee.buerokratt.ruuter.BaseTest;
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
-import ee.buerokratt.ruuter.helper.MappingHelper;
+import ee.buerokratt.ruuter.BaseStepTest;
+import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -13,14 +13,19 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-class AssignStepTest extends BaseTest {
+class AssignStepTest extends BaseStepTest {
 
     @Mock
-    private MappingHelper mappingHelper;
+    private ScriptingHelper scriptingHelper;
+
+    @BeforeEach
+    protected void mockScriptingHelper() {
+        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+    }
 
     @Test
     void execute_shouldAssignVariableToContext() {
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
+        HashMap<String, Object> testContext = new HashMap<>();
         String expectedResult = "VALUE";
         AssignStep<String> assignStep = new AssignStep<>() {{
             setAssign(new HashMap<>() {{
@@ -28,16 +33,17 @@ class AssignStepTest extends BaseTest {
             }});
         }};
 
+        when(ci.getContext()).thenReturn(testContext);
         when(scriptingHelper.containsScript(anyString())).thenReturn(false);
-        assignStep.execute(instance);
+        assignStep.execute(ci);
 
-        assertEquals(expectedResult, instance.getContext().get("key"));
+        assertEquals(expectedResult, ci.getContext().get("key"));
     }
 
     @Test
     void execute_shouldCallScriptingHelperWhenScriptFound() {
+        HashMap<String, Object> testContext = new HashMap<>();
         String expectedResult = "EVALUATED";
-        ConfigurationInstance instance = new ConfigurationInstance(scriptingHelper, applicationProperties, new HashMap<>(), new HashMap<>(), new HashMap<>(), mappingHelper, "", tracer);
         AssignStep<String> assignStep = new AssignStep<>() {{
             setAssign(new HashMap<>() {{
                 put("key", "${value}");
@@ -46,8 +52,10 @@ class AssignStepTest extends BaseTest {
 
         when(scriptingHelper.containsScript(anyString())).thenReturn(true);
         when(scriptingHelper.evaluateScripts(anyString(), anyMap())).thenReturn(expectedResult);
-        assignStep.execute(instance);
+        when(ci.getContext()).thenReturn(testContext);
+        assignStep.execute(ci);
 
-        assertEquals(expectedResult, instance.getContext().get("key"));
+        assertEquals(expectedResult, ci.getContext().get("key"));
     }
+
 }

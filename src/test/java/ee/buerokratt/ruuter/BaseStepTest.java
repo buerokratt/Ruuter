@@ -1,7 +1,6 @@
 package ee.buerokratt.ruuter;
 
-import ee.buerokratt.ruuter.configuration.ApplicationProperties;
-import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -13,7 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BaseTest {
+public class BaseStepTest {
 
     @Mock
     protected Tracer tracer;
@@ -22,13 +21,11 @@ public class BaseTest {
     protected Span span;
 
     @Mock
-    protected ScriptingHelper scriptingHelper;
-
-    @Mock
-    protected ApplicationProperties applicationProperties;
+    protected ConfigurationInstance ci;
 
     @BeforeEach
     protected void mockTracer() {
+        when(ci.getTracer()).thenReturn(tracer);
         when(tracer.nextSpan()).thenReturn(span);
         when(span.name(any())).thenReturn(span);
     }
