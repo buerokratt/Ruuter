@@ -32,6 +32,16 @@ class ConfigurationInstanceIT extends BaseIntegrationTest {
     }
 
     @Test
+    void execute_shouldSkipStepsWhereSkipIsTrue() {
+        client.get()
+            .uri("/skip")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("expected_result");
+    }
+
+    @Test
     void execute_shouldGetAndReturnValue() {
         String result = "expected_result";
         stubFor(get("/endpoint").willReturn(ok().withBody("\"%s\"".formatted(result))));
