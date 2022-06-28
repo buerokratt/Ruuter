@@ -1,4 +1,4 @@
-concatenateStrings:
+assign_boolean_values:
   assign:
     var1: true
     var2: false

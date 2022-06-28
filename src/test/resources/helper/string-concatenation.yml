@@ -1,4 +1,4 @@
-concatenateStrings:
+assign_strings:
   assign:
     var1: Büro
     var2: kratt
