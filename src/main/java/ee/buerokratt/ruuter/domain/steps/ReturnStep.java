@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.Map;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -17,14 +19,15 @@ public class ReturnStep extends ConfigurationStep {
     private String returnValue;
 
     @Override
-    protected void executeStepAction(ConfigurationInstance configurationInstance) {
-        ScriptingHelper scriptingHelper = configurationInstance.getScriptingHelper();
+    protected void executeStepAction(ConfigurationInstance ci) {
+        ScriptingHelper scriptingHelper = ci.getScriptingHelper();
 
         if (Boolean.TRUE.equals(scriptingHelper.containsScript(returnValue))) {
-            Object evaluatedValue = scriptingHelper.evaluateScripts(returnValue, configurationInstance.getContext());
-            configurationInstance.setReturnValue(evaluatedValue);
+            Map<String, Object> evalContext = scriptingHelper.setupEvalContext(ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
+            Object evaluatedValue = scriptingHelper.evaluateScripts(returnValue, evalContext);
+            ci.setReturnValue(evaluatedValue);
         } else {
-            configurationInstance.setReturnValue(returnValue);
+            ci.setReturnValue(returnValue);
         }
     }
 

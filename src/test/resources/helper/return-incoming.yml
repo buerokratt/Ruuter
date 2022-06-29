@@ -1,0 +1,7 @@
+step_1:
+  assign:
+    body: ${incoming.body}
+    params: ${incoming.params}
+
+step_2:
+  return: ${body.element + params.element} and ${incoming.params.element + incoming.body.element}

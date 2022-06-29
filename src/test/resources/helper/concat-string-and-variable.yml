@@ -1,0 +1,6 @@
+step_1:
+  assign:
+    personalCode: 1234567890
+
+step_2:
+  return: ${"PNOEE-" + personalCode}

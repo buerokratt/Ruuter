@@ -1,0 +1,7 @@
+step_1:
+  assign:
+    script1: ${incoming.body.script1}
+    script2: ${incoming.params.script2}
+
+step_2:
+  return: ${incoming.body.script1} & ${incoming.params.script2} & ${incoming.body.script1 + incoming.params.script2} & ${script1} & ${script2} & ${script1 + script2}

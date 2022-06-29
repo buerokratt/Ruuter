@@ -33,12 +33,12 @@ public abstract class HttpStep extends ConfigurationStep {
     protected String call;
 
     @Override
-    protected void logStep(Long elapsedTime, ConfigurationInstance configurationInstance) {
-        ApplicationProperties properties = configurationInstance.getProperties();
-        Integer responseStatus = ((HttpStepResult) configurationInstance.getContext().get(resultName)).getResponse().getStatus();
-        JsonNode responseNode = ((HttpStepResult) configurationInstance.getContext().get(resultName)).getResponse().getBody();
+    protected void logStep(Long elapsedTime, ConfigurationInstance ci) {
+        ApplicationProperties properties = ci.getProperties();
+        Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus();
+        JsonNode responseNode = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody();
         String responseContent = responseNode != null && properties.getLogging().getDisplayResponseContent() ? responseNode.toString() : "-";
         String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";
-        LoggingUtils.logStep(log, this, configurationInstance.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
+        LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
 }
