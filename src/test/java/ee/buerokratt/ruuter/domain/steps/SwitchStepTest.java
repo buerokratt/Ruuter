@@ -1,6 +1,5 @@
 package ee.buerokratt.ruuter.domain.steps;
 
-
 import ee.buerokratt.ruuter.BaseStepTest;
 import ee.buerokratt.ruuter.domain.steps.conditional.Condition;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;

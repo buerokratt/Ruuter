@@ -33,7 +33,9 @@ public abstract class ConfigurationStep {
             logStep(System.currentTimeMillis() - startTime, ci);
         } catch (Exception e) {
             LoggingUtils.logStepError(log, getType(), ci.getRequestOrigin(), name);
-            throw new StepExecutionException(name, e);
+            if (ci.getProperties().isStopProcessingUnRespondingService()) {
+                throw new StepExecutionException(name, e);
+            }
         } finally {
             newSpan.end();
         }

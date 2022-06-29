@@ -1,0 +1,8 @@
+assign_integers:
+  assign:
+    var1: 2
+    var2: 3
+    var3: 5
+
+return_value:
+  return: ${var1 - var2 + var3}

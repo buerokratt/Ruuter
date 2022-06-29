@@ -1,0 +1,8 @@
+assign_strings:
+  assign:
+    var1: Büro
+    var2: kratt
+    var3: www.kratid.ee
+
+return_value:
+  return: ${var1 + var2 + " " + var3}

@@ -10,6 +10,56 @@ import java.util.HashMap;
 class ScriptingHelperIT extends BaseIntegrationTest {
 
     @Test
+    void shouldConcatenateStrings() {
+        client.get()
+            .uri("/string-concatenation")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("Bürokratt www.kratid.ee");
+    }
+
+    @Test
+    void shouldConcatStringAndVariable() {
+        client.post()
+            .uri("/concat-string-and-variable")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("PNOEE-1234567890");
+    }
+
+    @Test
+    void shouldCalculateWithIntegers() {
+        client.get()
+            .uri("/integer-addition")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo(4);
+    }
+
+    @Test
+    void shouldEvaluateBooleanValue() {
+        client.get()
+            .uri("/boolean-or-evaluation")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo(true);
+    }
+
+    @Test
+    void shouldEvaluateBooleanValue2() {
+        client.get()
+            .uri("/boolean-and-evaluation")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo(false);
+    }
+
+    @Test
     void shouldBeAbleToUseIncomingResponseBodyAndParams() {
         HashMap<String, String> postBody = new HashMap<>();
         postBody.put("element", "123");
@@ -37,16 +87,6 @@ class ScriptingHelperIT extends BaseIntegrationTest {
             .expectBody()
             .jsonPath("$.response")
             .isEqualTo(expectedValue);
-    }
-
-    @Test
-    void shouldConcatStringAndVariable() {
-        client.post()
-            .uri("/concat-string-and-variable")
-            .exchange().expectStatus().isOk()
-            .expectBody()
-            .jsonPath("$.response")
-            .isEqualTo("PNOEE-1234567890");
     }
 
 }

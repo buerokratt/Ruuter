@@ -26,4 +26,12 @@ class ConfigurationControllerIT extends BaseIntegrationTest {
             .jsonPath("$.response")
             .isEqualTo("return_value");
     }
+
+    @Test
+    void getRoute_shouldGetMethodNotAllowedErrorWhenInvalidMethodType() {
+        client.put()
+            .uri("/test-call")
+            .exchange().expectStatus().isEqualTo(405);
+    }
+
 }
