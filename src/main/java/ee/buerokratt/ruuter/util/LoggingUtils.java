@@ -23,6 +23,13 @@ public class LoggingUtils {
         clearLogContext();
     }
 
+    public static void logIncorrectIncomingRequest(Logger log, String configurationName, String requestOrigin, String method) {
+        setLogContext(requestOrigin, "incoming.request", "-", "-", "-", "-", "-");
+        String message = "Request received with invalid method type %s for configuration: %s".formatted(method, configurationName);
+        log.error(message);
+        clearLogContext();
+    }
+
     public static void logStep(Logger log, ConfigurationStep step, String requestAuthorIp, Long elapsedTime, String requestTo, String requestContent, String responseContent, String responseStatus) {
         String stepType = Boolean.TRUE.equals(step.getSkip()) ? "skip" : step.getType();
         setLogContext(requestAuthorIp, stepType, elapsedTime.toString(), requestTo, requestContent, responseContent, responseStatus);
