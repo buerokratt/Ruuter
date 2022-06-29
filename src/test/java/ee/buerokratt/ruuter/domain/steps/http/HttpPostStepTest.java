@@ -104,7 +104,7 @@ class HttpPostStepTest extends BaseStepTest {
             setResultName("the_response");
         }};
 
-        when(properties.isStopProcessingUnRespondingSteps()).thenReturn(true);
+        when(properties.isStopProcessingUnRespondingService()).thenReturn(true);
         stubFor(get("/endpoint").willReturn(ok()));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedPostStep.execute(ci));

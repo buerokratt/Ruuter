@@ -83,7 +83,7 @@ class HttpGetStepTest extends BaseStepTest {
         }};
 
         when(ci.getProperties()).thenReturn(applicationProperties);
-        when(applicationProperties.isStopProcessingUnRespondingSteps()).thenReturn(true);
+        when(applicationProperties.isStopProcessingUnRespondingService()).thenReturn(true);
         stubFor(get("/endpoint").willReturn(ok()));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedGetStep.execute(ci));
