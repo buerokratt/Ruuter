@@ -28,10 +28,10 @@ class ConfigurationControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    void getRoute_shouldGetInternalServerErrorWhenInvalidMethodType() {
+    void getRoute_shouldGetMethodNotAllowedErrorWhenInvalidMethodType() {
         client.put()
             .uri("/test-call")
-            .exchange().expectStatus().isEqualTo(500);
+            .exchange().expectStatus().isEqualTo(405);
     }
 
 }

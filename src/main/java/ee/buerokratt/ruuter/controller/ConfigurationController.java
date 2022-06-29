@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.status;
 
 @Slf4j
 @RestController
@@ -29,7 +30,7 @@ public class ConfigurationController {
                                                              HttpServletRequest request) {
         if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
             LoggingUtils.logIncorrectIncomingRequest(log, configuration, request.getRemoteAddr(), request.getMethod());
-            return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+            return status(HttpStatus.METHOD_NOT_ALLOWED).body(new RuuterResponse());
         }
         return ok(new RuuterResponse(configurationService.execute(configuration, requestBody, requestParams, request.getRemoteAddr())));
     }
