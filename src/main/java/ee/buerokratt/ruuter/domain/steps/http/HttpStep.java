@@ -7,12 +7,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.service.ConfigurationService;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.HashMap;
 
 @Slf4j
 @Data
@@ -31,6 +34,21 @@ public abstract class HttpStep extends ConfigurationStep {
     protected String resultName;
     protected HttpQueryArgs args;
     protected String call;
+
+    public boolean isValidStatusCode(ConfigurationInstance ci, ConfigurationService configurationService)  {
+        ApplicationProperties properties = ci.getProperties();
+        Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus();
+        boolean isValidStatusCode = properties.getHttpCodesAllowList().contains(responseStatus);
+        if (!isValidStatusCode) {
+            ApplicationProperties.DefaultAction defaultAction = properties.getDefaultAction();
+            JsonNode responseBody = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody();
+            HashMap<String, String> body = defaultAction.getBody();
+            body.put("statusCode", responseStatus.toString());
+            body.put("responseBody", ci.getMappingHelper().convertObjectToString(responseBody));
+            configurationService.execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
+        }
+        return isValidStatusCode;
+    }
 
     @Override
     protected void logStep(Long elapsedTime, ConfigurationInstance ci) {

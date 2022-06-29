@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Setter
@@ -12,6 +13,8 @@ import java.util.List;
 public class ApplicationProperties {
     private String configPath;
     private boolean stopProcessingUnRespondingService;
+    private List<Integer> httpCodesAllowList;
+    private DefaultAction defaultAction;
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
 
@@ -26,6 +29,14 @@ public class ApplicationProperties {
     @Setter
     public static class IncomingRequests {
         private List<String> allowedMethodTypes;
+    }
+
+    @Getter
+    @Setter
+    public static class DefaultAction {
+        private String service;
+        private HashMap<String, String> body;
+        private HashMap<String, String> query;
     }
 
 }

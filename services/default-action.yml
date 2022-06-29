@@ -1,0 +1,8 @@
+post_default_action:
+  call: http.post
+  args:
+    url: https://7a7d51c0-1eeb-47b3-bc26-c57aef1f5aac.mock.pstmn.io
+    body:
+      responseBody: ${incoming.body.responseBody}
+      statusCode: ${incoming.body.statusCode}
+  result: the_response
