@@ -1,0 +1,10 @@
+first_step:
+  assign:
+    stringValue: "test"
+
+second_step:
+  return: "incorrect_final_result"
+
+third_step:
+  skip: false
+  return: "expected_result"
