@@ -3,10 +3,10 @@ package ee.buerokratt.ruuter.controller;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.RuuterResponse;
 import ee.buerokratt.ruuter.service.ConfigurationService;
-import ee.buerokratt.ruuter.service.exception.InvalidIncomingRequestMethodType;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,11 +27,11 @@ public class ConfigurationController {
                                                              @RequestBody(required = false) Map<String, String> requestBody,
                                                              @RequestParam(required = false) Map<String, String> requestParams,
                                                              HttpServletRequest request) {
-        if (properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
-            return ok(new RuuterResponse(configurationService.execute(configuration, requestBody, requestParams, request.getRemoteAddr())));
+        if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
+            LoggingUtils.logIncorrectIncomingRequest(log, configuration, request.getRemoteAddr(), request.getMethod());
+            return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
         }
-        LoggingUtils.logIncorrectIncomingRequest(log, configuration, request.getRemoteAddr(), request.getMethod());
-        throw new InvalidIncomingRequestMethodType(request.getMethod());
+        return ok(new RuuterResponse(configurationService.execute(configuration, requestBody, requestParams, request.getRemoteAddr())));
     }
 
 }
