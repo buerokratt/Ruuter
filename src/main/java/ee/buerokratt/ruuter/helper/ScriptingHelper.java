@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
@@ -24,6 +21,19 @@ public class ScriptingHelper {
 
     public boolean containsScript(String s) {
         return Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(s).find();
+    }
+
+    public Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, String> requestBody, Map<String, String> requestParams) {
+        Map<String, Object> incoming = new HashMap<>();
+        if (requestParams != null) {
+            incoming.put("params", new HashMap<>(requestParams));
+        }
+        if (requestBody != null) {
+            incoming.put("body", new HashMap<>(requestBody));
+        }
+        HashMap<String, Object> evalContext = new HashMap<>(context);
+        evalContext.put("incoming", incoming);
+        return evalContext;
     }
 
     public Object evaluateScripts(String toEval, Map<String, Object> evalContext) {

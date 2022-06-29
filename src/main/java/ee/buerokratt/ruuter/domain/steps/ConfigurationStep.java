@@ -22,18 +22,18 @@ public abstract class ConfigurationStep {
     private String nextStepName;
     private Boolean skip;
 
-    public final void execute(ConfigurationInstance configurationInstance) {
-        Span newSpan = configurationInstance.getTracer().nextSpan().name(name);
+    public final void execute(ConfigurationInstance ci) {
+        Span newSpan = ci.getTracer().nextSpan().name(name);
         long startTime = System.currentTimeMillis();
 
-        try (Tracer.SpanInScope ws = configurationInstance.getTracer().withSpan(newSpan.start())) {
+        try (Tracer.SpanInScope ws = ci.getTracer().withSpan(newSpan.start())) {
             if (!Boolean.TRUE.equals(skip)) {
-                executeStepAction(configurationInstance);
+                executeStepAction(ci);
             }
-            logStep(System.currentTimeMillis() - startTime, configurationInstance);
+            logStep(System.currentTimeMillis() - startTime, ci);
         } catch (Exception e) {
-            LoggingUtils.logStepError(log, getType(), configurationInstance.getRequestOrigin(), name);
-            if (configurationInstance.getProperties().isStopProcessingUnRespondingService()) {
+            LoggingUtils.logStepError(log, getType(), ci.getRequestOrigin(), name);
+            if (ci.getProperties().isStopProcessingUnRespondingService()) {
                 throw new StepExecutionException(name, e);
             }
         } finally {

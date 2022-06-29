@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -17,13 +18,14 @@ public class AssignStep<T> extends ConfigurationStep {
     private HashMap<String, T> assign;
 
     @Override
-    protected void executeStepAction(ConfigurationInstance configurationInstance) {
+    protected void executeStepAction(ConfigurationInstance ci) {
         assign.forEach((k, v) -> {
-            ScriptingHelper scriptingHelper = configurationInstance.getScriptingHelper();
+            ScriptingHelper scriptingHelper = ci.getScriptingHelper();
             if (v instanceof String && scriptingHelper.containsScript(v.toString())) {
-                configurationInstance.getContext().put(k, scriptingHelper.evaluateScripts(v.toString(), configurationInstance.getContext()));
+                Map<String, Object> evalContext = scriptingHelper.setupEvalContext(ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
+                ci.getContext().put(k, scriptingHelper.evaluateScripts(v.toString(), evalContext));
             } else {
-                configurationInstance.getContext().put(k, v);
+                ci.getContext().put(k, v);
             }
         });
     }
