@@ -41,21 +41,21 @@ public class ConfigurationInstance {
         }
     }
 
-    private void executeStep(String stepName, List<String> configurationNames) {
+    private void executeStep(String stepName, List<String> stepNames) {
         ConfigurationStep stepToExecute = steps.get(stepName);
         stepToExecute.execute(this);
-        executeNextStep(stepToExecute, configurationNames);
+        executeNextStep(stepToExecute, stepNames);
     }
 
-    private void executeNextStep(ConfigurationStep previousStep, List<String> configurationNames) {
+    private void executeNextStep(ConfigurationStep previousStep, List<String> stepNames) {
         if (previousStep.getNextStepName() == null) {
-            int nextStepIndex = configurationNames.indexOf(previousStep.getName()) + 1;
-            if (nextStepIndex >= configurationNames.size()) {
+            int nextStepIndex = stepNames.indexOf(previousStep.getName()) + 1;
+            if (nextStepIndex >= stepNames.size()) {
                 return;
             }
-            executeStep(configurationNames.get(nextStepIndex), configurationNames);
+            executeStep(stepNames.get(nextStepIndex), stepNames);
         } else if (!previousStep.getNextStepName().equals("end")) {
-            executeStep(previousStep.getNextStepName(), configurationNames);
+            executeStep(previousStep.getNextStepName(), stepNames);
         }
     }
 }

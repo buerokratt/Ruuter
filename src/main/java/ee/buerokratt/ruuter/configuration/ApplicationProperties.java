@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
 public class ApplicationProperties {
     private String configPath;
+    private boolean stopProcessingUnRespondingService;
     private Logging logging = new Logging();
 
     @Setter

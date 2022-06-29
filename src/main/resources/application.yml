@@ -1,5 +1,6 @@
 application:
   config-path: ${user.dir}/services
+  stopProcessingUnrespondingService: true
   logging:
     displayRequestContent: false
     displayResponseContent: false

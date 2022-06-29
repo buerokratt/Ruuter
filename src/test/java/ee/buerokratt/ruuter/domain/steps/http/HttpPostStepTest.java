@@ -16,6 +16,7 @@ import java.util.HashMap;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @WireMockTest
@@ -90,4 +91,24 @@ class HttpPostStepTest extends BaseStepTest {
         verify(postRequestedFor(urlEqualTo("/endpoint"))
             .withHeader("Cache-Control", equalTo("no-cache")));
     }
+
+    @Test
+    void execute_shouldThrowErrorWhenRequestFailsAndStopProcessingUnRespondingStepsIsTrue() {
+        String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
+        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
+            setUrl(getWrongRequestUrl);
+        }};
+        HttpStep expectedPostStep = new HttpPostStep() {{
+            setName("post_message");
+            setArgs(expectedGetArgs);
+            setResultName("the_response");
+        }};
+
+        when(properties.isStopProcessingUnRespondingService()).thenReturn(true);
+        stubFor(get("/endpoint").willReturn(ok()));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedPostStep.execute(ci));
+        assertEquals("Error executing: %s".formatted(expectedPostStep.getName()), exception.getMessage());
+    }
+
 }

@@ -3,16 +3,22 @@ package ee.buerokratt.ruuter.domain.steps.http;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.buerokratt.ruuter.BaseStepTest;
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.util.HashMap;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @WireMockTest
 class HttpGetStepTest extends BaseStepTest {
+
+    @Mock
+    private ApplicationProperties applicationProperties;
 
     @Test
     void execute_shouldQueryEndpointAndStoreResponse(WireMockRuntimeInfo wmRuntimeInfo) {
@@ -64,4 +70,24 @@ class HttpGetStepTest extends BaseStepTest {
         verify(getRequestedFor(urlEqualTo("/endpoint?some_val=Hello+World&another_val=123"))
             .withHeader("X-Custom-Header", equalTo("Some custom header value")));
     }
+    @Test
+    void execute_shouldThrowErrorWhenRequestFailsAndStopProcessingUnRespondingStepsIsTrue() {
+        String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
+        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
+            setUrl(getWrongRequestUrl);
+        }};
+        HttpStep expectedGetStep = new HttpGetStep() {{
+            setName("get_message");
+            setArgs(expectedGetArgs);
+            setResultName("the_response");
+        }};
+
+        when(ci.getProperties()).thenReturn(applicationProperties);
+        when(applicationProperties.isStopProcessingUnRespondingService()).thenReturn(true);
+        stubFor(get("/endpoint").willReturn(ok()));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedGetStep.execute(ci));
+        assertEquals("Error executing: %s".formatted(expectedGetStep.getName()), exception.getMessage());
+    }
+
 }
