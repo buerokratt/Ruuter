@@ -1,0 +1,20 @@
+version: '3.9'
+services:
+  ruuter:
+    container_name: ruuter
+    build:
+      context: .
+    environment:
+      - logging.level.root=INFO
+      - application.config-path=/services
+    volumes:
+      - ./services:/services
+    ports:
+      - 8080:8080
+    restart: always
+    networks:
+      - ruuter
+
+networks:
+  ruuter:
+    driver: bridge
