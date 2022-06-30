@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import ee.buerokratt.ruuter.BaseStepTest;
+import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @WireMockTest
-class HttpPostStepTest extends BaseStepTest {
+class HttpPostStepTest extends StepTestBase {
 
     @Mock
     private MappingHelper mappingHelper;
@@ -95,12 +95,12 @@ class HttpPostStepTest extends BaseStepTest {
     @Test
     void execute_shouldThrowErrorWhenRequestFailsAndStopProcessingUnRespondingStepsIsTrue() {
         String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
-        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
+        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
             setUrl(getWrongRequestUrl);
         }};
         HttpStep expectedPostStep = new HttpPostStep() {{
             setName("post_message");
-            setArgs(expectedGetArgs);
+            setArgs(expectedPostArgs);
             setResultName("the_response");
         }};
 
@@ -110,5 +110,4 @@ class HttpPostStepTest extends BaseStepTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedPostStep.execute(ci));
         assertEquals("Error executing: %s".formatted(expectedPostStep.getName()), exception.getMessage());
     }
-
 }

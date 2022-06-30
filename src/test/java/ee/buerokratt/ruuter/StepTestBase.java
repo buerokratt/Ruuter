@@ -12,7 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BaseStepTest {
+public class StepTestBase {
 
     @Mock
     protected Tracer tracer;
@@ -29,5 +29,4 @@ public class BaseStepTest {
         when(tracer.nextSpan()).thenReturn(span);
         when(span.name(any())).thenReturn(span);
     }
-
 }

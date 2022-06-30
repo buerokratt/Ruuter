@@ -6,7 +6,6 @@ import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain"})
 class ExecutionOrderIT extends BaseIntegrationTest {
-
     public static final String EXPECTED_RESULT = "expected_result";
 
     @Test
