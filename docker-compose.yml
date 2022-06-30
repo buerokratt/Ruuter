@@ -4,9 +4,6 @@ services:
     container_name: ruuter
     build:
       context: .
-    environment:
-      - logging.level.root=INFO
-      - application.config-path=/services
     volumes:
       - ./services:/services
     ports:
