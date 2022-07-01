@@ -11,7 +11,6 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class MappingHelper {
-
     private final ObjectMapper mapper;
 
     public JsonNode convertStringToNode(String content) {

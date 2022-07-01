@@ -88,5 +88,4 @@ class ScriptingHelperIT extends BaseIntegrationTest {
             .jsonPath("$.response")
             .isEqualTo(expectedValue);
     }
-
 }

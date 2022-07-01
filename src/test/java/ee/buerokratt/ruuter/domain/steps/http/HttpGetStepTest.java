@@ -2,7 +2,7 @@ package ee.buerokratt.ruuter.domain.steps.http;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import ee.buerokratt.ruuter.BaseStepTest;
+import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @WireMockTest
-class HttpGetStepTest extends BaseStepTest {
+class HttpGetStepTest extends StepTestBase {
 
     @Mock
     private ApplicationProperties applicationProperties;
@@ -70,6 +70,7 @@ class HttpGetStepTest extends BaseStepTest {
         verify(getRequestedFor(urlEqualTo("/endpoint?some_val=Hello+World&another_val=123"))
             .withHeader("X-Custom-Header", equalTo("Some custom header value")));
     }
+
     @Test
     void execute_shouldThrowErrorWhenRequestFailsAndStopProcessingUnRespondingStepsIsTrue() {
         String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
@@ -89,5 +90,4 @@ class HttpGetStepTest extends BaseStepTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedGetStep.execute(ci));
         assertEquals("Error executing: %s".formatted(expectedGetStep.getName()), exception.getMessage());
     }
-
 }

@@ -16,6 +16,7 @@ import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpPostRequest;
 @ToString(callSuper = true)
 @NoArgsConstructor
 public class HttpPostStep extends HttpStep {
+
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         HttpResponse<String> response = makeHttpPostRequest(args, ci.getMappingHelper().convertObjectToString(args.getBody()));
