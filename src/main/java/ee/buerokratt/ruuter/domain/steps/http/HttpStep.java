@@ -41,10 +41,11 @@ public abstract class HttpStep extends ConfigurationStep {
         boolean isValidStatusCode = properties.getHttpCodesAllowList().contains(responseStatus);
         if (!isValidStatusCode) {
             ApplicationProperties.DefaultAction defaultAction = properties.getDefaultAction();
-            JsonNode responseBody = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody();
+            HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
             HashMap<String, String> body = defaultAction.getBody();
             body.put("statusCode", responseStatus.toString());
-            body.put("responseBody", ci.getMappingHelper().convertObjectToString(responseBody));
+            body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
+            body.put("failedRequestId", response.getRequestId());
             configurationService.execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
         }
         return isValidStatusCode;

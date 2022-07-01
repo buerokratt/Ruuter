@@ -15,4 +15,5 @@ public class HttpQueryResponse {
     private JsonNode body;
     private Map<String, List<String>> headers;
     private Integer status;
+    private String requestId;
 }

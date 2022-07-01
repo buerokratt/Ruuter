@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.slf4j.MDC;
 
 import java.net.http.HttpResponse;
 
@@ -18,7 +19,7 @@ public class HttpGetStep extends HttpStep {
     protected void executeStepAction(ConfigurationInstance ci) {
         HttpResponse<String> response = ci.getHttpHelper().makeHttpGetRequest(args, ci);
         JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
-        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode());
+        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode(), MDC.get("spanId"));
         ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
     }
 

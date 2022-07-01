@@ -5,4 +5,5 @@ post_default_action:
     body:
       responseBody: ${incoming.body.responseBody}
       statusCode: ${incoming.body.statusCode}
+      failedRequestId: ${incoming.body.failedRequestId}
   result: the_response
