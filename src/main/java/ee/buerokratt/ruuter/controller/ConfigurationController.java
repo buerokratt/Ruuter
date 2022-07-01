@@ -32,7 +32,7 @@ public class ConfigurationController {
             LoggingUtils.logIncorrectIncomingRequest(log, configuration, request.getRemoteAddr(), request.getMethod());
             return status(HttpStatus.METHOD_NOT_ALLOWED).body(new RuuterResponse());
         }
-        return ok(new RuuterResponse(configurationService.execute(configuration, requestBody, requestParams, request.getRemoteAddr())));
+        return ok(new RuuterResponse(configurationService.execute(configuration, request.getMethod(), requestBody, requestParams, request.getRemoteAddr())));
     }
 
 }
