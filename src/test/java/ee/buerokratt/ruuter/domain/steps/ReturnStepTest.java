@@ -27,7 +27,7 @@ class ReturnStepTest extends BaseStepTest {
             setReturnValue(expectedResult);
         }};
 
-        when(scriptingHelper.containsScript(anyString())).thenReturn(false);
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         assignStep.execute(ci);
 
         verify(ci, times(1)).setReturnValue(expectedResult);
@@ -40,8 +40,7 @@ class ReturnStepTest extends BaseStepTest {
             setReturnValue("${value}");
         }};
 
-        when(scriptingHelper.containsScript(anyString())).thenReturn(true);
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap())).thenReturn(expectedResult);
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         assignStep.execute(ci);
 
         verify(ci, times(1)).setReturnValue(expectedResult);

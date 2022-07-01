@@ -3,6 +3,7 @@ package ee.buerokratt.ruuter.domain;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
+import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.ConfigurationService;
@@ -30,6 +31,7 @@ public class ConfigurationInstance {
     private final String requestOrigin;
     private final Tracer tracer;
     private final ConfigurationService configurationService;
+    private final HttpHelper httpHelper;
     private Object returnValue;
 
     public void execute(String configurationName) {

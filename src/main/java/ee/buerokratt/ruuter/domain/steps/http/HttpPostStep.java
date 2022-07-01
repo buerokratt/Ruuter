@@ -9,8 +9,6 @@ import lombok.ToString;
 
 import java.net.http.HttpResponse;
 
-import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpPostRequest;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -18,7 +16,7 @@ import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpPostRequest;
 public class HttpPostStep extends HttpStep {
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        HttpResponse<String> response = makeHttpPostRequest(args, ci.getMappingHelper().convertObjectToString(args.getBody()));
+        HttpResponse<String> response = ci.getHttpHelper().makeHttpPostRequest(args, ci);
         JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
         HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode());
         ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
