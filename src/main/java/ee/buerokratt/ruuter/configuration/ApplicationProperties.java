@@ -12,7 +12,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
 public class ApplicationProperties {
     private String configPath;
-    private boolean stopProcessingUnRespondingService;
+    private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
     private DefaultAction defaultAction;
     private Logging logging = new Logging();

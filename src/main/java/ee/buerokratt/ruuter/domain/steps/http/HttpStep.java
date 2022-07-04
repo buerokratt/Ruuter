@@ -7,14 +7,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
-import ee.buerokratt.ruuter.service.ConfigurationService;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 
 @Slf4j
@@ -35,20 +36,30 @@ public abstract class HttpStep extends ConfigurationStep {
     protected HttpQueryArgs args;
     protected String call;
 
-    public boolean isValidStatusCode(ConfigurationInstance ci, ConfigurationService configurationService)  {
-        ApplicationProperties properties = ci.getProperties();
-        Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus();
-        boolean isValidStatusCode = properties.getHttpCodesAllowList().contains(responseStatus);
-        if (!isValidStatusCode) {
-            ApplicationProperties.DefaultAction defaultAction = properties.getDefaultAction();
-            HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
-            HashMap<String, String> body = defaultAction.getBody();
-            body.put("statusCode", responseStatus.toString());
-            body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
-            body.put("failedRequestId", response.getRequestId());
-            configurationService.execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
+    @Override
+    protected void executeStepAction(ConfigurationInstance ci) {
+        HttpResponse<String> response = getHttpRequestResponse(ci);
+        JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
+        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode(), MDC.get("spanId"));
+        ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
+        if (!ci.getProperties().getHttpCodesAllowList().isEmpty() && !ci.getProperties().getHttpCodesAllowList().contains(response.statusCode())) {
+            throw new IllegalArgumentException();
         }
-        return isValidStatusCode;
+    }
+
+    protected abstract HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci);
+
+    @Override
+    public void handleFailedResult(ConfigurationInstance ci) {
+        super.handleFailedResult(ci);
+        ApplicationProperties.DefaultAction defaultAction = ci.getProperties().getDefaultAction();
+        HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
+        HashMap<String, String> body = defaultAction.getBody();
+        body.put("statusCode", response.getStatus().toString());
+        body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
+        body.put("failedRequestId", MDC.get("spanId"));
+        Object res = ci.getConfigurationService().execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
+        ci.getContext().put(resultName, res);
     }
 
     @Override

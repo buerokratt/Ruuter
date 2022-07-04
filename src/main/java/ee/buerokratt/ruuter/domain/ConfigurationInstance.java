@@ -2,7 +2,6 @@ package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
-import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
@@ -47,16 +46,9 @@ public class ConfigurationInstance {
     }
 
     private void executeStep(String stepName, List<String> stepNames) {
-        boolean isValidStatusCode = true;
         ConfigurationStep stepToExecute = steps.get(stepName);
         stepToExecute.execute(this);
-        if (stepToExecute.getType().equals("http.post") || stepToExecute.getType().equals("http.get")) {
-            HttpStep httpStepToExecute = (HttpStep) stepToExecute;
-            isValidStatusCode = httpStepToExecute.isValidStatusCode(this, configurationService);
-        }
-        if (isValidStatusCode) {
-            executeNextStep(stepToExecute, stepNames);
-        }
+        executeNextStep(stepToExecute, stepNames);
     }
 
     private void executeNextStep(ConfigurationStep previousStep, List<String> stepNames) {

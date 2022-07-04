@@ -1,6 +1,5 @@
 package ee.buerokratt.ruuter.helper;
 
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.domain.steps.http.HttpQueryArgs;
 import ee.buerokratt.ruuter.service.exception.InvalidHttpRequestException;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,15 +24,15 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Service
 @RequiredArgsConstructor
 public class HttpHelper {
+    private final MappingHelper mappingHelper;
 
-    public HttpResponse<String> makeHttpPostRequest(HttpQueryArgs args, ConfigurationInstance ci) {
+    public HttpResponse<String> makeHttpPostRequest(HttpQueryArgs args, Map<String, Object> body) {
         try {
-
             HttpRequest.Builder request = HttpRequest.newBuilder()
-                .uri(new URI(getUriFromArgs(args, ci)))
+                .uri(new URI(getUriFromArgs(args, body)))
                 .timeout(Duration.of(10, SECONDS))
                 .headers("Content-Type", "text/plain;charset=UTF-8")
-                .POST(HttpRequest.BodyPublishers.ofString(ci.getMappingHelper().convertObjectToString(evaluateMapValues(args.getBody(), ci))));
+                .POST(HttpRequest.BodyPublishers.ofString(mappingHelper.convertObjectToString(body)));
             if (args.getHeaders() != null) {
                 request.headers(convertHeadersMapToList(args.getHeaders()));
             }
@@ -45,10 +43,10 @@ public class HttpHelper {
         }
     }
 
-    public HttpResponse<String> makeHttpGetRequest(HttpQueryArgs args, ConfigurationInstance ci) {
+    public HttpResponse<String> makeHttpGetRequest(HttpQueryArgs args) {
         try {
             HttpRequest.Builder request = HttpRequest.newBuilder()
-                .uri(new URI(getUriFromArgs(args, ci)))
+                .uri(new URI(getUriFromArgs(args, args.getBody())))
                 .timeout(Duration.of(10, SECONDS))
                 .GET();
             if (args.getHeaders() != null) {
@@ -73,9 +71,9 @@ public class HttpHelper {
         }
     }
 
-    private String getUriFromArgs(HttpQueryArgs args, ConfigurationInstance ci) {
+    private String getUriFromArgs(HttpQueryArgs args, Map<String, Object> body) {
         boolean hasParams = args.getQuery() != null && args.getQuery().size() > 0;
-        return !hasParams ? args.getUrl() : "%s?%s".formatted(args.getUrl(), URLEncodedUtils.format(mapToNameValuePairList(evaluateMapValues(args.getQuery(), ci)), "utf-8"));
+        return !hasParams ? args.getUrl() : "%s?%s".formatted(args.getUrl(), URLEncodedUtils.format(mapToNameValuePairList(body), "utf-8"));
     }
 
     private List<BasicNameValuePair> mapToNameValuePairList(Map<String, Object> map) {
@@ -94,11 +92,5 @@ public class HttpHelper {
             return headers.toArray(new String[0]);
         }
         return new String[0];
-    }
-
-    private HashMap<String, Object> evaluateMapValues(HashMap<String, Object> map, ConfigurationInstance ci) {
-        HashMap<String, Object> evaluatedMap = new HashMap<>();
-        map.forEach((k, v) -> evaluatedMap.put(k, ci.getScriptingHelper().evaluateScripts(v, ci.getContext(), ci.getRequestBody(), ci.getRequestParams())));
-        return evaluatedMap;
     }
 }

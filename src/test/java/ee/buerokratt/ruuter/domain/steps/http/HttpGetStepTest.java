@@ -6,19 +6,20 @@ import ee.buerokratt.ruuter.BaseStepTest;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
+import ee.buerokratt.ruuter.service.ConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiPredicate;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @WireMockTest
 class HttpGetStepTest extends BaseStepTest {
@@ -38,6 +39,12 @@ class HttpGetStepTest extends BaseStepTest {
     @Mock
     private BiPredicate<String, String> biPredicate;
 
+    @Mock
+    private ApplicationProperties.DefaultAction defaultAction;
+
+    @Mock
+    private ConfigurationService configurationService;
+
     private HttpHeaders httpHeaders;
 
     @BeforeEach
@@ -49,14 +56,14 @@ class HttpGetStepTest extends BaseStepTest {
     }
 
     @Test
-    void execute_shouldQueryEndpointAndStoreResponse(WireMockRuntimeInfo wmRuntimeInfo) {
+    void execute_shouldQueryEndpointAndStoreResponse(WireMockRuntimeInfo wireMockRuntimeInfo) {
         HashMap<String, Object> testContext = new HashMap<>();
         HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");
                 put("another_val", 123);
             }});
-            setUrl("http://localhost:%s/endpoint".formatted(wmRuntimeInfo.getHttpPort()));
+            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
         }};
         HttpStep expectedGetStep = new HttpGetStep() {{
             setName("get_message");
@@ -65,21 +72,24 @@ class HttpGetStepTest extends BaseStepTest {
         }};
 
         when(ci.getContext()).thenReturn(testContext);
-        when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs, ci)).thenReturn(httpResponse);
+        when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs)).thenReturn(httpResponse);
         when(httpResponse.body()).thenReturn("body");
         when(httpResponse.statusCode()).thenReturn(200);
         when(httpResponse.headers()).thenReturn(httpHeaders);
-        stubFor(get("/endpoint?some_val=Hello+World&another_val=123").willReturn(ok()));
         expectedGetStep.execute(ci);
 
         assertEquals(200, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
     }
 
     @Test
-    void execute_shouldThrowErrorWhenRequestFailsAndStopProcessingUnRespondingServiceIsTrue() {
-        String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
+    void execute_shouldExecuteDefaultActionWhenRequestIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        HashMap<String, Object> testContext = new HashMap<>();
         HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
-            setUrl(getWrongRequestUrl);
+            setQuery(new HashMap<>() {{
+                put("some_val", "Hello World");
+                put("another_val", 123);
+            }});
+            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
         }};
         HttpStep expectedGetStep = new HttpGetStep() {{
             setName("get_message");
@@ -87,15 +97,21 @@ class HttpGetStepTest extends BaseStepTest {
             setResultName("the_response");
         }};
 
-        when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs, ci)).thenReturn(httpResponse);
+        when(ci.getContext()).thenReturn(testContext);
+        when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs)).thenReturn(httpResponse);
+        when(ci.getConfigurationService()).thenReturn(configurationService);
+        when(applicationProperties.getDefaultAction()).thenReturn(defaultAction);
+        when(defaultAction.getService()).thenReturn("default-action");
+        when(defaultAction.getBody()).thenReturn(new HashMap<>());
+        when(defaultAction.getQuery()).thenReturn(new HashMap<>());
+        when(ci.getRequestOrigin()).thenReturn("");
+        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
         when(httpResponse.body()).thenReturn("body");
-        when(httpResponse.statusCode()).thenReturn(200);
+        when(httpResponse.statusCode()).thenReturn(201);
         when(httpResponse.headers()).thenReturn(httpHeaders);
-        when(applicationProperties.isStopProcessingUnRespondingService()).thenReturn(true);
-        stubFor(get("/endpoint").willReturn(ok()));
+        expectedGetStep.execute(ci);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedGetStep.execute(ci));
-        assertEquals("Error executing: %s".formatted(expectedGetStep.getName()), exception.getMessage());
+        verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
     }
 
 }

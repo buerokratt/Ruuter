@@ -1,26 +1,24 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.slf4j.MDC;
 
 import java.net.http.HttpResponse;
+import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
 public class HttpPostStep extends HttpStep {
+
     @Override
-    protected void executeStepAction(ConfigurationInstance ci) {
-        HttpResponse<String> response = ci.getHttpHelper().makeHttpPostRequest(args, ci);
-        JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
-        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode(), MDC.get("spanId"));
-        ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
+    protected HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci) {
+        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateMapValues(args.getBody(), ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
+        return ci.getHttpHelper().makeHttpPostRequest(args, evaluatedBody);
     }
 
     @Override
