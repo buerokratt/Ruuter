@@ -33,5 +33,4 @@ class ConfigurationControllerIT extends BaseIntegrationTest {
             .uri("/test-call")
             .exchange().expectStatus().isEqualTo(405);
     }
-
 }

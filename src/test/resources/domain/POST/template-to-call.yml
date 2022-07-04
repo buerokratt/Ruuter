@@ -1,0 +1,11 @@
+step_1:
+  assign:
+    stringValue: ${incoming.body.element1}
+    integerValue: ${incoming.params.element2}
+
+step_2:
+  assign:
+    doubleNumber: ${incoming.body.element2}
+
+return_value:
+  return: ${stringValue} v${doubleNumber + " since " + integerValue}

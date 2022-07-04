@@ -16,6 +16,7 @@ import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpGetRequest;
 @ToString(callSuper = true)
 @NoArgsConstructor
 public class HttpGetStep extends HttpStep {
+
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         HttpResponse<String> response = makeHttpGetRequest(args);

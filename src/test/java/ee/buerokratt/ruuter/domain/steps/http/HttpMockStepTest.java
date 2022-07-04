@@ -2,7 +2,7 @@ package ee.buerokratt.ruuter.domain.steps.http;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.buerokratt.ruuter.BaseStepTest;
+import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 
-class HttpMockStepTest extends BaseStepTest {
+class HttpMockStepTest extends StepTestBase {
 
     @Mock
     private MappingHelper mappingHelper;
@@ -57,5 +57,4 @@ class HttpMockStepTest extends BaseStepTest {
 
         assertEquals(expectedResult, ci.getContext().get(resultName));
     }
-
 }

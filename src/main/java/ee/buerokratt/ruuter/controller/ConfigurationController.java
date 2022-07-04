@@ -25,8 +25,8 @@ public class ConfigurationController {
 
     @RequestMapping(value = "/{configuration}")
     public ResponseEntity<RuuterResponse> queryConfiguration(@PathVariable String configuration,
-                                                             @RequestBody(required = false) Map<String, String> requestBody,
-                                                             @RequestParam(required = false) Map<String, String> requestParams,
+                                                             @RequestBody(required = false) Map<String, Object> requestBody,
+                                                             @RequestParam(required = false) Map<String, Object> requestParams,
                                                              HttpServletRequest request) {
         if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
             LoggingUtils.logIncorrectIncomingRequest(log, configuration, request.getRemoteAddr(), request.getMethod());
