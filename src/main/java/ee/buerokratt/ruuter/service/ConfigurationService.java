@@ -42,18 +42,15 @@ public class ConfigurationService {
     }
 
     public Map<String, Map<String, Map<String, ConfigurationStep>>> getConfigurations(String configPath) {
-        List<File> directories = Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).toList();
-        Map<String, Map<String, Map<String, ConfigurationStep>>> allConfigurations = new HashMap<>();
-        for (File directory: directories) {
+        return Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
             try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))) {
-                allConfigurations.put(directory.getName().toUpperCase(), paths
+                return paths
                     .filter(Files::isRegularFile)
-                    .collect(toMap(FileUtils::getFileNameWithoutSuffix, configurationMappingHelper::getConfigurationSteps)));
+                    .collect(toMap(FileUtils::getFileNameWithoutSuffix, configurationMappingHelper::getConfigurationSteps));
             } catch (Exception e) {
                 throw new LoadConfigurationsException(e);
             }
-        }
-        return allConfigurations;
+        }));
     }
 
     public Object execute(String configuration, String requestType, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
