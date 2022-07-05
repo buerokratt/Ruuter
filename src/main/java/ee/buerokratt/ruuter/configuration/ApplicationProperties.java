@@ -15,8 +15,8 @@ public class ApplicationProperties {
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
     private DefaultAction defaultAction;
-    private Logging logging = new Logging();
-    private IncomingRequests incomingRequests = new IncomingRequests();
+    private Logging logging;
+    private IncomingRequests incomingRequests;
 
     @Setter
     @Getter

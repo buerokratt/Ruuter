@@ -32,9 +32,7 @@ public abstract class ConfigurationStep {
             }
             logStep(System.currentTimeMillis() - startTime, ci);
         }  catch (Exception e) {
-            if (ci.getProperties().getDefaultAction() != null && ci.getProperties().getDefaultAction().getService() != null) {
-                handleFailedResult(ci);
-            }
+            handleFailedResult(ci);
             if (ci.getProperties().getStopInCaseOfException() != null && ci.getProperties().getStopInCaseOfException()) {
                 throw new StepExecutionException(name, e);
             }
