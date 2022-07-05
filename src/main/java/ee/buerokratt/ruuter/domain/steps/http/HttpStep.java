@@ -13,6 +13,10 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+
+import java.net.http.HttpResponse;
+import java.util.HashMap;
 
 @Slf4j
 @Data
@@ -33,6 +37,31 @@ public abstract class HttpStep extends ConfigurationStep {
     protected String call;
 
     @Override
+    protected void executeStepAction(ConfigurationInstance ci) {
+        HttpResponse<String> response = getHttpRequestResponse(ci);
+        JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
+        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode(), MDC.get("spanId"));
+        ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
+        if (!ci.getProperties().getHttpCodesAllowList().isEmpty() && !ci.getProperties().getHttpCodesAllowList().contains(response.statusCode())) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    public void handleFailedResult(ConfigurationInstance ci) {
+        super.handleFailedResult(ci);
+        ApplicationProperties.DefaultAction defaultAction = ci.getProperties().getDefaultAction();
+        if (defaultAction != null && defaultAction.getService() != null) {
+            HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
+            HashMap<String, Object> body = defaultAction.getBody();
+            body.put("statusCode", response.getStatus().toString());
+            body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
+            body.put("failedRequestId", MDC.get("spanId"));
+            ci.getConfigurationService().execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
+        }
+    }
+
+    @Override
     protected void logStep(Long elapsedTime, ConfigurationInstance ci) {
         ApplicationProperties properties = ci.getProperties();
         Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus();
@@ -41,4 +70,6 @@ public abstract class HttpStep extends ConfigurationStep {
         String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";
         LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
+
+    protected abstract HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci);
 }

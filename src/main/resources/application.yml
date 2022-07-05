@@ -1,11 +1,18 @@
 application:
   config-path: ${user.dir}/services
-  stopProcessingUnrespondingService: true
+  stopInCaseOfException: true
   logging:
     displayRequestContent: false
     displayResponseContent: false
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
+  httpCodesAllowList: [ 200, 201, 202 ]
+  defaultAction:
+    service: default-action
+    body:
+      some_val: "Hello World"
+    query:
+      another_val: 123
 
 spring:
   application:

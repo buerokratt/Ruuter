@@ -36,11 +36,15 @@ public class ScriptingHelper {
         return evalContext;
     }
 
-    public Object evaluateScripts(String toEval, Map<String, Object> evalContext) {
+    public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
+        if (!containsScript(toEval.toString())) {
+            return toEval;
+        }
+        Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestParams);
         Bindings bindings = createBindingsWithContext(evalContext);
 
-        List<String> nonScriptSlices = Arrays.stream(toEval.split(SCRIPT_REGEX)).toList();
-        List<Object> evaluatedScripts = Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(toEval).results()
+        List<String> nonScriptSlices = Arrays.stream(toEval.toString().split(SCRIPT_REGEX)).toList();
+        List<Object> evaluatedScripts = Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(toEval.toString()).results()
             .map(matchResult -> matchResult.group(0))
             .map(scriptToExecute -> setupObjectsInScript(removeScriptWrapper(scriptToExecute), bindings, evalContext))
             .map(evaluableScript -> evaluate(bindings, evaluableScript))
@@ -52,6 +56,15 @@ public class ScriptingHelper {
         return nonScriptSlices.stream()
             .map(nonScriptSlice -> evaluatedScripts.isEmpty() ? nonScriptSlice : nonScriptSlice + evaluatedScripts.remove(0))
             .reduce("", (s, s2) -> s + s2);
+    }
+
+    public Map<String, Object> evaluateMapValues(Map<String, Object> map, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
+        if (map == null || map.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        Map<String, Object> evaluatedMap = new HashMap<>();
+        map.forEach((k, v) -> evaluatedMap.put(k, evaluateScripts(v, context, requestBody, requestParams)));
+        return evaluatedMap;
     }
 
     private Bindings createBindingsWithContext(Map<String, Object> evalContext) {
@@ -94,4 +107,5 @@ public class ScriptingHelper {
     private String removeScriptWrapper(String s) {
         return s.substring(2, s.length() - 1);
     }
+
 }

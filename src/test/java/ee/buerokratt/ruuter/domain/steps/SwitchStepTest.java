@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 class SwitchStepTest extends StepTestBase {
@@ -49,9 +51,9 @@ class SwitchStepTest extends StepTestBase {
         }};
 
         when(ci.getContext()).thenReturn(testContext);
-        when(scriptingHelper.evaluateScripts("${currentTime == \"Sunday\"}", testContext)).thenReturn(true);
-        when(scriptingHelper.evaluateScripts("${currentTime == \"Saturday\"}", testContext)).thenReturn(false);
-        when(scriptingHelper.evaluateScripts("${currentTime == \"Friday\"}", testContext)).thenReturn(false);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Sunday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(true);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Saturday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(false);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Friday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(false);
         switchStep.execute(ci);
 
         assertEquals("fourth_step", switchStep.getNextStepName());

@@ -39,7 +39,7 @@ public class TemplateStep extends ConfigurationStep {
         return toMap(Map.Entry::getKey, entry -> {
                 if (scriptingHelper.containsScript(entry.getValue().toString())) {
                     Map<String, Object> evalContext = scriptingHelper.setupEvalContext(ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-                    return scriptingHelper.evaluateScripts(entry.getValue().toString(), evalContext);
+                    return scriptingHelper.evaluateScripts(entry.getValue().toString(), evalContext, ci.getRequestBody(), ci.getRequestParams());
                 }
                 return entry.getValue();
             }

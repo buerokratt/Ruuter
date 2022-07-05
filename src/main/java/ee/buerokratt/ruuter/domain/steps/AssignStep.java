@@ -1,14 +1,12 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
-import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.HashMap;
-import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -19,15 +17,7 @@ public class AssignStep<T> extends ConfigurationStep {
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        assign.forEach((k, v) -> {
-            ScriptingHelper scriptingHelper = ci.getScriptingHelper();
-            if (v instanceof String && scriptingHelper.containsScript(v.toString())) {
-                Map<String, Object> evalContext = scriptingHelper.setupEvalContext(ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-                ci.getContext().put(k, scriptingHelper.evaluateScripts(v.toString(), evalContext));
-            } else {
-                ci.getContext().put(k, v);
-            }
-        });
+        assign.forEach((k, v) -> ci.getContext().put(k, ci.getScriptingHelper().evaluateScripts(v, ci.getContext(), ci.getRequestBody(), ci.getRequestParams())));
     }
 
     @Override
