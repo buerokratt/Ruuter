@@ -6,6 +6,15 @@ application:
     displayResponseContent: false
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
+#    externalForwarding:
+#      method: POST
+#      endpoint: "http://localhost:8080/call-template"
+#      paramsToPass:
+#        GET: true
+#        POST: true
+#        headers: true
+#      proceedPredicate:
+#        httpStatusCode: [ 200..202 ]
   httpCodesAllowList: [ 200, 201, 202 ]
   defaultAction:
     service: default-action

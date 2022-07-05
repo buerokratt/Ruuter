@@ -29,6 +29,30 @@ public class ApplicationProperties {
     @Setter
     public static class IncomingRequests {
         private List<String> allowedMethodTypes;
+        private ExternalForwarding externalForwarding = new ExternalForwarding();
+
+        @Getter
+        @Setter
+        public static class ExternalForwarding {
+            private String method;
+            private String endpoint;
+            private ParamsToPass paramsToPass = new ParamsToPass();
+            private ProceedPredicate proceedPredicate = new ProceedPredicate();
+
+            @Getter
+            @Setter
+            public static class ParamsToPass {
+                private Boolean get;
+                private Boolean post;
+                private Boolean headers;
+            }
+
+            @Getter
+            @Setter
+            public static class ProceedPredicate {
+                private List<String> httpStatusCode;
+            }
+        }
     }
 
     @Getter
@@ -38,5 +62,4 @@ public class ApplicationProperties {
         private HashMap<String, Object> body;
         private HashMap<String, Object> query;
     }
-
 }

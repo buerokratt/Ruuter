@@ -1,45 +1,31 @@
 package ee.buerokratt.ruuter.helper;
 
-import ee.buerokratt.ruuter.domain.steps.http.HttpQueryArgs;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class HttpHelperTest {
 
-    @Mock
-    private MappingHelper mappingHelper;
-
     @Test
-    void makeHttpPostRequest_shouldThrowErrorWhenUrlSyntaxError() {
-        HttpHelper httpHelper = new HttpHelper(mappingHelper);
-        HttpQueryArgs args = new HttpQueryArgs() {{
-            setHeaders(new HashMap<>());
-            setUrl("http://localhost:randomPort/endpoint");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-        }};
-        HashMap<String, Object> body = args.getBody();
+    void post_shouldThrowErrorWhenUrlSyntaxError() {
+        HttpHelper httpHelper = new HttpHelper();
+        String url = "http://localhost:randomPort/endpoint";
+        HashMap<String, Object> body = new HashMap<>();
+        HashMap<String, Object> query = new HashMap<>();
+        HashMap<String, String> headers = new HashMap<>();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> httpHelper.makeHttpPostRequest(args, body));
-        assertEquals(exception.getMessage(), "unsupported URI %s".formatted(args.getUrl()));
+        assertThrows(IllegalArgumentException.class, () -> httpHelper.post(url, body, query, headers));
     }
 
     @Test
-    void makeHttpGetRequest_shouldThrowErrorWhenUrlSyntaxError() {
-        HttpHelper httpHelper = new HttpHelper(mappingHelper);
-        HttpQueryArgs args = new HttpQueryArgs() {{
-            setHeaders(new HashMap<>());
-            setUrl("http://localhost:randomPort/endpoint");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-        }};
+    void get_shouldThrowErrorWhenUrlSyntaxError() {
+        HttpHelper httpHelper = new HttpHelper();
+        String url = "http://localhost:randomPort/endpoint";
+        HashMap<String, Object> query = new HashMap<>();
+        HashMap<String, String> headers = new HashMap<>();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> httpHelper.makeHttpGetRequest(args));
-        assertEquals(exception.getMessage(), "unsupported URI %s".formatted(args.getUrl()));
+        assertThrows(IllegalArgumentException.class, () -> httpHelper.get(url, query, headers));
     }
-
 }
