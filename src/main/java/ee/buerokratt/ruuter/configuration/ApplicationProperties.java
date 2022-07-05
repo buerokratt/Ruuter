@@ -17,9 +17,10 @@ public class ApplicationProperties {
     private DefaultAction defaultAction;
     private Logging logging;
     private IncomingRequests incomingRequests;
+    private HttpPost httpPost;
 
-    @Setter
     @Getter
+    @Setter
     public static class Logging {
         private Boolean displayRequestContent;
         private Boolean displayResponseContent;
@@ -29,6 +30,12 @@ public class ApplicationProperties {
     @Setter
     public static class IncomingRequests {
         private List<String> allowedMethodTypes;
+    }
+
+    @Getter
+    @Setter
+    public static class HttpPost {
+        private HashMap<String, String> headers;
     }
 
     @Getter

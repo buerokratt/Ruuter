@@ -17,6 +17,7 @@ public class HttpPostStep extends HttpStep {
 
     @Override
     protected HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci) {
+        args.addHeaders(ci);
         Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateMapValues(args.getBody(), ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
         return ci.getHttpHelper().makeHttpPostRequest(args, evaluatedBody);
     }

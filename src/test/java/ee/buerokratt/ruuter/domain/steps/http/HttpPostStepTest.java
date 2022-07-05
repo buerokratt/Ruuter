@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiPredicate;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -124,5 +125,31 @@ class HttpPostStepTest extends StepTestBase {
         expectedPostStep.execute(ci);
 
         verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
+    }
+
+    @Test
+    void execute_shouldAddDefaultHeadersDefinedInSettingsFileToRequest() {
+        String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
+        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
+            setUrl(getWrongRequestUrl);
+            setHeaders(new HashMap<>() {{
+                put("header1", "value1");
+            }});
+        }};
+        HttpStep expectedPostStep = new HttpPostStep() {{
+            setName("post_message");
+            setArgs(expectedPostArgs);
+            setResultName("the_response");
+        }};
+        ApplicationProperties.HttpPost httpPost = new ApplicationProperties.HttpPost() {{
+            setHeaders(new HashMap<>() {{
+                put("header2", "value2");
+            }});
+        }};
+
+        when(properties.getHttpPost()).thenReturn(httpPost);
+        expectedPostStep.execute(ci);
+
+        assertEquals("value2", expectedPostStep.getArgs().getHeaders().get("header2"));
     }
 }
