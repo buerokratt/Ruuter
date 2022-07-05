@@ -35,8 +35,8 @@ public class ApplicationProperties {
     @Setter
     public static class DefaultAction {
         private String service;
-        private HashMap<String, String> body;
-        private HashMap<String, String> query;
+        private HashMap<String, Object> body;
+        private HashMap<String, Object> query;
     }
 
 }

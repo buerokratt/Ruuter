@@ -30,7 +30,6 @@ public class ConfigurationInstance {
     private final HashMap<String, Object> context = new HashMap<>();
     private final String requestOrigin;
     private final Tracer tracer;
-    private final ConfigurationService configurationService;
     private final HttpHelper httpHelper;
     private Object returnValue;
 

@@ -31,7 +31,7 @@ public class HttpHelper {
             HttpRequest.Builder request = HttpRequest.newBuilder()
                 .uri(new URI(getUriFromArgs(args, body)))
                 .timeout(Duration.of(10, SECONDS))
-                .headers("Content-Type", "text/plain;charset=UTF-8")
+                .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(mappingHelper.convertObjectToString(body)));
             if (args.getHeaders() != null) {
                 request.headers(convertHeadersMapToList(args.getHeaders()));

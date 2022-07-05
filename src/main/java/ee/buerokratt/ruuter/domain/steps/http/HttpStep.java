@@ -52,7 +52,7 @@ public abstract class HttpStep extends ConfigurationStep {
         super.handleFailedResult(ci);
         ApplicationProperties.DefaultAction defaultAction = ci.getProperties().getDefaultAction();
         HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
-        HashMap<String, String> body = defaultAction.getBody();
+        HashMap<String, Object> body = defaultAction.getBody();
         body.put("statusCode", response.getStatus().toString());
         body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
         body.put("failedRequestId", MDC.get("spanId"));

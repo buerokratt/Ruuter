@@ -36,7 +36,7 @@ public class ScriptingHelper {
         return evalContext;
     }
 
-    public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, String> requestBody, Map<String, String> requestParams) {
+    public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
         if (!containsScript(toEval.toString())) {
             return toEval;
         }
@@ -58,7 +58,7 @@ public class ScriptingHelper {
             .reduce("", (s, s2) -> s + s2);
     }
 
-    public Map<String, Object> evaluateMapValues(Map<String, Object> map, Map<String, Object> context, Map<String, String> requestBody, Map<String, String> requestParams) {
+    public Map<String, Object> evaluateMapValues(Map<String, Object> map, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
         if (map == null || map.isEmpty()) {
             throw new IllegalArgumentException();
         }
