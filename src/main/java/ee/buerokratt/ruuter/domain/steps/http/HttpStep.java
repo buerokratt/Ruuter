@@ -47,8 +47,6 @@ public abstract class HttpStep extends ConfigurationStep {
         }
     }
 
-    protected abstract HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci);
-
     @Override
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
@@ -58,8 +56,7 @@ public abstract class HttpStep extends ConfigurationStep {
         body.put("statusCode", response.getStatus().toString());
         body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
         body.put("failedRequestId", MDC.get("spanId"));
-        Object res = ci.getConfigurationService().execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
-        ci.getContext().put(resultName, res);
+        ci.getConfigurationService().execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
     }
 
     @Override
@@ -71,4 +68,6 @@ public abstract class HttpStep extends ConfigurationStep {
         String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";
         LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
+
+    protected abstract HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci);
 }
