@@ -53,9 +53,9 @@ public class ConfigurationService {
         }
     }
 
-    public Object execute(String configuration, Map<String, String> requestBody, Map<String, String> requestParams, String requestOrigin) {
+    public Object execute(String configuration, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
         Map<String, ConfigurationStep> steps = configurations.get(configuration);
-        ConfigurationInstance configurationInstance = new ConfigurationInstance(scriptingHelper, properties, steps, requestBody, requestParams, mappingHelper, requestOrigin, tracer, this, httpHelper);
+        ConfigurationInstance configurationInstance = new ConfigurationInstance(this, scriptingHelper, properties, steps, requestBody, requestParams, mappingHelper, requestOrigin, tracer, httpHelper);
         configurationInstance.execute(configuration);
         return configurationInstance.getReturnValue();
     }

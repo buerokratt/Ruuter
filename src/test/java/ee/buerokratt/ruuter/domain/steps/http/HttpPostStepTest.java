@@ -2,7 +2,7 @@ package ee.buerokratt.ruuter.domain.steps.http;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import ee.buerokratt.ruuter.BaseStepTest;
+import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @WireMockTest
-class HttpPostStepTest extends BaseStepTest {
+class HttpPostStepTest extends StepTestBase {
 
     @Mock
     private MappingHelper mappingHelper;
@@ -125,5 +125,4 @@ class HttpPostStepTest extends BaseStepTest {
 
         verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
     }
-
 }

@@ -5,12 +5,13 @@ import ee.buerokratt.ruuter.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.HashMap;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @WireMockTest(httpPort = 8090)
 @TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain"})
 class ConfigurationInstanceIT extends BaseIntegrationTest {
-
     public static final String EXPECTED_RESULT = "expected_result";
 
     @Test
@@ -70,4 +71,18 @@ class ConfigurationInstanceIT extends BaseIntegrationTest {
             .isEqualTo(200);
     }
 
+    @Test
+    void execute_shouldCallTemplate() {
+        HashMap<String, String> postBody = new HashMap<>();
+        postBody.put("element1", "Byrokratt");
+        postBody.put("element3", "- 4 More Years");
+
+        client.post()
+            .uri("/call-template?element2=2021")
+            .bodyValue(postBody)
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("Byrokratt v2.0 since 2021 - 4 More Years");
+    }
 }

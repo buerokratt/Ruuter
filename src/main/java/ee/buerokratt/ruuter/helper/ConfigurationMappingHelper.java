@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.domain.steps.AssignStep;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
+import ee.buerokratt.ruuter.domain.steps.TemplateStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpMockStep;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
@@ -63,6 +64,9 @@ public class ConfigurationMappingHelper {
                 return mapper.treeToValue(jsonNode, HttpMockStep.class);
             }
             return mapper.treeToValue(jsonNode, HttpStep.class);
+        }
+        if (jsonNode.get("template") != null) {
+            return mapper.treeToValue(jsonNode, TemplateStep.class);
         }
         if (jsonNode.get("assign") != null) {
             return mapper.treeToValue(jsonNode, AssignStep.class);

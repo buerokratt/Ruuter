@@ -1,6 +1,6 @@
 package ee.buerokratt.ruuter.domain.steps;
 
-import ee.buerokratt.ruuter.BaseStepTest;
+import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.domain.steps.conditional.Condition;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-class SwitchStepTest extends BaseStepTest {
+class SwitchStepTest extends StepTestBase {
 
     @Mock
     private ScriptingHelper scriptingHelper;
@@ -58,5 +58,4 @@ class SwitchStepTest extends BaseStepTest {
 
         assertEquals("fourth_step", switchStep.getNextStepName());
     }
-
 }

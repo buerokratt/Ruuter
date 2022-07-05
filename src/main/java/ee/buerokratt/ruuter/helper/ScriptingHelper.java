@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.helper;
 
+import ee.buerokratt.ruuter.helper.exception.ScriptEvaluationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +17,13 @@ public class ScriptingHelper {
     public static final String OBJECT_REGEX = "([a-zA-Z0-9_. \"]+\\.[a-zA-Z0-9_. \"]+)";
     public static final String SCRIPT_REGEX = "(\\$\\{[^}]+})";
     private final MappingHelper mappingHelper;
-
     private final ScriptEngine engine;
 
     public boolean containsScript(String s) {
         return Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(s).find();
     }
 
-    public Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, String> requestBody, Map<String, String> requestParams) {
+    public Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
         Map<String, Object> incoming = new HashMap<>();
         if (requestParams != null) {
             incoming.put("params", new HashMap<>(requestParams));
@@ -100,7 +100,7 @@ public class ScriptingHelper {
         try {
             return engine.eval(evaluableString, bindings);
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new ScriptEvaluationException(evaluableString, e);
         }
     }
 

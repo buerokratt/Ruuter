@@ -1,6 +1,6 @@
 package ee.buerokratt.ruuter.domain.steps;
 
-import ee.buerokratt.ruuter.BaseStepTest;
+import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-class ReturnStepTest extends BaseStepTest {
+class ReturnStepTest extends StepTestBase {
 
     @Mock
     private ScriptingHelper scriptingHelper;
@@ -23,12 +23,12 @@ class ReturnStepTest extends BaseStepTest {
     @Test
     void execute_shouldAssignReturnValue() {
         String expectedResult = "VALUE 1";
-        ReturnStep assignStep = new ReturnStep() {{
+        ReturnStep returnStep = new ReturnStep() {{
             setReturnValue(expectedResult);
         }};
 
         when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
-        assignStep.execute(ci);
+        returnStep.execute(ci);
 
         verify(ci, times(1)).setReturnValue(expectedResult);
     }
@@ -36,14 +36,13 @@ class ReturnStepTest extends BaseStepTest {
     @Test
     void execute_shouldCallScriptingHelperWhenScriptFound() {
         String expectedResult = "VALUE 2";
-        ReturnStep assignStep = new ReturnStep() {{
+        ReturnStep returnStep = new ReturnStep() {{
             setReturnValue("${value}");
         }};
 
         when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
-        assignStep.execute(ci);
+        returnStep.execute(ci);
 
         verify(ci, times(1)).setReturnValue(expectedResult);
     }
-
 }
