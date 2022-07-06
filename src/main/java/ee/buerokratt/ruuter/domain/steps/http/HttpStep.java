@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
 import java.net.http.HttpResponse;
-import java.util.HashMap;
 
 @Slf4j
 @Data
@@ -35,7 +34,7 @@ public abstract class HttpStep extends ConfigurationStep {
     protected String resultName;
     protected HttpQueryArgs args;
     protected String call;
-    protected DefaultAction defaultAction;
+    protected HttpDefaultAction httpDefaultAction;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
@@ -52,11 +51,11 @@ public abstract class HttpStep extends ConfigurationStep {
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
         if (!ci.getProperties().getHttpCodesAllowList().contains(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus())) {
-            DefaultAction propertiesDefaultAction = ci.getProperties().getDefaultAction();
-            if (defaultAction != null && defaultAction.getService() != null) {
-                defaultAction.executeDefaultAction(ci, resultName);
-            } else if (propertiesDefaultAction != null && propertiesDefaultAction.getService() != null) {
-                propertiesDefaultAction.executeDefaultAction(ci, resultName);
+            HttpDefaultAction propertiesHttpDefaultAction = ci.getProperties().getHttpDefaultAction();
+            if (httpDefaultAction != null && httpDefaultAction.getService() != null) {
+                httpDefaultAction.executeHttpDefaultAction(ci, resultName);
+            } else if (propertiesHttpDefaultAction != null && propertiesHttpDefaultAction.getService() != null) {
+                propertiesHttpDefaultAction.executeHttpDefaultAction(ci, resultName);
             }
         }
     }
