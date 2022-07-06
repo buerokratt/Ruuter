@@ -3,7 +3,6 @@ WORKDIR /workspace/app
 
 COPY gradlew .
 COPY gradlew.bat .
-COPY .gradle .gradle
 COPY gradle gradle
 COPY build.gradle .
 COPY src src
