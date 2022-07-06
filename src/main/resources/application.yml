@@ -6,15 +6,15 @@ application:
     displayResponseContent: false
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
-#    externalForwarding:
-#      method: POST
-#      endpoint: "http://localhost:8080/call-template"
-#      paramsToPass:
-#        GET: true
-#        POST: true
-#        headers: true
-#      proceedPredicate:
-#        httpStatusCode: [ 200..202 ]
+    externalForwarding:
+      method: POST
+      endpoint: "http://localhost:8081/json/v2/reflect_chat_id"
+      paramsToPass:
+        get: true
+        post: false
+        headers: true
+      proceedPredicate:
+        httpStatusCode: [ 200..202, 204 ]
   httpCodesAllowList: [ 200, 201, 202 ]
   defaultAction:
     service: default-action
