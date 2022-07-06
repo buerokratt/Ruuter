@@ -3,10 +3,10 @@ package ee.buerokratt.ruuter.domain.steps.http;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.JsonNode;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.http.ResponseEntity;
 
-import java.net.http.HttpResponse;
 import java.util.Map;
 
 @Slf4j
@@ -38,13 +38,17 @@ public abstract class HttpStep extends ConfigurationStep {
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        HttpResponse<String> response = getHttpRequestResponse(ci);
-        JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
-        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode(), MDC.get("spanId"));
+        ResponseEntity<Object> response = getRequestResponse(ci);
+        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(response.getBody(), response.getHeaders(), response.getStatusCodeValue(), MDC.get("spanId"));
         ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
-        if (!ci.getProperties().getHttpCodesAllowList().isEmpty() && !ci.getProperties().getHttpCodesAllowList().contains(response.statusCode())) {
+
+        if (!isAllowedHttpStatusCode(ci, response)) {
             throw new IllegalArgumentException();
         }
+    }
+
+    private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, ResponseEntity<Object> response) {
+        return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response.getStatusCodeValue());
     }
 
     @Override
@@ -64,12 +68,13 @@ public abstract class HttpStep extends ConfigurationStep {
     @Override
     protected void logStep(Long elapsedTime, ConfigurationInstance ci) {
         ApplicationProperties properties = ci.getProperties();
+        MappingHelper mappingHelper = ci.getMappingHelper();
         Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus();
-        JsonNode responseNode = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody();
-        String responseContent = responseNode != null && properties.getLogging().getDisplayResponseContent() ? responseNode.toString() : "-";
+        String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody());
+        String responseContent = responseBody != null && properties.getLogging().getDisplayResponseContent() ? responseBody : "-";
         String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";
         LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
 
-    protected abstract HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci);
+    protected abstract ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci);
 }

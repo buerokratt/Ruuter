@@ -1,0 +1,10 @@
+post_message:
+  call: http.post
+  args:
+    url: http://localhost:8090/endpoint
+    body:
+      mappedValue: ${"expected" + " " + "mapped"} value
+  result: the_response
+
+return_value:
+  return: ${the_response}

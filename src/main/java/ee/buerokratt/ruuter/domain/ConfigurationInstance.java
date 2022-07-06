@@ -36,9 +36,7 @@ public class ConfigurationInstance {
     public void execute(String configurationName) {
         List<String> stepNames = steps.keySet().stream().toList();
         try {
-            LoggingUtils.logIncomingRequest(log, configurationName, requestOrigin);
             executeStep(stepNames.get(0), stepNames);
-            LoggingUtils.logRequestProcessed(log, configurationName, requestOrigin);
         } catch (Exception e) {
             LoggingUtils.logRequestError(log, configurationName, requestOrigin, e);
             setReturnValue(null);
