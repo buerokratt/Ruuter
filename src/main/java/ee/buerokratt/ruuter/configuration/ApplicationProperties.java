@@ -14,9 +14,9 @@ public class ApplicationProperties {
     private String configPath;
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
-    private DefaultAction defaultAction;
-    private Logging logging;
-    private IncomingRequests incomingRequests;
+    private DefaultAction defaultAction = new DefaultAction();
+    private Logging logging = new Logging();
+    private IncomingRequests incomingRequests = new IncomingRequests();
 
     @Setter
     @Getter

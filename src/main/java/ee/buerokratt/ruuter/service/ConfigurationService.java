@@ -69,8 +69,8 @@ public class ConfigurationService {
 
     private boolean allowedToExecuteConfiguration(Map<String, Object> requestBody, Map<String, Object> requestParams) {
         if (externalForwardingHelper.shouldForwardRequest()) {
-            ResponseEntity<Object> stringHttpResponse = externalForwardingHelper.forwardRequest(requestBody, requestParams);
-            return externalForwardingHelper.isAllowedForwardingResponse(stringHttpResponse.getStatusCodeValue());
+            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestParams);
+            return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
         }
         return true;
     }

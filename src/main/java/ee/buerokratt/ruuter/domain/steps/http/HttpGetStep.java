@@ -15,7 +15,7 @@ public class HttpGetStep extends HttpStep {
 
     @Override
     public ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci) {
-        return ci.getHttpHelper().get(args.getUrl(), args.getQuery(), args.getHeaders());
+        return ci.getHttpHelper().doGet(args.getUrl(), args.getQuery(), args.getHeaders());
     }
 
     @Override

@@ -32,10 +32,10 @@ public class ExternalForwardingHelper {
         Map<String, Object> body = shouldAddBody(requestBody) ? requestBody : new HashMap<>();
 
         if (properties.getIncomingRequests().getExternalForwarding().getMethod().equals(HttpMethod.POST.name())) {
-            return httpHelper.post(forwardingUrl, body, params, new HashMap<>());
+            return httpHelper.doPost(forwardingUrl, body, params, new HashMap<>());
         }
         if (properties.getIncomingRequests().getExternalForwarding().getMethod().equals(HttpMethod.GET.name())) {
-            return httpHelper.get(forwardingUrl, params, new HashMap<>());
+            return httpHelper.doGet(forwardingUrl, params, new HashMap<>());
         }
         throw new IllegalArgumentException();
     }

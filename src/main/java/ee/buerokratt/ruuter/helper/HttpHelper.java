@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class HttpHelper {
 
-    public ResponseEntity<Object> post(String url, Map<String, Object> body, Map<String, Object> params, Map<String, String> headers) {
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> params, Map<String, String> headers) {
         WebClient client = WebClient.builder()
             .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
             .baseUrl(url)
@@ -36,7 +36,7 @@ public class HttpHelper {
             .block();
     }
 
-    public ResponseEntity<Object> get(String url, Map<String, Object> params, Map<String, String> headers) {
+    public ResponseEntity<Object> doGet(String url, Map<String, Object> params, Map<String, String> headers) {
         WebClient client = WebClient.builder()
             .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
             .baseUrl(url)

@@ -63,7 +63,7 @@ class HttpGetStepTest extends StepTestBase {
 
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getContext()).thenReturn(testContext);
-        when(httpHelper.get(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
+        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
         expectedGetStep.execute(ci);
 
         assertEquals(200, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
@@ -87,7 +87,7 @@ class HttpGetStepTest extends StepTestBase {
         }};
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
-        when(httpHelper.get(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
+        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getContext()).thenReturn(testContext);
@@ -121,7 +121,7 @@ class HttpGetStepTest extends StepTestBase {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
         when(ci.getContext()).thenReturn(testContext);
-        when(ci.getHttpHelper().get(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
+        when(ci.getHttpHelper().doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
         when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
         expectedGetStep.execute(ci);
 
