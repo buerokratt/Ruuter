@@ -11,6 +11,7 @@ import ee.buerokratt.ruuter.service.ConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
@@ -41,9 +42,6 @@ class HttpPostStepTest extends StepTestBase {
 
     @Mock
     private BiPredicate<String, String> biPredicate;
-
-    @Mock
-    private ApplicationProperties.DefaultAction defaultAction;
 
     @Mock
     private ConfigurationService configurationService;
@@ -93,7 +91,12 @@ class HttpPostStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldExecuteDefaultActionWhenRequestIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) {
+    void execute_shouldExecuteDefaultActionWhenResponseCodeIsNotInWhitelist(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        DefaultAction defaultAction = Mockito.spy(new DefaultAction() {{
+            setService("default-action");
+            setBody(new HashMap<>());
+            setQuery(new HashMap<>());
+        }});
         HashMap<String, Object> testContext = new HashMap<>();
         HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
             setBody(new HashMap<>() {{
@@ -113,9 +116,7 @@ class HttpPostStepTest extends StepTestBase {
         when(ci.getHttpHelper().makeHttpPostRequest(any(), any())).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
         when(properties.getDefaultAction()).thenReturn(defaultAction);
-        when(defaultAction.getService()).thenReturn("default-action");
-        when(defaultAction.getBody()).thenReturn(new HashMap<>());
-        when(defaultAction.getQuery()).thenReturn(new HashMap<>());
+        doCallRealMethod().when(defaultAction).executeDefaultAction(eq(ci), anyString());
         when(ci.getRequestOrigin()).thenReturn("");
         when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
         when(httpResponse.body()).thenReturn("body");

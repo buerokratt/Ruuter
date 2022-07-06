@@ -35,6 +35,7 @@ public abstract class HttpStep extends ConfigurationStep {
     protected String resultName;
     protected HttpQueryArgs args;
     protected String call;
+    protected DefaultAction defaultAction;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
@@ -50,14 +51,13 @@ public abstract class HttpStep extends ConfigurationStep {
     @Override
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
-        ApplicationProperties.DefaultAction defaultAction = ci.getProperties().getDefaultAction();
-        if (defaultAction != null && defaultAction.getService() != null) {
-            HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
-            HashMap<String, Object> body = defaultAction.getBody();
-            body.put("statusCode", response.getStatus().toString());
-            body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
-            body.put("failedRequestId", MDC.get("spanId"));
-            ci.getConfigurationService().execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
+        if (!ci.getProperties().getHttpCodesAllowList().contains(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus())) {
+            DefaultAction propertiesDefaultAction = ci.getProperties().getDefaultAction();
+            if (defaultAction != null && defaultAction.getService() != null) {
+                defaultAction.executeDefaultAction(ci, resultName);
+            } else if (propertiesDefaultAction != null && propertiesDefaultAction.getService() != null) {
+                propertiesDefaultAction.executeDefaultAction(ci, resultName);
+            }
         }
     }
 

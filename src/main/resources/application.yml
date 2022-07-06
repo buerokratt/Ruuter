@@ -10,9 +10,9 @@ application:
   defaultAction:
     service: default-action
     body:
-      some_val: "Hello World"
+      someVal: "Hello World"
     query:
-      another_val: 123
+      anotherVal: 123
 
 spring:
   application:

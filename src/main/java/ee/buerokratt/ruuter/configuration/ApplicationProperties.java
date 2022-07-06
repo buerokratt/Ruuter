@@ -1,10 +1,10 @@
 package ee.buerokratt.ruuter.configuration;
 
+import ee.buerokratt.ruuter.domain.steps.http.DefaultAction;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Setter
@@ -30,13 +30,4 @@ public class ApplicationProperties {
     public static class IncomingRequests {
         private List<String> allowedMethodTypes;
     }
-
-    @Getter
-    @Setter
-    public static class DefaultAction {
-        private String service;
-        private HashMap<String, Object> body;
-        private HashMap<String, Object> query;
-    }
-
 }
