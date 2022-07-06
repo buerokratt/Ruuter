@@ -11,12 +11,11 @@ import ee.buerokratt.ruuter.service.ConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.net.http.HttpHeaders;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.BiPredicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -37,12 +36,6 @@ class HttpPostStepTest extends StepTestBase {
     private ScriptingHelper scriptingHelper;
 
     @Mock
-    private HttpResponse<String> httpResponse;
-
-    @Mock
-    private BiPredicate<String, String> biPredicate;
-
-    @Mock
     private ApplicationProperties.DefaultAction defaultAction;
 
     @Mock
@@ -51,15 +44,12 @@ class HttpPostStepTest extends StepTestBase {
     @Mock
     private ApplicationProperties.Logging logging;
 
-    private HttpHeaders httpHeaders;
-
     @BeforeEach
     protected void mockDependencies() {
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getProperties()).thenReturn(properties);
         when(ci.getHttpHelper()).thenReturn(httpHelper);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        httpHeaders = HttpHeaders.of(new HashMap<>(), biPredicate);
+        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
     @Test
@@ -77,19 +67,17 @@ class HttpPostStepTest extends StepTestBase {
             setArgs(expectedPostArgs);
             setResultName("the_response");
         }};
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
         when(ci.getContext()).thenReturn(testContext);
-        when(ci.getHttpHelper().makeHttpPostRequest(eq(expectedPostArgs), anyMap())).thenReturn(httpResponse);
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
-        when(scriptingHelper.evaluateMapValues(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
-        when(httpResponse.body()).thenReturn("body");
-        when(httpResponse.statusCode()).thenReturn(200);
-        when(httpResponse.headers()).thenReturn(httpHeaders);
+        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
         when(properties.getLogging()).thenReturn(logging);
         when(logging.getDisplayRequestContent()).thenReturn(false);
+
         expectedPostStep.execute(ci);
 
-        assertEquals(200, ((HttpStepResult) ci.getContext().get("the_response")).getResponse().getStatus());
+        assertEquals(200, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
     }
 
     @Test
@@ -107,20 +95,19 @@ class HttpPostStepTest extends StepTestBase {
             setArgs(expectedPostArgs);
             setResultName("the_response");
         }};
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
         when(ci.getContext()).thenReturn(testContext);
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
-        when(ci.getHttpHelper().makeHttpPostRequest(any(), any())).thenReturn(httpResponse);
+        when(ci.getRequestOrigin()).thenReturn("");
         when(ci.getConfigurationService()).thenReturn(configurationService);
+        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
         when(properties.getDefaultAction()).thenReturn(defaultAction);
+        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
         when(defaultAction.getService()).thenReturn("default-action");
         when(defaultAction.getBody()).thenReturn(new HashMap<>());
         when(defaultAction.getQuery()).thenReturn(new HashMap<>());
-        when(ci.getRequestOrigin()).thenReturn("");
-        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
-        when(httpResponse.body()).thenReturn("body");
-        when(httpResponse.statusCode()).thenReturn(201);
-        when(httpResponse.headers()).thenReturn(httpHeaders);
+
         expectedPostStep.execute(ci);
 
         verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());

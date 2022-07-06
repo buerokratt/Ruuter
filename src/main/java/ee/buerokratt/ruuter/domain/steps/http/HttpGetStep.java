@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import java.net.http.HttpResponse;
+import org.springframework.http.ResponseEntity;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -15,8 +14,8 @@ import java.net.http.HttpResponse;
 public class HttpGetStep extends HttpStep {
 
     @Override
-    public HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci) {
-        return ci.getHttpHelper().makeHttpGetRequest(args);
+    public ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci) {
+        return ci.getHttpHelper().doGet(args.getUrl(), args.getQuery(), args.getHeaders());
     }
 
     @Override

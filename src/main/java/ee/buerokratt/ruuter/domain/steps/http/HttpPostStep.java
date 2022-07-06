@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.http.ResponseEntity;
 
-import java.net.http.HttpResponse;
 import java.util.Map;
 
 @Data
@@ -16,9 +16,9 @@ import java.util.Map;
 public class HttpPostStep extends HttpStep {
 
     @Override
-    protected HttpResponse<String> getHttpRequestResponse(ConfigurationInstance ci) {
-        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateMapValues(args.getBody(), ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-        return ci.getHttpHelper().makeHttpPostRequest(args, evaluatedBody);
+    protected ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci) {
+        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(args.getBody(), ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
+        return ci.getHttpHelper().doPost(args.getUrl(), evaluatedBody, args.getQuery(), args.getHeaders());
     }
 
     @Override
