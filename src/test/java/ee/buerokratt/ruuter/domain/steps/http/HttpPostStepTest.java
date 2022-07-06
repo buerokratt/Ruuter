@@ -42,19 +42,13 @@ class HttpPostStepTest extends StepTestBase {
     private ConfigurationService configurationService;
 
     @Mock
-    private ApplicationProperties.Logging logging;
-
-    @Mock
     private ApplicationProperties.HttpPost httpPost;
-
-    private HttpHeaders httpHeaders;
 
     @BeforeEach
     protected void mockDependencies() {
         when(ci.getProperties()).thenReturn(properties);
         when(ci.getHttpHelper()).thenReturn(httpHelper);
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
-        httpHeaders = HttpHeaders.of(new HashMap<>(), biPredicate);
     }
 
     @Test
@@ -66,6 +60,7 @@ class HttpPostStepTest extends StepTestBase {
                 put("another_val", 123);
             }});
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
+            setHeaders(new HashMap<>());
         }};
         HttpStep expectedPostStep = new HttpPostStep() {{
             setName("post_message");
@@ -75,10 +70,10 @@ class HttpPostStepTest extends StepTestBase {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
         when(ci.getContext()).thenReturn(testContext);
+        when(properties.getHttpPost()).thenReturn(httpPost);
+        when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
-        when(properties.getLogging()).thenReturn(logging);
-        when(logging.getDisplayRequestContent()).thenReturn(false);
 
         expectedPostStep.execute(ci);
 
@@ -94,6 +89,7 @@ class HttpPostStepTest extends StepTestBase {
                 put("another_val", 123);
             }});
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
+            setHeaders(new HashMap<>());
         }};
         HttpStep expectedPostStep = new HttpPostStep() {{
             setName("post_message");
@@ -105,6 +101,9 @@ class HttpPostStepTest extends StepTestBase {
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
         when(ci.getConfigurationService()).thenReturn(configurationService);
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(properties.getHttpPost()).thenReturn(httpPost);
+        when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
         when(properties.getDefaultAction()).thenReturn(defaultAction);
