@@ -4,7 +4,7 @@
 ## Configuration
 
 ### External forwarding
-If the following values are defined, then every incoming request is forwarded to the defined ednpoint.
+If the following values are defined, then every incoming request is forwarded to the defined endpoint.
 * method - accepted values: `GET`, `POST`
 * paramsToPass.get - whether to forward query params from incoming request
 * paramsToPass.post - whether to forward body from incoming request
