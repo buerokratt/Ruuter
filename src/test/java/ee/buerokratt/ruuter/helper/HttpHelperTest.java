@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class HttpHelperTest {
 
@@ -22,7 +24,7 @@ class HttpHelperTest {
             setBody(new HashMap<>());
             setQuery(new HashMap<>());
         }};
-        HashMap<String, Object> body = args.getBody();
+        Map<String, Object> body = args.getBody();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> httpHelper.makeHttpPostRequest(args, body));
         assertEquals(exception.getMessage(), "unsupported URI %s".formatted(args.getUrl()));

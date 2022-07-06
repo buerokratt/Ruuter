@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -35,15 +35,15 @@ public class ApplicationProperties {
     @Getter
     @Setter
     public static class HttpPost {
-        private HashMap<String, String> headers;
+        private Map<String, String> headers;
     }
 
     @Getter
     @Setter
     public static class DefaultAction {
         private String service;
-        private HashMap<String, Object> body;
-        private HashMap<String, Object> query;
+        private Map<String, Object> body;
+        private Map<String, Object> query;
     }
 
 }

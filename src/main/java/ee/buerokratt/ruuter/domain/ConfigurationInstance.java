@@ -27,7 +27,7 @@ public class ConfigurationInstance {
     private final Map<String, Object> requestBody;
     private final Map<String, Object> requestParams;
     private final MappingHelper mappingHelper;
-    private final HashMap<String, Object> context = new HashMap<>();
+    private final Map<String, Object> context = new HashMap<>();
     private final String requestOrigin;
     private final Tracer tracer;
     private final HttpHelper httpHelper;

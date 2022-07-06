@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
 import java.net.http.HttpResponse;
-import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Data
@@ -53,7 +53,7 @@ public abstract class HttpStep extends ConfigurationStep {
         ApplicationProperties.DefaultAction defaultAction = ci.getProperties().getDefaultAction();
         if (defaultAction != null && defaultAction.getService() != null) {
             HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
-            HashMap<String, Object> body = defaultAction.getBody();
+            Map<String, Object> body = defaultAction.getBody();
             body.put("statusCode", response.getStatus().toString());
             body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
             body.put("failedRequestId", MDC.get("spanId"));

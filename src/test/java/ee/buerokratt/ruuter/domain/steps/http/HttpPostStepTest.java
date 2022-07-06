@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiPredicate;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -52,14 +51,14 @@ class HttpPostStepTest extends StepTestBase {
     @Mock
     private ApplicationProperties.Logging logging;
 
+    @Mock
+    private ApplicationProperties.HttpPost httpPost;
+
     private HttpHeaders httpHeaders;
 
     @BeforeEach
     protected void mockDependencies() {
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getProperties()).thenReturn(properties);
-        when(ci.getHttpHelper()).thenReturn(httpHelper);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         httpHeaders = HttpHeaders.of(new HashMap<>(), biPredicate);
     }
 
@@ -80,8 +79,12 @@ class HttpPostStepTest extends StepTestBase {
         }};
 
         when(ci.getContext()).thenReturn(testContext);
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(ci.getHttpHelper()).thenReturn(httpHelper);
         when(ci.getHttpHelper().makeHttpPostRequest(eq(expectedPostArgs), anyMap())).thenReturn(httpResponse);
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(properties.getHttpPost()).thenReturn(httpPost);
+        when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(scriptingHelper.evaluateMapValues(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
         when(httpResponse.body()).thenReturn("body");
         when(httpResponse.statusCode()).thenReturn(200);
@@ -111,9 +114,13 @@ class HttpPostStepTest extends StepTestBase {
 
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(ci.getHttpHelper()).thenReturn(httpHelper);
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getHttpHelper().makeHttpPostRequest(any(), any())).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
         when(properties.getDefaultAction()).thenReturn(defaultAction);
+        when(properties.getHttpPost()).thenReturn(httpPost);
+        when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(defaultAction.getService()).thenReturn("default-action");
         when(defaultAction.getBody()).thenReturn(new HashMap<>());
         when(defaultAction.getQuery()).thenReturn(new HashMap<>());
@@ -128,10 +135,9 @@ class HttpPostStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldAddDefaultHeadersDefinedInSettingsFileToRequest() {
-        String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
+    void execute_shouldAddDefaultHeadersDefinedInSettingsFileToRequest(WireMockRuntimeInfo wireMockRuntimeInfo) {
         HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
-            setUrl(getWrongRequestUrl);
+            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
             setHeaders(new HashMap<>() {{
                 put("header1", "value1");
             }});

@@ -6,14 +6,14 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
 public class AssignStep<T> extends ConfigurationStep {
-    private HashMap<String, T> assign;
+    private Map<String, T> assign;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
