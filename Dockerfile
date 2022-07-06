@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-alpine as build
+FROM openjdk:17-jdk as build
 WORKDIR /workspace/app
 
 COPY gradlew .
@@ -8,6 +8,7 @@ COPY gradle gradle
 COPY build.gradle .
 COPY src src
 
+RUN chmod 754 ./gradlew
 RUN ./gradlew -Pprod clean bootJar
 RUN mkdir -p build/libs && (cd build/libs; jar -xf *.jar)
 
