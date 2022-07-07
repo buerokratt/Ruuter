@@ -17,12 +17,19 @@ public class ApplicationProperties {
     private DefaultAction defaultAction = new DefaultAction();
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
+    private FinalResponse finalResponse = new FinalResponse();
 
     @Setter
     @Getter
     public static class Logging {
         private Boolean displayRequestContent;
         private Boolean displayResponseContent;
+    }
+
+    @Setter
+    @Getter
+    public static class FinalResponse {
+        private Integer httpStatusCode;
     }
 
     @Getter

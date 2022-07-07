@@ -2,6 +2,7 @@ package ee.buerokratt.ruuter.domain.steps;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.steps.http.HttpStepResult;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,10 @@ public class ReturnStep extends ConfigurationStep {
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        ci.setReturnValue(ci.getScriptingHelper().evaluateScripts(returnValue, ci.getContext(), ci.getRequestBody(), ci.getRequestParams()));
+        ci.setReturnValue((HttpStepResult) ci.getScriptingHelper().evaluateScripts(returnValue, ci.getContext(), ci.getRequestBody(), ci.getRequestParams()));
+        if (ci.getProperties().getFinalResponse() != null && ci.getProperties().getFinalResponse().getHttpStatusCode() != null) {
+            ci.getReturnValue().getResponse().setStatus(ci.getProperties().getFinalResponse().getHttpStatusCode());
+        }
     }
 
     @Override

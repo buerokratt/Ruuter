@@ -13,6 +13,8 @@ application:
       some_val: "Hello World"
     query:
       another_val: 123
+  finalResponse:
+      httpStatusCode: 200
 
 spring:
   application:
