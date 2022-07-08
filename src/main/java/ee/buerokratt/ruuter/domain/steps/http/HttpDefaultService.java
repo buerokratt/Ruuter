@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 @Data
 @NoArgsConstructor
-public class HttpDefaultAction {
+public class HttpDefaultService {
     private String service;
     private HashMap<String, Object> body;
     private HashMap<String, Object> query;

@@ -81,7 +81,7 @@ class HttpGetStepTest extends StepTestBase {
 
     @Test
     void execute_shouldExecuteDefaultActionWhenRequestIsInvalidAndStopInCaseOfExceptionIsTrue(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HttpDefaultAction httpDefaultAction = Mockito.spy(new HttpDefaultAction() {{
+        HttpDefaultService httpDefaultService = Mockito.spy(new HttpDefaultService() {{
             setService("default-action");
             setBody(new HashMap<>());
             setQuery(new HashMap<>());
@@ -103,8 +103,8 @@ class HttpGetStepTest extends StepTestBase {
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs)).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(applicationProperties.getHttpDefaultAction()).thenReturn(httpDefaultAction);
-        doCallRealMethod().when(httpDefaultAction).executeHttpDefaultAction(eq(ci), anyString());
+        when(applicationProperties.getDefaultServiceInCaseOfException()).thenReturn(httpDefaultService);
+        doCallRealMethod().when(httpDefaultService).executeHttpDefaultAction(eq(ci), anyString());
         when(ci.getRequestOrigin()).thenReturn("");
         when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
         when(httpResponse.body()).thenReturn("body");
@@ -117,7 +117,7 @@ class HttpGetStepTest extends StepTestBase {
 
     @Test
     void execute_shouldExecuteStepSpecificDefaultActionWhenRequestIsInvalidAndStopInCaseOfExceptionIsTrue(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HttpDefaultAction httpDefaultAction2 = Mockito.spy(new HttpDefaultAction() {{
+        HttpDefaultService httpDefaultService2 = Mockito.spy(new HttpDefaultService() {{
             setService("default-action2");
             setBody(new HashMap<>());
             setQuery(new HashMap<>());
@@ -134,7 +134,7 @@ class HttpGetStepTest extends StepTestBase {
             setName("get_message");
             setArgs(expectedGetArgs);
             setResultName("the_response");
-            setHttpDefaultAction(httpDefaultAction2);
+            setHttpDefaultService(httpDefaultService2);
         }};
 
         when(ci.getContext()).thenReturn(testContext);

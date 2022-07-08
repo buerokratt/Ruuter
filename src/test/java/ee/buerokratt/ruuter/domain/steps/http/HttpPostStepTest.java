@@ -92,7 +92,7 @@ class HttpPostStepTest extends StepTestBase {
 
     @Test
     void execute_shouldExecuteDefaultActionWhenResponseCodeIsNotInWhitelist(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HttpDefaultAction httpDefaultAction = Mockito.spy(new HttpDefaultAction() {{
+        HttpDefaultService httpDefaultService = Mockito.spy(new HttpDefaultService() {{
             setService("default-action");
             setBody(new HashMap<>());
             setQuery(new HashMap<>());
@@ -115,8 +115,8 @@ class HttpPostStepTest extends StepTestBase {
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
         when(ci.getHttpHelper().makeHttpPostRequest(any(), any())).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(properties.getHttpDefaultAction()).thenReturn(httpDefaultAction);
-        doCallRealMethod().when(httpDefaultAction).executeHttpDefaultAction(eq(ci), anyString());
+        when(properties.getDefaultServiceInCaseOfException()).thenReturn(httpDefaultService);
+        doCallRealMethod().when(httpDefaultService).executeHttpDefaultAction(eq(ci), anyString());
         when(ci.getRequestOrigin()).thenReturn("");
         when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
         when(httpResponse.body()).thenReturn("body");

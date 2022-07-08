@@ -34,7 +34,7 @@ public abstract class HttpStep extends ConfigurationStep {
     protected String resultName;
     protected HttpQueryArgs args;
     protected String call;
-    protected HttpDefaultAction httpDefaultAction;
+    protected HttpDefaultService httpDefaultService;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
@@ -51,11 +51,11 @@ public abstract class HttpStep extends ConfigurationStep {
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
         if (!ci.getProperties().getHttpCodesAllowList().contains(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus())) {
-            HttpDefaultAction propertiesHttpDefaultAction = ci.getProperties().getHttpDefaultAction();
-            if (httpDefaultAction != null && httpDefaultAction.getService() != null) {
-                httpDefaultAction.executeHttpDefaultAction(ci, resultName);
-            } else if (propertiesHttpDefaultAction != null && propertiesHttpDefaultAction.getService() != null) {
-                propertiesHttpDefaultAction.executeHttpDefaultAction(ci, resultName);
+            HttpDefaultService propertiesHttpDefaultService = ci.getProperties().getDefaultServiceInCaseOfException();
+            if (httpDefaultService != null && httpDefaultService.getService() != null) {
+                httpDefaultService.executeHttpDefaultAction(ci, resultName);
+            } else if (propertiesHttpDefaultService != null && propertiesHttpDefaultService.getService() != null) {
+                propertiesHttpDefaultService.executeHttpDefaultAction(ci, resultName);
             }
         }
     }

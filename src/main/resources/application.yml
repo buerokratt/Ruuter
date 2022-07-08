@@ -7,7 +7,7 @@ application:
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
   httpCodesAllowList: [ 200, 201, 202 ]
-  defaultAction:
+  defaultServiceInCaseOfException:
     service: default-action
     body:
       someVal: "Hello World"
