@@ -23,6 +23,7 @@ public class TemplateStep extends ConfigurationStep {
     private String templateToCall;
     @JsonAlias({"result"})
     private String resultName;
+    private String requestType;
     private Map<String, Object> body;
     private Map<String, Object> params;
 
@@ -32,7 +33,7 @@ public class TemplateStep extends ConfigurationStep {
         Map<String, Object> templateBody = body != null ? body.entrySet().stream().collect(toEvaluatedMap(scriptingHelper, ci)) : null;
         Map<String, Object> templateParams = params != null ? params.entrySet().stream().collect(toEvaluatedMap(scriptingHelper, ci)) : new HashMap<>();
 
-        ci.getContext().put(resultName,  ci.getConfigurationService().execute(templateToCall, templateBody, templateParams, ci.getRequestOrigin()));
+        ci.getContext().put(resultName,  ci.getConfigurationService().execute(templateToCall, requestType, templateBody, templateParams, ci.getRequestOrigin()));
     }
 
     private Collector<Map.Entry<String, Object>, ?, Map<String, Object>> toEvaluatedMap(ScriptingHelper scriptingHelper, ConfigurationInstance ci) {

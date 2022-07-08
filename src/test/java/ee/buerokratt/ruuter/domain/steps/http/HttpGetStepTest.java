@@ -100,7 +100,7 @@ class HttpGetStepTest extends StepTestBase {
 
         expectedGetStep.execute(ci);
 
-        verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
+        verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
     }
 
     @Test
@@ -125,6 +125,6 @@ class HttpGetStepTest extends StepTestBase {
         when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
         expectedGetStep.execute(ci);
 
-        verify(configurationService, times(0)).execute(anyString(), anyMap(), anyMap(), anyString());
+        verify(configurationService, times(0)).execute(anyString(), anyString(), anyMap(), anyMap(), anyString());
     }
 }
