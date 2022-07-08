@@ -34,5 +34,4 @@ public class ConfigurationController {
         }
         return ok(new RuuterResponse(configurationService.execute(configuration, requestBody, requestParams, request.getRemoteAddr())));
     }
-
 }

@@ -14,9 +14,9 @@ public class ApplicationProperties {
     private String configPath;
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
-    private HttpDefaultService defaultServiceInCaseOfException;
-    private Logging logging;
-    private IncomingRequests incomingRequests;
+    private HttpDefaultService defaultServiceInCaseOfException = new HttpDefaultService();
+    private Logging logging = new Logging();
+    private IncomingRequests incomingRequests = new IncomingRequests();
 
     @Setter
     @Getter
@@ -29,5 +29,29 @@ public class ApplicationProperties {
     @Setter
     public static class IncomingRequests {
         private List<String> allowedMethodTypes;
+        private ExternalForwarding externalForwarding = new ExternalForwarding();
+
+        @Getter
+        @Setter
+        public static class ExternalForwarding {
+            private String method;
+            private String endpoint;
+            private ParamsToPass paramsToPass = new ParamsToPass();
+            private ProceedPredicate proceedPredicate = new ProceedPredicate();
+
+            @Getter
+            @Setter
+            public static class ParamsToPass {
+                private Boolean get;
+                private Boolean post;
+                private Boolean headers;
+            }
+
+            @Getter
+            @Setter
+            public static class ProceedPredicate {
+                private List<String> httpStatusCode;
+            }
+        }
     }
 }

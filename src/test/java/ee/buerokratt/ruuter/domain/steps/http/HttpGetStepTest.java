@@ -11,12 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.net.http.HttpHeaders;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.BiPredicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
@@ -32,25 +31,15 @@ class HttpGetStepTest extends StepTestBase {
     private HttpHelper httpHelper;
 
     @Mock
-    private HttpResponse<String> httpResponse;
-
-    @Mock
     private MappingHelper mappingHelper;
 
     @Mock
-    private BiPredicate<String, String> biPredicate;
-
-    @Mock
     private ConfigurationService configurationService;
-
-    private HttpHeaders httpHeaders;
 
     @BeforeEach
     protected void mockDependencies() {
         when(ci.getHttpHelper()).thenReturn(httpHelper);
         when(ci.getProperties()).thenReturn(applicationProperties);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        httpHeaders = HttpHeaders.of(new HashMap<>(), biPredicate);
     }
 
     @Test
@@ -68,15 +57,15 @@ class HttpGetStepTest extends StepTestBase {
             setArgs(expectedGetArgs);
             setResultName("the_response");
         }};
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getContext()).thenReturn(testContext);
-        when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs)).thenReturn(httpResponse);
-        when(httpResponse.body()).thenReturn("body");
-        when(httpResponse.statusCode()).thenReturn(200);
-        when(httpResponse.headers()).thenReturn(httpHeaders);
+        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
         expectedGetStep.execute(ci);
 
         assertEquals(200, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
+        assertEquals(httpResponse.getBody(), ((HttpStepResult) testContext.get("the_response")).getResponse().getBody());
     }
 
     @Test
@@ -99,7 +88,11 @@ class HttpGetStepTest extends StepTestBase {
             setArgs(expectedGetArgs);
             setResultName("the_response");
         }};
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
+        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
+        when(ci.getConfigurationService()).thenReturn(configurationService);
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs)).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
@@ -111,6 +104,14 @@ class HttpGetStepTest extends StepTestBase {
         when(httpResponse.statusCode()).thenReturn(201);
         when(httpResponse.headers()).thenReturn(httpHeaders);
         failingGetStep.execute(ci);
+        when(ci.getRequestOrigin()).thenReturn("");
+        when(applicationProperties.getDefaultAction()).thenReturn(defaultAction);
+        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
+        when(defaultAction.getService()).thenReturn("default-action");
+        when(defaultAction.getBody()).thenReturn(new HashMap<>());
+        when(defaultAction.getQuery()).thenReturn(new HashMap<>());
+
+        expectedGetStep.execute(ci);
 
         verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
     }
@@ -165,13 +166,11 @@ class HttpGetStepTest extends StepTestBase {
             setArgs(expectedGetArgs);
             setResultName("the_response");
         }};
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
         when(ci.getContext()).thenReturn(testContext);
-        when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs)).thenReturn(httpResponse);
+        when(ci.getHttpHelper().doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
         when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
-        when(httpResponse.body()).thenReturn("body");
-        when(httpResponse.statusCode()).thenReturn(201);
-        when(httpResponse.headers()).thenReturn(httpHeaders);
         expectedGetStep.execute(ci);
 
         verify(configurationService, times(0)).execute(anyString(), anyMap(), anyMap(), anyString());
