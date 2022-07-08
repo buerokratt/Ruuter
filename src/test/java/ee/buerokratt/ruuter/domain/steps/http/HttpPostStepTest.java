@@ -36,15 +36,6 @@ class HttpPostStepTest extends StepTestBase {
     @Mock
     private ScriptingHelper scriptingHelper;
 
-//    @Mock
-//    private ApplicationProperties.DefaultAction defaultAction;
-//
-//    @Mock
-//    private HttpResponse<String> httpResponse;
-//
-//    @Mock
-//    private BiPredicate<String, String> biPredicate;
-
     @Mock
     private ConfigurationService configurationService;
 
