@@ -48,7 +48,7 @@ class HttpMockStepTest extends StepTestBase {
         }};
         HttpStepResult expectedResult = new HttpStepResult() {{
             setRequest(mockStepRequest);
-            setResponse(new HttpQueryResponse(new ObjectMapper().convertValue(mockStepResponse, JsonNode.class), null, 200));
+            setResponse(new HttpQueryResponse(new ObjectMapper().convertValue(mockStepResponse, JsonNode.class), null, 200, null));
         }};
 
         when(ci.getContext()).thenReturn(testContext);

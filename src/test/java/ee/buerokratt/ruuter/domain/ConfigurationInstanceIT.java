@@ -1,8 +1,12 @@
 package ee.buerokratt.ruuter.domain;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.buerokratt.ruuter.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.HashMap;
@@ -57,7 +61,7 @@ class ConfigurationInstanceIT extends BaseIntegrationTest {
     @Test
     void execute_shouldGetAndReturnValue() {
         String result = "expected_result";
-        stubFor(get("/endpoint").willReturn(ok().withBody("\"%s\"".formatted(result))));
+        stubFor(get("/endpoint").willReturn(ok().withBody("\"%s\"".formatted(result)).withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
 
         client.get()
             .uri("/get-and-return")
@@ -84,5 +88,22 @@ class ConfigurationInstanceIT extends BaseIntegrationTest {
             .expectBody()
             .jsonPath("$.response")
             .isEqualTo("Byrokratt v2.0 since 2021 - 4 More Years");
+    }
+
+    @Test
+    void execute_shouldCallPostWithMappedBody() throws JsonProcessingException {
+        String expectedMappedValue = "expected mapped value";
+        HashMap<String, String> expectedPostBody = new HashMap<>();
+        expectedPostBody.put("mappedValue", expectedMappedValue);
+
+        stubFor(post("/endpoint").withRequestBody(equalToJson(new ObjectMapper().writeValueAsString(expectedPostBody)))
+            .willReturn(ok().withBody("\"%s\"".formatted(expectedMappedValue)).withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+
+        client.get()
+            .uri("/post-mapped-value")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$..response.body")
+            .isEqualTo(expectedMappedValue);
     }
 }

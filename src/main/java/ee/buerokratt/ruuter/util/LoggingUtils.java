@@ -33,7 +33,6 @@ public class LoggingUtils {
     public static void logStep(Logger log, ConfigurationStep step, String requestAuthorIp, Long elapsedTime, String requestTo, String requestContent, String responseContent, String responseStatus) {
         String stepType = Boolean.TRUE.equals(step.getSkip()) ? "skip" : step.getType();
         setLogContext(requestAuthorIp, stepType, elapsedTime.toString(), requestTo, requestContent, responseContent, responseStatus);
-
         String message = "Executed: %s".formatted(step.getName());
         log.info(message);
         clearLogContext();

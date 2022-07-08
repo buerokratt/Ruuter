@@ -1,23 +1,24 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
+import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import ee.buerokratt.ruuter.service.ConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @WireMockTest
 class HttpPostStepTest extends StepTestBase {
@@ -28,14 +29,31 @@ class HttpPostStepTest extends StepTestBase {
     @Mock
     private ApplicationProperties properties;
 
+    @Mock
+    private HttpHelper httpHelper;
+
+    @Mock
+    private ScriptingHelper scriptingHelper;
+
+    @Mock
+    private ApplicationProperties.DefaultAction defaultAction;
+
+    @Mock
+    private ConfigurationService configurationService;
+
+    @Mock
+    private ApplicationProperties.Logging logging;
+
     @BeforeEach
     protected void mockDependencies() {
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getProperties()).thenReturn(properties);
+        when(ci.getHttpHelper()).thenReturn(httpHelper);
+        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
     @Test
-    void execute_shouldSendPostRequestAndStoreResponse(WireMockRuntimeInfo wireMockRuntimeInfo) throws JsonProcessingException {
+    void execute_shouldSendPostRequestAndStoreResponse(WireMockRuntimeInfo wireMockRuntimeInfo) {
         HashMap<String, Object> testContext = new HashMap<>();
         HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
             setBody(new HashMap<>() {{
@@ -49,20 +67,21 @@ class HttpPostStepTest extends StepTestBase {
             setArgs(expectedPostArgs);
             setResultName("the_response");
         }};
-        ApplicationProperties.Logging logging = new ApplicationProperties.Logging();
-        logging.setDisplayRequestContent(false);
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
         when(ci.getContext()).thenReturn(testContext);
+        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
         when(properties.getLogging()).thenReturn(logging);
-        when(mappingHelper.convertObjectToString(anyMap())).thenReturn(new ObjectMapper().writeValueAsString(expectedPostArgs.getBody()));
-        stubFor(post("/endpoint").willReturn(ok()));
+        when(logging.getDisplayRequestContent()).thenReturn(false);
+
         expectedPostStep.execute(ci);
 
-        assertEquals(200, ((HttpStepResult) ci.getContext().get("the_response")).getResponse().getStatus());
+        assertEquals(200, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
     }
 
     @Test
-    void execute_shouldPassDefinedHeadersToRequest(WireMockRuntimeInfo wireMockRuntimeInfo) throws JsonProcessingException {
+    void execute_shouldExecuteDefaultActionWhenRequestIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) {
         HashMap<String, Object> testContext = new HashMap<>();
         HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
             setBody(new HashMap<>() {{
@@ -70,44 +89,27 @@ class HttpPostStepTest extends StepTestBase {
                 put("another_val", 123);
             }});
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-            setHeaders(new HashMap<>(){{
-                put("Cache-Control", "no-cache");
-            }});
         }};
         HttpStep expectedPostStep = new HttpPostStep() {{
             setName("post_message");
             setArgs(expectedPostArgs);
             setResultName("the_response");
         }};
-        ApplicationProperties.Logging logging = new ApplicationProperties.Logging();
-        logging.setDisplayRequestContent(false);
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
         when(ci.getContext()).thenReturn(testContext);
-        when(properties.getLogging()).thenReturn(logging);
-        when(mappingHelper.convertObjectToString(anyMap())).thenReturn(new ObjectMapper().writeValueAsString(expectedPostArgs.getBody()));
-        stubFor(post("/endpoint").willReturn(ok()));
+        when(ci.getRequestOrigin()).thenReturn("");
+        when(ci.getConfigurationService()).thenReturn(configurationService);
+        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
+        when(properties.getDefaultAction()).thenReturn(defaultAction);
+        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
+        when(defaultAction.getService()).thenReturn("default-action");
+        when(defaultAction.getBody()).thenReturn(new HashMap<>());
+        when(defaultAction.getQuery()).thenReturn(new HashMap<>());
+
         expectedPostStep.execute(ci);
 
-        verify(postRequestedFor(urlEqualTo("/endpoint"))
-            .withHeader("Cache-Control", equalTo("no-cache")));
-    }
-
-    @Test
-    void execute_shouldThrowErrorWhenRequestFailsAndStopProcessingUnRespondingStepsIsTrue() {
-        String getWrongRequestUrl = "http://localhost:randomPort/endpoint";
-        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
-            setUrl(getWrongRequestUrl);
-        }};
-        HttpStep expectedPostStep = new HttpPostStep() {{
-            setName("post_message");
-            setArgs(expectedPostArgs);
-            setResultName("the_response");
-        }};
-
-        when(properties.isStopProcessingUnRespondingService()).thenReturn(true);
-        stubFor(get("/endpoint").willReturn(ok()));
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> expectedPostStep.execute(ci));
-        assertEquals("Error executing: %s".formatted(expectedPostStep.getName()), exception.getMessage());
+        verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
     }
 }

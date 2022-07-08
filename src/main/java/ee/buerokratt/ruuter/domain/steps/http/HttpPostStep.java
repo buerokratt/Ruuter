@@ -1,15 +1,13 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.http.ResponseEntity;
 
-import java.net.http.HttpResponse;
-
-import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpPostRequest;
+import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -18,11 +16,9 @@ import static ee.buerokratt.ruuter.util.HttpUtils.makeHttpPostRequest;
 public class HttpPostStep extends HttpStep {
 
     @Override
-    protected void executeStepAction(ConfigurationInstance ci) {
-        HttpResponse<String> response = makeHttpPostRequest(args, ci.getMappingHelper().convertObjectToString(args.getBody()));
-        JsonNode responseBody = response.body().isEmpty() ? null : ci.getMappingHelper().convertStringToNode(response.body());
-        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(responseBody, response.headers().map(), response.statusCode());
-        ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
+    protected ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci) {
+        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(args.getBody(), ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
+        return ci.getHttpHelper().doPost(args.getUrl(), evaluatedBody, args.getQuery(), args.getHeaders());
     }
 
     @Override

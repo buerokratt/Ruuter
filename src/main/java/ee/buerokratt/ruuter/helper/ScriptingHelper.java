@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 @RequiredArgsConstructor
@@ -23,24 +24,21 @@ public class ScriptingHelper {
         return Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(s).find();
     }
 
-    public Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
-        Map<String, Object> incoming = new HashMap<>();
-        if (requestParams != null) {
-            incoming.put("params", new HashMap<>(requestParams));
-        }
-        if (requestBody != null) {
-            incoming.put("body", new HashMap<>(requestBody));
-        }
-        HashMap<String, Object> evalContext = new HashMap<>(context);
-        evalContext.put("incoming", incoming);
-        return evalContext;
+    public Map<String, Object> evaluateScripts(Map<String, Object> map, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
+        return map == null || map.isEmpty() ? map : map.entrySet().stream()
+            .collect(toMap(Map.Entry::getKey, objectEntry -> evaluateScripts(objectEntry.getValue(), context, requestBody, requestParams)));
     }
 
-    public Object evaluateScripts(String toEval, Map<String, Object> evalContext) {
+    public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
+        if (!containsScript(toEval.toString())) {
+            return toEval;
+        }
+
+        Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestParams);
         Bindings bindings = createBindingsWithContext(evalContext);
 
-        List<String> nonScriptSlices = Arrays.stream(toEval.split(SCRIPT_REGEX)).toList();
-        List<Object> evaluatedScripts = Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(toEval).results()
+        List<String> nonScriptSlices = Arrays.stream(toEval.toString().split(SCRIPT_REGEX)).toList();
+        List<Object> evaluatedScripts = Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(toEval.toString()).results()
             .map(matchResult -> matchResult.group(0))
             .map(scriptToExecute -> setupObjectsInScript(removeScriptWrapper(scriptToExecute), bindings, evalContext))
             .map(evaluableScript -> evaluate(bindings, evaluableScript))
@@ -52,6 +50,19 @@ public class ScriptingHelper {
         return nonScriptSlices.stream()
             .map(nonScriptSlice -> evaluatedScripts.isEmpty() ? nonScriptSlice : nonScriptSlice + evaluatedScripts.remove(0))
             .reduce("", (s, s2) -> s + s2);
+    }
+
+    public Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
+        Map<String, Object> incoming = new HashMap<>();
+        if (requestParams != null) {
+            incoming.put("params", new HashMap<>(requestParams));
+        }
+        if (requestBody != null) {
+            incoming.put("body", new HashMap<>(requestBody));
+        }
+        HashMap<String, Object> evalContext = new HashMap<>(context);
+        evalContext.put("incoming", incoming);
+        return evalContext;
     }
 
     private Bindings createBindingsWithContext(Map<String, Object> evalContext) {
@@ -78,7 +89,7 @@ public class ScriptingHelper {
         if (possibleObject.contains("\"")) {
             return possibleObject;
         }
-        String objectName = possibleObject.substring(0, possibleObject.indexOf('.', 0));
+        String objectName = possibleObject.substring(0, possibleObject.indexOf('.'));
         bindings.put(objectName, mappingHelper.convertObjectToString(evalContext.get(objectName)));
         return "JSON.parse(" + possibleObject.replaceFirst("\\.", ").");
     }

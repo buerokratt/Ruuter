@@ -1,6 +1,5 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,8 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HttpQueryResponse {
-    private JsonNode body;
+    private Object body;
     private Map<String, List<String>> headers;
     private Integer status;
+    private String requestId;
 }

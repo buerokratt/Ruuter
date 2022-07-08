@@ -2,6 +2,7 @@ package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.ConfigurationService;
@@ -29,14 +30,13 @@ public class ConfigurationInstance {
     private final HashMap<String, Object> context = new HashMap<>();
     private final String requestOrigin;
     private final Tracer tracer;
+    private final HttpHelper httpHelper;
     private Object returnValue;
 
     public void execute(String configurationName) {
         List<String> stepNames = steps.keySet().stream().toList();
         try {
-            LoggingUtils.logIncomingRequest(log, configurationName, requestOrigin);
             executeStep(stepNames.get(0), stepNames);
-            LoggingUtils.logRequestProcessed(log, configurationName, requestOrigin);
         } catch (Exception e) {
             LoggingUtils.logRequestError(log, configurationName, requestOrigin, e);
             setReturnValue(null);

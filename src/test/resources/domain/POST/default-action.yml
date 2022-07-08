@@ -1,0 +1,9 @@
+post_default_action:
+  call: http.post
+  args:
+    url: http://localhost:8090/default-action
+    body:
+      responseBody: ${incoming.body.responseBody}
+      statusCode: ${incoming.body.statusCode}
+      failedRequestId: ${incoming.body.failedRequestId}
+  result: the_response

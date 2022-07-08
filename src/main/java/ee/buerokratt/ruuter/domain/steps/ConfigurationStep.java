@@ -31,14 +31,18 @@ public abstract class ConfigurationStep {
                 executeStepAction(ci);
             }
             logStep(System.currentTimeMillis() - startTime, ci);
-        } catch (Exception e) {
-            LoggingUtils.logStepError(log, getType(), ci.getRequestOrigin(), name);
-            if (ci.getProperties().isStopProcessingUnRespondingService()) {
+        }  catch (Exception e) {
+            handleFailedResult(ci);
+            if (ci.getProperties().getStopInCaseOfException() != null && ci.getProperties().getStopInCaseOfException()) {
                 throw new StepExecutionException(name, e);
             }
         } finally {
             newSpan.end();
         }
+    }
+
+    protected void handleFailedResult(ConfigurationInstance ci) {
+        LoggingUtils.logStepError(log, getType(), ci.getRequestOrigin(), name);
     }
 
     public abstract String getType();
