@@ -67,6 +67,22 @@ To package the application as a war in order to deploy it to an application serv
 gradlew -Pprod -Pwar clean bootWar
 ```
 
+## Configuration
+### Default service
+
+Default service is a service file that will be executed when request status code is not in http codes allowlist. Default service can be
+defined in application.yml file with name defaultServiceInCaseOfException. Service is a file name in /services folder. Body and query are optional.
+
+```
+defaultServiceInCaseOfException:
+    service: default-service
+    body:
+      someVal: "Hello World"
+    query:
+      anotherVal: 123
+```
+
+
 
 ## License
 
