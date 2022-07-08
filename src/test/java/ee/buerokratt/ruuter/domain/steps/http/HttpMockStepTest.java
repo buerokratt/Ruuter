@@ -1,28 +1,16 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.StepTestBase;
-import ee.buerokratt.ruuter.helper.MappingHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 
 class HttpMockStepTest extends StepTestBase {
-
-    @Mock
-    private MappingHelper mappingHelper;
-
-    @BeforeEach
-    protected void mockDependencies() {
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-    }
 
     @Test
     void execute_shouldStoreResponse() {
@@ -48,11 +36,10 @@ class HttpMockStepTest extends StepTestBase {
         }};
         HttpStepResult expectedResult = new HttpStepResult() {{
             setRequest(mockStepRequest);
-            setResponse(new HttpQueryResponse(new ObjectMapper().convertValue(mockStepResponse, JsonNode.class), null, 200, null));
+            setResponse(new ResponseEntity<>(mockStepResponse, null, HttpStatus.OK));
         }};
 
         when(ci.getContext()).thenReturn(testContext);
-        when(mappingHelper.convertMapToNode(anyMap())).thenReturn(new ObjectMapper().convertValue(mockStepRequest.getBody(), JsonNode.class));
         httpMockStep.execute(ci);
 
         assertEquals(expectedResult, ci.getContext().get(resultName));

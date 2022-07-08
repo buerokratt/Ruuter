@@ -1,7 +1,7 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.StepTestBase;
-import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.ConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +20,9 @@ class TemplateStepTest extends StepTestBase {
 
     @Mock
     private ScriptingHelper scriptingHelper;
+
+    @Mock
+    ConfigurationInstance templateInstance;
 
     @BeforeEach
     protected void mockDependencies() {
@@ -42,7 +45,8 @@ class TemplateStepTest extends StepTestBase {
 
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn(requestOrigin);
-        when(configurationService.execute(templateToCall, "POST", null, new HashMap<>(), requestOrigin)).thenReturn(expectedResult);
+        when(templateInstance.getReturnValue()).thenReturn(expectedResult);
+        when(configurationService.execute(templateToCall, "POST", new HashMap<>(), new HashMap<>(), requestOrigin)).thenReturn(templateInstance);
         templateStep.execute(ci);
 
         assertEquals(expectedResult, ci.getContext().get(resultName));

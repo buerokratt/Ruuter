@@ -8,11 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collector;
-
-import static java.util.stream.Collectors.toMap;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -30,21 +26,11 @@ public class TemplateStep extends ConfigurationStep {
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         ScriptingHelper scriptingHelper = ci.getScriptingHelper();
-        Map<String, Object> templateBody = body != null ? body.entrySet().stream().collect(toEvaluatedMap(scriptingHelper, ci)) : null;
-        Map<String, Object> templateParams = params != null ? params.entrySet().stream().collect(toEvaluatedMap(scriptingHelper, ci)) : new HashMap<>();
+        Map<String, Object> templateBody = scriptingHelper.evaluateScripts(body, ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
+        Map<String, Object> templateParams = scriptingHelper.evaluateScripts(params, ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
 
-        ci.getContext().put(resultName,  ci.getConfigurationService().execute(templateToCall, requestType, templateBody, templateParams, ci.getRequestOrigin()));
-    }
-
-    private Collector<Map.Entry<String, Object>, ?, Map<String, Object>> toEvaluatedMap(ScriptingHelper scriptingHelper, ConfigurationInstance ci) {
-        return toMap(Map.Entry::getKey, entry -> {
-                if (scriptingHelper.containsScript(entry.getValue().toString())) {
-                    Map<String, Object> evalContext = scriptingHelper.setupEvalContext(ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-                    return scriptingHelper.evaluateScripts(entry.getValue().toString(), evalContext, ci.getRequestBody(), ci.getRequestParams());
-                }
-                return entry.getValue();
-            }
-        );
+        ConfigurationInstance templateInstance = ci.getConfigurationService().execute(templateToCall, requestType, templateBody, templateParams, ci.getRequestOrigin());
+        ci.getContext().put(resultName, templateInstance.getReturnValue());
     }
 
     @Override

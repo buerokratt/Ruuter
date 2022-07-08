@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -20,8 +23,8 @@ public class HttpMockStep extends ConfigurationStep {
 
     @Override
     public void executeStepAction(ConfigurationInstance ci) {
-        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(ci.getMappingHelper().convertMapToNode(args.getResponse()), null, 200, null);
-        ci.getContext().put(resultName, new HttpStepResult(args.getRequest(), httpQueryResponse));
+        ResponseEntity<Object> response = new ResponseEntity<>(args.getResponse(), null, HttpStatus.OK);
+        ci.getContext().put(resultName, new HttpStepResult(args.getRequest(), response, MDC.get("spanId")));
     }
 
     @Override

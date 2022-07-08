@@ -1,11 +1,13 @@
 package ee.buerokratt.ruuter.service;
 
 import ee.buerokratt.ruuter.BaseIntegrationTest;
-import ee.buerokratt.ruuter.domain.steps.*;
+import ee.buerokratt.ruuter.domain.steps.AssignStep;
+import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.domain.steps.ReturnStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpGetStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpPostStep;
-import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpQueryArgs;
+import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +20,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = { "application.config-path=${user.dir}/src/test/resources/service" })
 class ConfigurationServiceIT extends BaseIntegrationTest {
