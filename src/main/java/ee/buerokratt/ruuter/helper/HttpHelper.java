@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
@@ -28,12 +29,16 @@ public class HttpHelper {
             .defaultUriVariables(params)
             .build();
 
-        return client.post()
-            .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
-            .bodyValue(body)
-            .retrieve()
-            .toEntity(Object.class)
-            .block();
+        try {
+            return client.post()
+                .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
+                .bodyValue(body)
+                .retrieve()
+                .toEntity(Object.class)
+                .block();
+        } catch (WebClientResponseException e) {
+            return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
+        }
     }
 
     public ResponseEntity<Object> doGet(String url, Map<String, Object> params, Map<String, String> headers) {
@@ -44,11 +49,15 @@ public class HttpHelper {
             .defaultUriVariables(params)
             .build();
 
-        return client.get()
-            .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
-            .retrieve()
-            .toEntity(Object.class)
-            .block();
+        try {
+            return client.get()
+                .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
+                .retrieve()
+                .toEntity(Object.class)
+                .block();
+        } catch (WebClientResponseException e) {
+            return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
+        }
     }
 
     private void addHeadersIfNotNull(Map<String, String> headers, HttpHeaders httpHeaders) {

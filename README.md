@@ -67,6 +67,17 @@ To package the application as a war in order to deploy it to an application serv
 gradlew -Pprod -Pwar clean bootWar
 ```
 
+## Configuration
+### Final Response status code
+
+Final response status code can be defined in application.yml. When it is defined all the responses will have that status code.
+
+```
+finalResponse:
+      httpStatusCode: 200
+```
+
+
 
 ## License
 

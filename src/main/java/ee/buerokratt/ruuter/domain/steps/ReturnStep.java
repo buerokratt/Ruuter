@@ -19,8 +19,9 @@ public class ReturnStep extends ConfigurationStep {
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         ci.setReturnValue((HttpStepResult) ci.getScriptingHelper().evaluateScripts(returnValue, ci.getContext(), ci.getRequestBody(), ci.getRequestParams()));
-        if (ci.getProperties().getFinalResponse() != null && ci.getProperties().getFinalResponse().getHttpStatusCode() != null) {
-            ci.getReturnValue().getResponse().setStatus(ci.getProperties().getFinalResponse().getHttpStatusCode());
+        Integer finalResponseStatusCode = ci.getProperties().getFinalResponse().getHttpStatusCode();
+        if (finalResponseStatusCode != null) {
+            ci.getReturnValue().getResponse().setStatus(finalResponseStatusCode);
         }
     }
 
