@@ -61,7 +61,7 @@ public abstract class HttpStep extends ConfigurationStep {
             body.put("statusCode", response.getStatus().toString());
             body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
             body.put("failedRequestId", MDC.get("spanId"));
-            ci.getConfigurationService().execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
+            ci.getConfigurationService().execute(defaultAction.getService(), "POST", defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
         }
     }
 

@@ -110,6 +110,6 @@ class HttpPostStepTest extends StepTestBase {
 
         expectedPostStep.execute(ci);
 
-        verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
+        verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
     }
 }

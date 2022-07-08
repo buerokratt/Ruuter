@@ -59,13 +59,6 @@ public class ConfigurationService {
 
     public Object execute(String configuration, String requestType, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
         Map<String, ConfigurationStep> steps = configurations.get(requestType.toUpperCase()).get(configuration);
-        ConfigurationInstance configurationInstance = new ConfigurationInstance(this, scriptingHelper, properties, steps, requestBody, requestParams, mappingHelper, requestOrigin, tracer);
-        configurationInstance.execute(configuration);
-        return configurationInstance.getReturnValue();
-    }
-
-    public Object execute(String configuration, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
-        Map<String, ConfigurationStep> steps = configurations.get(configuration);
         LoggingUtils.logIncomingRequest(log, configuration, requestOrigin);
 
         ConfigurationInstance configurationInstance = new ConfigurationInstance(this, scriptingHelper, properties, steps, requestBody, requestParams, mappingHelper, requestOrigin, tracer, httpHelper);
