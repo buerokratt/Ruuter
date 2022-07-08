@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = { "application.config-path=${user.dir}/src/test/resources/service" })
 class ConfigurationServiceIT extends BaseIntegrationTest {
@@ -65,10 +67,9 @@ class ConfigurationServiceIT extends BaseIntegrationTest {
             setReturnValue("return_value");
         }};
 
-        Map<String, Map<String, Map<String, ConfigurationStep>>> configurations = configurationService.getConfigurations(configPath + "/configurations");
+        Map<String, Map<String, Map<String, ConfigurationStep>>> configurations = configurationService.getConfigurations(configPath);
         List<String> stepNames = new ArrayList<>(configurations.get("POST").get("test-conf").keySet());
 
-        assertEquals(1, configurations.size());
         assertEquals("get_message", stepNames.get(0));
         assertEquals("post_message", stepNames.get(1));
         assertEquals("assign_value", stepNames.get(2));
@@ -96,5 +97,14 @@ class ConfigurationServiceIT extends BaseIntegrationTest {
 
         assertEquals(httpGetStepHeaders, httpGetStep.getArgs().getHeaders());
         assertEquals(httpPostStepHeaders, httpPostStep.getArgs().getHeaders());
+    }
+
+    @Test
+    void getConfigurations_shouldPutAllConfigurationsToPostAndGetKeys() {
+        Map<String, Map<String, Map<String, ConfigurationStep>>> configurations = configurationService.getConfigurations(configPath);
+
+        assertEquals(2, configurations.keySet().size());
+        assertTrue(configurations.containsKey("POST"));
+        assertTrue(configurations.containsKey("GET"));
     }
 }
