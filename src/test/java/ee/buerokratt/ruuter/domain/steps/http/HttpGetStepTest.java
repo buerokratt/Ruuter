@@ -94,24 +94,10 @@ class HttpGetStepTest extends StepTestBase {
         when(ci.getConfigurationService()).thenReturn(configurationService);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getContext()).thenReturn(testContext);
-        when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs)).thenReturn(httpResponse);
-        when(ci.getConfigurationService()).thenReturn(configurationService);
+        when(ci.getRequestOrigin()).thenReturn("");
+        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
         when(applicationProperties.getDefaultServiceInCaseOfException()).thenReturn(httpDefaultService);
-        doCallRealMethod().when(httpDefaultService).executeHttpDefaultAction(eq(ci), anyString());
-        when(ci.getRequestOrigin()).thenReturn("");
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
-        when(httpResponse.body()).thenReturn("body");
-        when(httpResponse.statusCode()).thenReturn(201);
-        when(httpResponse.headers()).thenReturn(httpHeaders);
         failingGetStep.execute(ci);
-        when(ci.getRequestOrigin()).thenReturn("");
-        when(applicationProperties.getDefaultAction()).thenReturn(defaultAction);
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
-        when(defaultAction.getService()).thenReturn("default-action");
-        when(defaultAction.getBody()).thenReturn(new HashMap<>());
-        when(defaultAction.getQuery()).thenReturn(new HashMap<>());
-
-        expectedGetStep.execute(ci);
 
         verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
     }
@@ -137,15 +123,14 @@ class HttpGetStepTest extends StepTestBase {
             setResultName("the_response");
             setHttpDefaultService(httpDefaultService2);
         }};
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getHttpHelper().makeHttpGetRequest(expectedGetArgs)).thenReturn(httpResponse);
+        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
         when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
-        when(httpResponse.body()).thenReturn("body");
-        when(httpResponse.statusCode()).thenReturn(201);
-        when(httpResponse.headers()).thenReturn(httpHeaders);
         failingGetStep.execute(ci);
 
         verify(configurationService, times(1)).execute(eq("default-action2"), anyMap(), anyMap(), anyString());

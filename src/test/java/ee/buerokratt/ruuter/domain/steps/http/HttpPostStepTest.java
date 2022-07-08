@@ -36,14 +36,14 @@ class HttpPostStepTest extends StepTestBase {
     @Mock
     private ScriptingHelper scriptingHelper;
 
-    @Mock
-    private ApplicationProperties.DefaultAction defaultAction;
-
-    @Mock
-    private HttpResponse<String> httpResponse;
-
-    @Mock
-    private BiPredicate<String, String> biPredicate;
+//    @Mock
+//    private ApplicationProperties.DefaultAction defaultAction;
+//
+//    @Mock
+//    private HttpResponse<String> httpResponse;
+//
+//    @Mock
+//    private BiPredicate<String, String> biPredicate;
 
     @Mock
     private ConfigurationService configurationService;
@@ -102,32 +102,21 @@ class HttpPostStepTest extends StepTestBase {
             }});
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
         }};
-        HttpStep expectedPostStep = new HttpPostStep() {{
+        HttpStep failingPostStep = new HttpPostStep() {{
             setName("post_message");
             setArgs(expectedPostArgs);
             setResultName("the_response");
         }};
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
+        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
+        when(ci.getConfigurationService()).thenReturn(configurationService);
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
-        when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
-        when(properties.getDefaultAction()).thenReturn(defaultAction);
         when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
-        when(defaultAction.getService()).thenReturn("default-action");
-        when(defaultAction.getBody()).thenReturn(new HashMap<>());
-        when(defaultAction.getQuery()).thenReturn(new HashMap<>());
-
         when(properties.getDefaultServiceInCaseOfException()).thenReturn(httpDefaultService);
-        doCallRealMethod().when(httpDefaultService).executeHttpDefaultAction(eq(ci), anyString());
-        when(ci.getRequestOrigin()).thenReturn("");
-        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
-        when(httpResponse.body()).thenReturn("body");
-        when(httpResponse.statusCode()).thenReturn(201);
-        when(httpResponse.headers()).thenReturn(httpHeaders);
-        expectedPostStep.execute(ci);
+        failingPostStep.execute(ci);
 
         verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
     }

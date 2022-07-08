@@ -15,6 +15,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Slf4j
 @Data
@@ -37,7 +38,7 @@ public abstract class HttpStep extends ConfigurationStep {
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        ResponseEntity<Object> response = getRequestResponse(ci);
+        ResponseEntity<Object> response = tryGetRequestResponse(ci);
         HttpQueryResponse httpQueryResponse = new HttpQueryResponse(response.getBody(), response.getHeaders(), response.getStatusCodeValue(), MDC.get("spanId"));
         ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
 
@@ -56,9 +57,9 @@ public abstract class HttpStep extends ConfigurationStep {
         if (!ci.getProperties().getHttpCodesAllowList().contains(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus())) {
             HttpDefaultService propertiesHttpDefaultService = ci.getProperties().getDefaultServiceInCaseOfException();
             if (httpDefaultService != null && httpDefaultService.getService() != null) {
-                httpDefaultService.executeHttpDefaultAction(ci, resultName);
+                httpDefaultService.executeHttpDefaultService(ci, resultName);
             } else if (propertiesHttpDefaultService != null && propertiesHttpDefaultService.getService() != null) {
-                propertiesHttpDefaultService.executeHttpDefaultAction(ci, resultName);
+                propertiesHttpDefaultService.executeHttpDefaultService(ci, resultName);
             }
         }
     }
@@ -72,6 +73,14 @@ public abstract class HttpStep extends ConfigurationStep {
         String responseContent = responseBody != null && properties.getLogging().getDisplayResponseContent() ? responseBody : "-";
         String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";
         LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
+    }
+
+    private ResponseEntity<Object> tryGetRequestResponse(ConfigurationInstance ci) {
+        try {
+            return getRequestResponse(ci);
+        } catch (WebClientResponseException e) {
+            return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
+        }
     }
 
     protected abstract ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci);

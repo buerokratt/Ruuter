@@ -14,7 +14,7 @@ public class HttpDefaultService {
     private HashMap<String, Object> body;
     private HashMap<String, Object> query;
 
-    public void executeHttpDefaultAction(ConfigurationInstance ci, String resultName) {
+    public void executeHttpDefaultService(ConfigurationInstance ci, String resultName) {
         HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
         body = body == null ? new HashMap<>() : body;
         body.put("statusCode", response.getStatus().toString());
