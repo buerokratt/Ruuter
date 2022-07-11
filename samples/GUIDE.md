@@ -67,10 +67,10 @@ Notes:
 * [Passing parameters to DSL](./general/params.md)
 
 ### Step types
-* [http-get](./step-types/http-get.md)
-* [http-post](./step-types/http-post.md)
-* [assign](./step-types/assign-variables.md)
-* [conditional-jump](./step-types/conditional-jump.md)
-* [return](./step-types/return.md)
-* [template](./step-types/template.md)
-* [mock](./step-types/mock.md)
+* [http-get](steps/http-get.md)
+* [http-post](steps/http-post.md)
+* [assign](steps/assign-variables.md)
+* [conditional-jump](steps/conditional-jump.md)
+* [return](steps/return.md)
+* [template](steps/template.md)
+* [mock](steps/mock.md)
