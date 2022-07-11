@@ -1,4 +1,4 @@
-# Templated services
+# Templates
 
 ```
 - validate_user:
