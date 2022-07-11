@@ -1,28 +1,52 @@
-# Respond to request by setting custom cookies
+# Return step
 
+### Assign return value
+```
+return_value:
+    return "result"
+```
+
+### Assign return value with script
+```
+assign_step:
+    assign:
+        variable: "result"
+
+return_value:
+    return ${variable}
+```
+
+### Set custom cookies to response
 `set-cookies.yaml`
-
 ```
-# Ruuter service configuration as YAML
-- step_1:
-    args:
-        headers:
-            Set-Cookie:
-                customCookieName:
-                    Value: "customCookieValue"
-                    Domain: "https://example.com"
-                    Secure: ~
-                    HttpOnly: ~
-    result: set_custom_cookie
-
-- return_value:
-    return ${set_custom_cookie.headers}
+return_value:
+    headers:
+        Set-Cookie:
+            customCookieName: "customCookieValue"
+            Domain: "https://example.com"
+            Secure: false
+            HttpOnly: true
+        custom-header: "customValue"
+    return "result"
 ```
 
+### Set custom cookies to response with script
+`set-cookies-with-script.yaml`
 ```
-# Matching request in curl
-curl https://example.com/set-cookies \
-    --cookie 'customCookieName=customCookieValue; Domain=https://example.com; Secure; HttpOnly'
+assign_step:
+    assign:
+        setCookie:
+            customCookieName: "customCookieValue"
+            Domain: "https://example.com"
+            Secure: false
+            HttpOnly: true
+        customHeader: "customValue"
+
+return_value:
+    headers:
+        Set-Cookie: ${setCookie}
+        custom-header: ${customHeader}
+    return "result"
 ```
 
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

@@ -10,7 +10,7 @@ the already executed `STEP A`, then it will be executed again, **and the same ju
 
 If the user wishes to dictate when the processing of a DSL should end, they can use the value `end` for the `next` keyword, which stops the execution of a DSL.
 
-`Jump with end:`
+### Example of jump with end
 ```
 first_step:
     call: http.get
@@ -30,7 +30,7 @@ second_step:
       url: https://example.com/callC
     next: third_step
 ```
-`Jump over step:`
+### Example of jump over step
 ```
 first_step:
     call: http.get
@@ -48,7 +48,7 @@ second_step:
     args:
       url: https://example.com/callC
 ```
-`End:`
+### Example of end
 ```
 first_step:
     call: http.get

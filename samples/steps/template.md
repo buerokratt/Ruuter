@@ -1,28 +1,15 @@
-# Templates
+# Template Step
 
 ```
-- validate_user:
-    template: validate-user-session
-    result: clientInfo
-
-- initiate_chat:
-    template: resql-init-chat
-    result: chatInitResponse
-
-- get_chat_default_greeting:
-    template: get-chat-default-greeting
-    result: chatGreeting
-
-- return_value:
-    return:
-        headers:
-            Set-Cookie:
-                activeChatSession:
-                    Value: ${chatInitResponse.body.chatID}
-                    Domain: https://example.com
-                    Secure: ~
-                    HttpOnly: ~
-        body:
-            chatId: ${chatInitResponse.body.chatID}
-            response: ${chatGreeting.body}
+call_template:
+  template: template-to-call
+  requestType: post
+  body:
+    var1: ${incoming.body.element1}
+    var2: "2.0"
+  params:
+    var3: ${incoming.params.element2}
+  result: templateResult
 ```
+
+[Back to Guide](../GUIDE.md#Writing-DSL-files)

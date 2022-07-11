@@ -8,9 +8,7 @@ Many steps allow the DSL writer to utilise scripting, for which the main purpose
 
 Scripting is done in JavaScript. Steps use the following syntax to define where a script begins and ends: `${ script goes between here }`. 
 
-####Some Examples of different ways to use scripting:
-
-`Using a variable from previous steps`
+### Using a variable from previous steps
 ```
 first_step:
     assign: 
@@ -22,7 +20,8 @@ second_step:
 -----------------------------------------------
 Expected result: "myVariable" 
 ```
-`computation`
+
+### Computation
 ```
 first_step:
     return: ${999 + 1}
@@ -30,7 +29,8 @@ first_step:
 -----------------------------------------------
 Expected result: 1000 
 ```
-`conditional`
+
+### Conditional
 ```
 first_step:
     return: ${"test-string" === "test-string"}
@@ -38,7 +38,8 @@ first_step:
 -----------------------------------------------
 Expected result: true 
 ```
-`concatenation`
+
+### Concatenation
 ```
 first_step:
     assign: 

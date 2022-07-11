@@ -1,6 +1,6 @@
 # Passing parameters to DSL
 
-Often it's necessary to get either the body or parameters of the incoming query, to use them in the DSL. Ruuter stores these variables and allows their use 
+Often it's necessary to get either the body or parameters of the incoming request, to use them in the DSL. Ruuter stores these variables and allows their use 
 through the following keywords:
 * query parameters: `incoming.params`
 * request body: `incoming.body`

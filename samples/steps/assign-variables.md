@@ -7,7 +7,7 @@ step_1:
     integerValue: 2021
 ```
 
-## Assigning variables and using them
+### Assigning variables and using them
 
 ```
 step_1:
