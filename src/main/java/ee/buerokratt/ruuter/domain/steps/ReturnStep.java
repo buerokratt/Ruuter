@@ -7,11 +7,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static java.util.Map.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Map.Entry;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -20,8 +21,7 @@ import static java.util.stream.Collectors.*;
 public class ReturnStep extends ConfigurationStep {
     @JsonAlias({"return"})
     private String returnValue;
-
-    private HashMap<String, Object> headers = new HashMap<>();
+    private Map<String, Object> headers = new LinkedHashMap<>();
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -48,5 +50,31 @@ class ReturnStepTest extends StepTestBase {
         returnStep.execute(ci);
 
         verify(ci, times(1)).setReturnValue(expectedResult);
+    }
+
+    @Test
+    void execute_shouldAssignFormattedHeaders() {
+        Map<String, Object> headers = new HashMap<>();
+        Map<String, Object> cookieHeader = new LinkedHashMap<>() {{
+            put("cookieName", "headerName");
+            put("Domain", "localhost");
+            put("Secure", true);
+            put("HttpOnly", false);
+            put("stringBoolean", "false");
+            put("Max-Age", 300);
+            put("Expires", "2022-08-08T10:08:39.159Z");
+        }};
+        headers.put("Set-Cookie", cookieHeader);
+        ReturnStep returnStep = new ReturnStep() {{
+            setHeaders(headers);
+        }};
+        Map<String, String> expectedResult = new HashMap<>();
+        expectedResult.put("Set-Cookie", "cookieName=headerName; Domain=localhost; Secure; stringBoolean=false; Max-Age=300; Expires=2022-08-08T10:08:39.159Z; ");
+
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(headers);
+        returnStep.execute(ci);
+
+        verify(scriptingHelper, times(1)).evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap());
+        verify(ci, times(1)).setReturnHeaders(expectedResult);
     }
 }
