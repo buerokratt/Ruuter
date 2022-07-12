@@ -1,0 +1,13 @@
+mock_step:
+  call: reflect.mock
+  args:
+    request:
+      url: "www.example.com"
+    response:
+      project: "Bürokratt"
+      website: "www.kratid.ee"
+  result: reflected_request
+  sleep: 5000
+
+return_step:
+  return: ${reflected_request}
