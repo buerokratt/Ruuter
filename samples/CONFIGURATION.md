@@ -15,7 +15,7 @@ application:
 ```
 
 ### Incoming requests
-* `incomingRequests.allowedMethodTypes` - defines the allowed method types for Ruuters DSL endpoint. Any request with an invalid method type ise "denied" service.
+* `incomingRequests.allowedMethodTypes` - defines the allowed method types for Ruuters DSL endpoint. Any request with an invalid method type is "denied" service.
 ```
 application:
   incomingRequests:

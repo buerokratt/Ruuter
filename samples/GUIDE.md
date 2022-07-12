@@ -49,7 +49,7 @@ Therefore to call a desired DSL, one must simply make an HTTP request to ruuter,
 
 ### Request types
 
-Ruuter support's all HTTP method types - when a DSL request is made, Ruuter tries to find the queried DSL from the directory with the same name of the incoming
+Ruuter supports all HTTP method types - when a DSL request is made, Ruuter tries to find the queried DSL from the directory with the same name of the incoming
 HTTP method type.
 (to limit the allowed method types, see: [allowedMethodTypes](./CONFIGURATION.md#Incoming-requests) property)
 
