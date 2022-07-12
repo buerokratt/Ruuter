@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.controller;
+package ee.buerokratt.ruuter.configuration;
 
 import ee.buerokratt.ruuter.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/controller", "application.finalResponse.httpStatusCode=201"})
-class ConfigurationControllerITFinalResponse extends BaseIntegrationTest {
+class FinalResponseStatusCodeIT extends BaseIntegrationTest {
 
     @Test
     void queryConfiguration_shouldSetFinalResponseStatusCodeToRuuterResponse() {
