@@ -38,7 +38,7 @@ public abstract class HttpStep extends ConfigurationStep {
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        ResponseEntity<Object> response = tryGetRequestResponse(ci);
+        ResponseEntity<Object> response = getRequestResponse(ci);
         HttpQueryResponse httpQueryResponse = new HttpQueryResponse(response.getBody(), response.getHeaders(), response.getStatusCodeValue(), MDC.get("spanId"));
         ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
 

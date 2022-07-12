@@ -109,6 +109,6 @@ class HttpPostStepTest extends StepTestBase {
         when(properties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
         failingPostStep.execute(ci);
 
-        verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
+        verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
     }
 }

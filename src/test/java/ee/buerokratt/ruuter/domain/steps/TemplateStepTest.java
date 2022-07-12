@@ -1,6 +1,7 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.StepTestBase;
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.ConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,10 +16,10 @@ import static org.mockito.Mockito.when;
 class TemplateStepTest extends StepTestBase {
 
     @Mock
-    ConfigurationService configurationService;
+    private ConfigurationService configurationService;
 
     @Mock
-    ScriptingHelper scriptingHelper;
+    private ScriptingHelper scriptingHelper;
 
     @BeforeEach
     protected void mockDependencies() {
@@ -36,11 +37,12 @@ class TemplateStepTest extends StepTestBase {
         TemplateStep templateStep = new TemplateStep() {{
             setTemplateToCall(templateToCall);
             setResultName(resultName);
+            setRequestType("POST");
         }};
 
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn(requestOrigin);
-        when(configurationService.execute(templateToCall, null, new HashMap<>(), requestOrigin)).thenReturn(expectedResult);
+        when(configurationService.execute(templateToCall, "POST", null, new HashMap<>(), requestOrigin)).thenReturn(expectedResult);
         templateStep.execute(ci);
 
         assertEquals(expectedResult, ci.getContext().get(resultName));

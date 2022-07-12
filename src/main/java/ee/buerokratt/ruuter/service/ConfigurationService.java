@@ -12,9 +12,10 @@ import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
@@ -31,7 +32,7 @@ public class ConfigurationService {
     private final HttpHelper httpHelper;
     private final ExternalForwardingHelper externalForwardingHelper;
 
-    private final Map<String, Map<String, ConfigurationStep>> configurations;
+    private final Map<String, Map<String, Map<String, ConfigurationStep>>> configurations;
 
     public ConfigurationService(ApplicationProperties properties, ConfigurationMappingHelper configurationMappingHelper, ScriptingHelper scriptingHelper, Tracer tracer, MappingHelper mappingHelper, HttpHelper httpHelper, ExternalForwardingHelper externalForwardingHelper) {
         this.configurationMappingHelper = configurationMappingHelper;
@@ -44,18 +45,20 @@ public class ConfigurationService {
         this.externalForwardingHelper = externalForwardingHelper;
     }
 
-    public Map<String, Map<String, ConfigurationStep>> getConfigurations(String configPath) {
-        try (Stream<Path> paths = Files.walk(getFolderPath(configPath))) {
-            return paths
-                .filter(Files::isRegularFile)
-                .collect(toMap(FileUtils::getFileNameWithoutSuffix, configurationMappingHelper::getConfigurationSteps));
-        } catch (Exception e) {
-            throw new LoadConfigurationsException(e);
-        }
+    public Map<String, Map<String, Map<String, ConfigurationStep>>> getConfigurations(String configPath) {
+        return Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
+            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))) {
+                return paths
+                    .filter(Files::isRegularFile)
+                    .collect(toMap(FileUtils::getFileNameWithoutSuffix, configurationMappingHelper::getConfigurationSteps));
+            } catch (Exception e) {
+                throw new LoadConfigurationsException(e);
+            }
+        }));
     }
 
-    public Object execute(String configuration, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
-        Map<String, ConfigurationStep> steps = configurations.get(configuration);
+    public Object execute(String configuration, String requestType, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
+        Map<String, ConfigurationStep> steps = configurations.get(requestType.toUpperCase()).get(configuration);
         LoggingUtils.logIncomingRequest(log, configuration, requestOrigin);
 
         ConfigurationInstance configurationInstance = new ConfigurationInstance(this, scriptingHelper, properties, steps, requestBody, requestParams, mappingHelper, requestOrigin, tracer, httpHelper);
