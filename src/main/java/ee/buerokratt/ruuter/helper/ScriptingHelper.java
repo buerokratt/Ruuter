@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.toMap;
 public class ScriptingHelper {
     public static final String OBJECT_REGEX = "([a-zA-Z0-9_. \"]+\\.[a-zA-Z0-9_. \"]+)";
     public static final String SCRIPT_REGEX = "(\\$\\{[^}]+})";
+
     private final MappingHelper mappingHelper;
     private final ScriptEngine engine;
 
@@ -26,11 +27,14 @@ public class ScriptingHelper {
 
     public Map<String, Object> evaluateScripts(Map<String, Object> map, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
         return map == null || map.isEmpty() ? map : map.entrySet().stream()
-            .collect(toMap(Map.Entry::getKey, objectEntry -> evaluateScripts(objectEntry.getValue(), context, requestBody, requestParams)));
+            .collect(toMap(Map.Entry::getKey, objectEntry -> evaluateScripts(objectEntry.getValue(), context, requestBody, requestParams), (x, y) -> y, LinkedHashMap::new));
     }
 
     public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
-        if (!containsScript(toEval.toString())) {
+        if (toEval instanceof Map map) {
+            return evaluateScripts(map, context, requestBody, requestParams);
+        }
+        if (toEval == null || !containsScript(toEval.toString())) {
             return toEval;
         }
 
@@ -52,7 +56,7 @@ public class ScriptingHelper {
             .reduce("", (s, s2) -> s + s2);
     }
 
-    public Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
+    private Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
         Map<String, Object> incoming = new HashMap<>();
         if (requestParams != null) {
             incoming.put("params", new HashMap<>(requestParams));

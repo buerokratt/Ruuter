@@ -40,8 +40,8 @@ public abstract class HttpStep extends ConfigurationStep {
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         ResponseEntity<Object> response = getRequestResponse(ci);
-        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(response.getBody(), response.getHeaders(), response.getStatusCodeValue(), MDC.get("spanId"));
-        ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
+        ci.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
+
         if (!isAllowedHttpStatusCode(ci, response)) {
             throw new IllegalArgumentException();
         }
@@ -52,12 +52,12 @@ public abstract class HttpStep extends ConfigurationStep {
         super.handleFailedResult(ci);
         ApplicationProperties.DefaultAction defaultAction = ci.getProperties().getDefaultAction();
         if (defaultAction != null && defaultAction.getService() != null) {
-            HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
+            ResponseEntity<Object> response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
             Map<String, Object> body = defaultAction.getBody();
-            body.put("statusCode", response.getStatus().toString());
-            body.put("responseBody", response.getBody());
+            body.put("statusCode", response.getStatusCodeValue());
+            body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
             body.put("failedRequestId", MDC.get("spanId"));
-            ci.getConfigurationService().execute(defaultAction.getService(), defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
+            ci.getConfigurationService().execute(defaultAction.getService(), "POST", defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
         }
     }
 
@@ -65,7 +65,7 @@ public abstract class HttpStep extends ConfigurationStep {
     protected void logStep(Long elapsedTime, ConfigurationInstance ci) {
         ApplicationProperties properties = ci.getProperties();
         MappingHelper mappingHelper = ci.getMappingHelper();
-        Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus();
+        Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatusCodeValue();
         String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody());
         String responseContent = responseBody != null && properties.getLogging().getDisplayResponseContent() ? responseBody : "-";
         String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";

@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.buerokratt.ruuter.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 
@@ -71,8 +72,8 @@ class ConfigurationInstanceIT extends BaseIntegrationTest {
             .isEqualTo("http://localhost:8090/endpoint")
             .jsonPath("$..response.body")
             .isEqualTo(result)
-            .jsonPath("$..response.status")
-            .isEqualTo(200);
+            .jsonPath("$..response.statusCodeValue")
+            .isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
