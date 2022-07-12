@@ -71,14 +71,6 @@ public abstract class HttpStep extends ConfigurationStep {
         LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
 
-    private ResponseEntity<Object> tryGetRequestResponse(ConfigurationInstance ci) {
-        try {
-            return getRequestResponse(ci);
-        } catch (WebClientResponseException e) {
-            return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
-        }
-    }
-
     private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, Integer response) {
         return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response);
     }
