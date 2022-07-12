@@ -14,7 +14,7 @@ public class ApplicationProperties {
     private String configPath;
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
-    private HttpPost httpPost;
+    private HttpPost httpPost = new HttpPost();
     private DefaultAction defaultAction = new DefaultAction();
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
