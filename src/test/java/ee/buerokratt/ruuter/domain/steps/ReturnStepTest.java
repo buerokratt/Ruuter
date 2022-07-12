@@ -38,7 +38,6 @@ class ReturnStepTest extends StepTestBase {
             setReturnValue(expectedResult);
         }};
 
-        when(ci.getProperties()).thenReturn(properties);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
         when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         returnStep.execute(ci);
@@ -53,7 +52,6 @@ class ReturnStepTest extends StepTestBase {
             setReturnValue("${value}");
         }};
 
-        when(ci.getProperties()).thenReturn(properties);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
         when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         returnStep.execute(ci);
@@ -85,55 +83,5 @@ class ReturnStepTest extends StepTestBase {
 
         verify(scriptingHelper, times(1)).evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap());
         verify(ci, times(1)).setReturnHeaders(expectedResult);
-    }
-
-    @Test
-    void execute_shouldAddDefaultHttpStatusCodeDefinedInApplicationYmlFile() {
-        HttpStepResult expectedResult = new HttpStepResult() {{
-            setRequest(null);
-            setResponse(new HttpQueryResponse() {{
-                setStatus(HttpStatus.OK.value());
-            }});
-        }};
-        ReturnStep returnStep = new ReturnStep() {{
-            setReturnValue("${value}");
-        }};
-        ApplicationProperties.FinalResponse finalResponse = new ApplicationProperties.FinalResponse() {{
-            setHttpStatusCode(HttpStatus.ACCEPTED.value());
-        }};
-
-        when(ci.getProperties()).thenReturn(properties);
-        when(ci.getReturnValue()).thenReturn(expectedResult);
-        when(properties.getFinalResponse()).thenReturn(finalResponse);
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
-        returnStep.execute(ci);
-
-        HttpStepResult resultWithDefaultStatusCode = (HttpStepResult) ci.getReturnValue();
-        assertEquals(HttpStatus.ACCEPTED.value(), resultWithDefaultStatusCode.getResponse().getStatus());
-    }
-
-    @Test
-    void execute_shouldNotAddDefaultHttpStatusCodeWhenItIsNull() {
-        HttpStepResult expectedResult = new HttpStepResult() {{
-            setRequest(null);
-            setResponse(new HttpQueryResponse() {{
-                setStatus(HttpStatus.OK.value());
-            }});
-        }};
-        ReturnStep returnStep = new ReturnStep() {{
-            setReturnValue("${value}");
-        }};
-        ApplicationProperties.FinalResponse finalResponse = new ApplicationProperties.FinalResponse() {{
-            setHttpStatusCode(null);
-        }};
-
-        when(ci.getProperties()).thenReturn(properties);
-        when(ci.getReturnValue()).thenReturn(expectedResult);
-        when(properties.getFinalResponse()).thenReturn(finalResponse);
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
-        returnStep.execute(ci);
-
-        HttpStepResult resultWithDefaultStatusCode = (HttpStepResult) ci.getReturnValue();
-        assertEquals(HttpStatus.OK.value(), resultWithDefaultStatusCode.getResponse().getStatus());
     }
 }

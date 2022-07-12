@@ -94,6 +94,7 @@ class HttpPostStepTest extends StepTestBase {
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
         when(ci.getConfigurationService()).thenReturn(configurationService);
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
         when(properties.getDefaultAction()).thenReturn(defaultAction);
