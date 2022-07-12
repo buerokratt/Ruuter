@@ -30,7 +30,7 @@ public class ConfigurationInstance {
     private final MappingHelper mappingHelper;
     private final HttpHelper httpHelper;
     private final Tracer tracer;
-    private final HashMap<String, Object> context = new HashMap<>();
+    private final Map<String, Object> context = new HashMap<>();
 
     private Object returnValue;
     private Map<String, String> returnHeaders = new HashMap<>();

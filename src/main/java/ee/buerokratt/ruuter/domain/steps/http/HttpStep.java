@@ -1,23 +1,23 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
-    import com.fasterxml.jackson.annotation.JsonAlias;
-    import com.fasterxml.jackson.annotation.JsonSubTypes;
-    import com.fasterxml.jackson.annotation.JsonTypeInfo;
-    import ee.buerokratt.ruuter.configuration.ApplicationProperties;
-    import ee.buerokratt.ruuter.domain.ConfigurationInstance;
-    import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
-    import ee.buerokratt.ruuter.helper.MappingHelper;
-    import ee.buerokratt.ruuter.util.LoggingUtils;
-    import lombok.Data;
-    import lombok.EqualsAndHashCode;
-    import lombok.NoArgsConstructor;
-    import lombok.ToString;
-    import lombok.extern.slf4j.Slf4j;
-    import org.slf4j.MDC;
-    import org.springframework.http.ResponseEntity;
-    import org.springframework.web.reactive.function.client.WebClientResponseException;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.helper.MappingHelper;
+import ee.buerokratt.ruuter.util.LoggingUtils;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-    import java.util.Map;
+import java.util.Map;
 
 @Slf4j
 @Data

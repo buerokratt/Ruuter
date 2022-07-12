@@ -15,6 +15,9 @@ application:
       another_val: 123
   finalResponse:
       httpStatusCode: 200
+  httpPost:
+    headers:
+      Content-Type: "application/json"
 
 spring:
   application:
