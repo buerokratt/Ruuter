@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.utils;
+package ee.buerokratt.ruuter.service.utils;
 
 import org.junit.jupiter.api.Test;
 

@@ -71,7 +71,7 @@ class HttpPostStepTest extends StepTestBase {
 
         expectedPostStep.execute(ci);
 
-        assertEquals(200, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
+        assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
     }
 
     @Test
@@ -97,13 +97,13 @@ class HttpPostStepTest extends StepTestBase {
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
         when(properties.getDefaultAction()).thenReturn(defaultAction);
-        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
+        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
         when(defaultAction.getService()).thenReturn("default-action");
         when(defaultAction.getBody()).thenReturn(new HashMap<>());
         when(defaultAction.getQuery()).thenReturn(new HashMap<>());
 
         expectedPostStep.execute(ci);
 
-        verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
+        verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
     }
 }
