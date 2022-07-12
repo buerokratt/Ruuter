@@ -64,7 +64,7 @@ class HttpGetStepTest extends StepTestBase {
         when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
         expectedGetStep.execute(ci);
 
-        assertEquals(200, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
+        assertEquals(HttpStatus.OK.value(), ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
         assertEquals(httpResponse.getBody(), ((HttpStepResult) testContext.get("the_response")).getResponse().getBody());
     }
 
@@ -95,7 +95,7 @@ class HttpGetStepTest extends StepTestBase {
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
+        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
         when(applicationProperties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
         failingGetStep.execute(ci);
 
@@ -130,10 +130,10 @@ class HttpGetStepTest extends StepTestBase {
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
+        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
         failingGetStep.execute(ci);
 
-        verify(configurationService, times(1)).execute(eq("default-action2"), anyMap(), anyMap(), anyString());
+        verify(configurationService, times(1)).execute(eq("default-action2"), eq("POST"), anyMap(), anyMap(), anyString());
     }
 
     @Test
@@ -155,7 +155,7 @@ class HttpGetStepTest extends StepTestBase {
 
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getHttpHelper().doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
+        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
         expectedGetStep.execute(ci);
 
         verify(configurationService, times(0)).execute(anyString(), anyString(), anyMap(), anyMap(), anyString());

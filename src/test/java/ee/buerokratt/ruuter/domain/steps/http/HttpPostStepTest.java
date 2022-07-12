@@ -75,7 +75,7 @@ class HttpPostStepTest extends StepTestBase {
 
         expectedPostStep.execute(ci);
 
-        assertEquals(200, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
+        assertEquals(HttpStatus.OK.value(), ((HttpStepResult) testContext.get("the_response")).getResponse().getStatus());
     }
 
     @Test
@@ -105,7 +105,7 @@ class HttpPostStepTest extends StepTestBase {
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
-        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
+        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
         when(properties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
         failingPostStep.execute(ci);
 

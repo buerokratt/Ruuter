@@ -7,6 +7,7 @@ import ee.buerokratt.ruuter.helper.MappingHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 
@@ -48,7 +49,7 @@ class HttpMockStepTest extends StepTestBase {
         }};
         HttpStepResult expectedResult = new HttpStepResult() {{
             setRequest(mockStepRequest);
-            setResponse(new HttpQueryResponse(new ObjectMapper().convertValue(mockStepResponse, JsonNode.class), null, 200, null));
+            setResponse(new HttpQueryResponse(new ObjectMapper().convertValue(mockStepResponse, JsonNode.class), null, HttpStatus.OK.value(), null));
         }};
 
         when(ci.getContext()).thenReturn(testContext);

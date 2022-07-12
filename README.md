@@ -72,7 +72,7 @@ gradlew -Pprod -Pwar clean bootWar
 
 Default service is a service file that will be executed when the request status code is not within the allowlist of HTTP response codes.
 
-Default service can be defined in the `application.yml` file by the name of `defaultServiceInCaseOfException`. The service itself is yet another service in `/dsl` folder. Both `body` and `query` parameters are optional and covered here as an example.
+Default service can be defined in the `application.yml` file by the name of `defaultServiceInCaseOfException`. The service itself is yet another service in `/dsl/POST` folder. Both `body` and `query` parameters are optional and covered here as an example.
 
 ```
 defaultServiceInCaseOfException:

@@ -19,6 +19,6 @@ public class DefaultHttpService {
         body.put("statusCode", response.getStatus().toString());
         body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
         body.put("failedRequestId", MDC.get("spanId"));
-        ci.getConfigurationService().execute(service, body, query, ci.getRequestOrigin());
+        ci.getConfigurationService().execute(service, "POST", body, query, ci.getRequestOrigin());
     }
 }
