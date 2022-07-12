@@ -1,6 +1,7 @@
 package ee.buerokratt.ruuter.controller;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.domain.RuuterResponse;
 import ee.buerokratt.ruuter.service.ConfigurationService;
 import ee.buerokratt.ruuter.util.LoggingUtils;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-import static org.springframework.http.ResponseEntity.ok;
+import static ee.buerokratt.ruuter.util.LoggingUtils.INCOMING_REQUEST;
 import static org.springframework.http.ResponseEntity.status;
 
 @Slf4j
@@ -29,9 +30,13 @@ public class ConfigurationController {
                                                              @RequestParam(required = false) Map<String, Object> requestParams,
                                                              HttpServletRequest request) {
         if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
-            LoggingUtils.logIncorrectIncomingRequest(log, configuration, request.getRemoteAddr(), request.getMethod());
+            String errorMsg = "Request received with invalid method type %s for configuration: %s".formatted(request.getMethod(), configuration);
+            LoggingUtils.logError(log, errorMsg, request.getRemoteAddr(), INCOMING_REQUEST);
             return status(HttpStatus.METHOD_NOT_ALLOWED).body(new RuuterResponse());
         }
-        return ok(new RuuterResponse(configurationService.execute(configuration, request.getMethod(), requestBody, requestParams, request.getRemoteAddr())));
+        ConfigurationInstance ci = configurationService.execute(configuration, request.getMethod(),  requestBody, requestParams, request.getRemoteAddr());
+        return status(HttpStatus.OK)
+            .headers(httpHeaders -> ci.getReturnHeaders().forEach(httpHeaders::add))
+            .body(new RuuterResponse(ci.getReturnValue()));
     }
 }

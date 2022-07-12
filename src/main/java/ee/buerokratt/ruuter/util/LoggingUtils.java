@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.MDC;
 
 public class LoggingUtils {
+    public static final String INCOMING_REQUEST = "incoming.request";
     public static final String STEP_TYPE = "stepType";
     public static final String REQUEST_AUTHOR_IP = "requestAuthorIp";
     public static final String REQUEST_TO = "requestTo";
@@ -12,21 +13,26 @@ public class LoggingUtils {
     public static final String RESPONSE_CONTENT = "responseContent";
     public static final String RESPONSE_CODE = "responseCode";
     public static final String RESPONSE_IN = "responseInMs";
+    public static final String INCOMING_RESPONSE = "incoming.response";
 
     private LoggingUtils() {
     }
 
-    public static void logIncomingRequest(Logger log, String configurationName, String requestOrigin) {
-        setLogContext(requestOrigin, "incoming.request", "-", "-", "-", "-", "-");
-        String message = "Request received for configuration: %s".formatted(configurationName);
-        log.info(message, "123");
+    public static void logError(Logger log, String message, String requestOrigin, String stepType) {
+        setLogContext(requestOrigin, stepType, "-", "-", "-", "-", "-");
+        log.error(message);
         clearLogContext();
     }
 
-    public static void logIncorrectIncomingRequest(Logger log, String configurationName, String requestOrigin, String method) {
-        setLogContext(requestOrigin, "incoming.request", "-", "-", "-", "-", "-");
-        String message = "Request received with invalid method type %s for configuration: %s".formatted(method, configurationName);
-        log.error(message);
+    public static void logError(Logger log, String message, String requestOrigin, String stepType, Throwable e) {
+        setLogContext(requestOrigin, stepType, "-", "-", "-", "-", "-");
+        log.error(message, e);
+        clearLogContext();
+    }
+
+    public static void logInfo(Logger log, String message, String requestOrigin, String stepType) {
+        setLogContext(requestOrigin, stepType, "-", "-", "-", "-", "-");
+        log.info(message);
         clearLogContext();
     }
 
@@ -35,27 +41,6 @@ public class LoggingUtils {
         setLogContext(requestAuthorIp, stepType, elapsedTime.toString(), requestTo, requestContent, responseContent, responseStatus);
         String message = "Executed: %s".formatted(step.getName());
         log.info(message);
-        clearLogContext();
-    }
-
-    public static void logStepError(Logger log, String stepType, String requestOrigin, String stepName) {
-        setLogContext(requestOrigin, stepType, "-", "-", "-", "-", "-");
-        String message = "Error: %s".formatted(stepName);
-        log.error(message);
-        clearLogContext();
-    }
-
-    public static void logRequestProcessed(Logger log, String configurationName, String requestOrigin) {
-        setLogContext(requestOrigin, "incoming.response", "-", "-", "-", "-", "-");
-        String message = "Request processed for configuration: %s".formatted(configurationName);
-        log.info(message);
-        clearLogContext();
-    }
-
-    public static void logRequestError(Logger log, String configurationName, String requestOrigin, Throwable e) {
-        setLogContext(requestOrigin, "incoming.response", "-", "-", "-", "-", "-");
-        String message = "Error executing configuration: %s".formatted(configurationName);
-        log.error(message, e);
         clearLogContext();
     }
 

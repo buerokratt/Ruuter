@@ -42,14 +42,14 @@ public abstract class ConfigurationStep {
     }
 
     protected void handleFailedResult(ConfigurationInstance ci) {
-        LoggingUtils.logStepError(log, getType(), ci.getRequestOrigin(), name);
+        LoggingUtils.logError(log, "Error: %s".formatted(name), ci.getRequestOrigin(), getType());
     }
+
+    protected void logStep(Long elapsedTime, ConfigurationInstance ci) {
+        LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, "-", "-", "-", "-");
+    }
+
+    protected abstract void executeStepAction(ConfigurationInstance ci);
 
     public abstract String getType();
-
-    protected abstract void executeStepAction(ConfigurationInstance configurationInstance);
-
-    protected void logStep(Long elapsedTime, ConfigurationInstance configurationInstance) {
-        LoggingUtils.logStep(log, this, configurationInstance.getRequestOrigin(), elapsedTime, "-", "-", "-", "-");
-    }
 }
