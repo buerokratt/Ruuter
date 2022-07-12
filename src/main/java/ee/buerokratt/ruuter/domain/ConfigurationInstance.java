@@ -2,7 +2,6 @@ package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
-import ee.buerokratt.ruuter.domain.steps.http.HttpStepResult;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
@@ -32,7 +31,7 @@ public class ConfigurationInstance {
     private final String requestOrigin;
     private final Tracer tracer;
     private final HttpHelper httpHelper;
-    private HttpStepResult returnValue;
+    private Object returnValue;
 
     public void execute(String configurationName) {
         List<String> stepNames = steps.keySet().stream().toList();

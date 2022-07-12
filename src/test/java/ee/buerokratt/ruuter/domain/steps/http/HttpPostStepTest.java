@@ -41,12 +41,8 @@ class HttpPostStepTest extends StepTestBase {
     @Mock
     private ConfigurationService configurationService;
 
-    @Mock
-    private ApplicationProperties.Logging logging;
-
     @BeforeEach
     protected void mockDependencies() {
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getProperties()).thenReturn(properties);
         when(ci.getHttpHelper()).thenReturn(httpHelper);
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
@@ -72,8 +68,6 @@ class HttpPostStepTest extends StepTestBase {
         when(ci.getContext()).thenReturn(testContext);
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
-        when(properties.getLogging()).thenReturn(logging);
-        when(logging.getDisplayRequestContent()).thenReturn(false);
 
         expectedPostStep.execute(ci);
 

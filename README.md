@@ -70,8 +70,11 @@ gradlew -Pprod -Pwar clean bootWar
 ## Configuration
 ### Final Response status code
 
-Final response status code can be defined in application.yml. When it is defined all the responses will have that status code.
+Final response status code can be defined in application.yml. If defined, all final responses by Ruuter will respond with this status code no matter what.
 
+The business value lies in not allowing perpetrators to fish for exceptions, weaknesses, etc in back-end systems via requests from public network.
+
+Nevertheless, applications (including Ruuter's) log files contain actual HTTP response codes, being the appropriate source for debugging, alerting, etc.
 ```
 finalResponse:
       httpStatusCode: 200
