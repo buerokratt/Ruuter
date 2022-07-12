@@ -89,9 +89,9 @@ class HttpGetStepTest extends StepTestBase {
 
         when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(applicationProperties.getDefaultAction()).thenReturn(defaultAction);
         when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
         when(defaultAction.getService()).thenReturn("default-action");

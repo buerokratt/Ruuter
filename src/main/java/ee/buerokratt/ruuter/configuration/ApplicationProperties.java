@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -14,12 +14,13 @@ public class ApplicationProperties {
     private String configPath;
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
+    private HttpPost httpPost = new HttpPost();
     private DefaultAction defaultAction = new DefaultAction();
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
 
-    @Setter
     @Getter
+    @Setter
     public static class Logging {
         private Boolean displayRequestContent;
         private Boolean displayResponseContent;
@@ -57,9 +58,15 @@ public class ApplicationProperties {
 
     @Getter
     @Setter
+    public static class HttpPost {
+        private Map<String, String> headers;
+    }
+
+    @Getter
+    @Setter
     public static class DefaultAction {
         private String service;
-        private HashMap<String, Object> body;
-        private HashMap<String, Object> query;
+        private Map<String, Object> body;
+        private Map<String, Object> query;
     }
 }

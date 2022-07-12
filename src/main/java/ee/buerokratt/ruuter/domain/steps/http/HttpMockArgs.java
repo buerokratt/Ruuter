@@ -3,11 +3,11 @@ package ee.buerokratt.ruuter.domain.steps.http;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
 public class HttpMockArgs {
     private HttpQueryArgs request;
-    private HashMap<String, Object> response;
+    private Map<String, Object> response;
 }

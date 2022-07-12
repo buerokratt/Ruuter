@@ -15,8 +15,9 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Data
@@ -46,17 +47,13 @@ public abstract class HttpStep extends ConfigurationStep {
         }
     }
 
-    private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, ResponseEntity<Object> response) {
-        return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response.getStatusCodeValue());
-    }
-
     @Override
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
         ApplicationProperties.DefaultAction defaultAction = ci.getProperties().getDefaultAction();
         if (defaultAction != null && defaultAction.getService() != null) {
             ResponseEntity<Object> response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
-            HashMap<String, Object> body = defaultAction.getBody();
+            Map<String, Object> body = defaultAction.getBody();
             body.put("statusCode", response.getStatusCodeValue());
             body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
             body.put("failedRequestId", MDC.get("spanId"));
@@ -73,6 +70,10 @@ public abstract class HttpStep extends ConfigurationStep {
         String responseContent = responseBody != null && properties.getLogging().getDisplayResponseContent() ? responseBody : "-";
         String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";
         LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
+    }
+
+    private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, ResponseEntity<Object> response) {
+        return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response.getStatusCodeValue());
     }
 
     protected abstract ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci);
