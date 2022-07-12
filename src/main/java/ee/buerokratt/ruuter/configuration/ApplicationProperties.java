@@ -1,6 +1,6 @@
 package ee.buerokratt.ruuter.configuration;
 
-import ee.buerokratt.ruuter.domain.steps.http.HttpDefaultService;
+import ee.buerokratt.ruuter.domain.steps.http.DefaultHttpService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -14,7 +14,7 @@ public class ApplicationProperties {
     private String configPath;
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
-    private HttpDefaultService defaultServiceInCaseOfException = new HttpDefaultService();
+    private DefaultHttpService defaultServiceInCaseOfException = new DefaultHttpService();
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
 

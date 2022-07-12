@@ -34,7 +34,7 @@ public abstract class HttpStep extends ConfigurationStep {
     protected String resultName;
     protected HttpQueryArgs args;
     protected String call;
-    protected HttpDefaultService httpDefaultService;
+    protected DefaultHttpService localHttpExceptionService;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
@@ -42,24 +42,20 @@ public abstract class HttpStep extends ConfigurationStep {
         HttpQueryResponse httpQueryResponse = new HttpQueryResponse(response.getBody(), response.getHeaders(), response.getStatusCodeValue(), MDC.get("spanId"));
         ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
 
-        if (!isAllowedHttpStatusCode(ci, response)) {
+        if (!isAllowedHttpStatusCode(ci, response.getStatusCodeValue())) {
             throw new IllegalArgumentException();
         }
-    }
-
-    private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, ResponseEntity<Object> response) {
-        return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response.getStatusCodeValue());
     }
 
     @Override
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
-        if (!ci.getProperties().getHttpCodesAllowList().contains(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus())) {
-            HttpDefaultService propertiesHttpDefaultService = ci.getProperties().getDefaultServiceInCaseOfException();
-            if (httpDefaultService != null && httpDefaultService.getService() != null) {
-                httpDefaultService.executeHttpDefaultService(ci, resultName);
-            } else if (propertiesHttpDefaultService != null && propertiesHttpDefaultService.getService() != null) {
-                propertiesHttpDefaultService.executeHttpDefaultService(ci, resultName);
+        if (!isAllowedHttpStatusCode(ci, ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus())) {
+            DefaultHttpService globalHttpExceptionService = ci.getProperties().getDefaultServiceInCaseOfException();
+            if (localHttpExceptionServiceExists()) {
+                localHttpExceptionService.executeHttpDefaultService(ci, resultName);
+            } else if (globalHttpExceptionServiceExists(globalHttpExceptionService)) {
+                globalHttpExceptionService.executeHttpDefaultService(ci, resultName);
             }
         }
     }
@@ -81,6 +77,18 @@ public abstract class HttpStep extends ConfigurationStep {
         } catch (WebClientResponseException e) {
             return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
         }
+    }
+
+    private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, Integer response) {
+        return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response);
+    }
+
+    private boolean localHttpExceptionServiceExists() {
+        return localHttpExceptionService != null && localHttpExceptionService.getService() != null;
+    }
+
+    private boolean globalHttpExceptionServiceExists(DefaultHttpService globalHttpExceptionConfiguration) {
+        return globalHttpExceptionConfiguration != null && globalHttpExceptionConfiguration.getService() != null;
     }
 
     protected abstract ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci);

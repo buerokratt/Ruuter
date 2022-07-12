@@ -70,7 +70,7 @@ class HttpGetStepTest extends StepTestBase {
 
     @Test
     void execute_shouldExecuteDefaultActionWhenRequestIsInvalidAndStopInCaseOfExceptionIsTrue(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HttpDefaultService httpDefaultService = Mockito.spy(new HttpDefaultService() {{
+        DefaultHttpService defaultHttpService = Mockito.spy(new DefaultHttpService() {{
             setService("default-action");
             setBody(new HashMap<>());
             setQuery(new HashMap<>());
@@ -96,7 +96,7 @@ class HttpGetStepTest extends StepTestBase {
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
         when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(200);}});
-        when(applicationProperties.getDefaultServiceInCaseOfException()).thenReturn(httpDefaultService);
+        when(applicationProperties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
         failingGetStep.execute(ci);
 
         verify(configurationService, times(1)).execute(eq("default-action"), anyMap(), anyMap(), anyString());
@@ -104,7 +104,7 @@ class HttpGetStepTest extends StepTestBase {
 
     @Test
     void execute_shouldExecuteStepSpecificDefaultActionWhenRequestIsInvalidAndStopInCaseOfExceptionIsTrue(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HttpDefaultService httpDefaultService2 = Mockito.spy(new HttpDefaultService() {{
+        DefaultHttpService defaultHttpService2 = Mockito.spy(new DefaultHttpService() {{
             setService("default-action2");
             setBody(new HashMap<>());
             setQuery(new HashMap<>());
@@ -121,7 +121,7 @@ class HttpGetStepTest extends StepTestBase {
             setName("get_message");
             setArgs(expectedGetArgs);
             setResultName("the_response");
-            setHttpDefaultService(httpDefaultService2);
+            setLocalHttpExceptionService(defaultHttpService2);
         }};
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 

@@ -9,14 +9,13 @@ import java.util.HashMap;
 
 @Data
 @NoArgsConstructor
-public class HttpDefaultService {
+public class DefaultHttpService {
     private String service;
-    private HashMap<String, Object> body;
+    private HashMap<String, Object> body = new HashMap<>();
     private HashMap<String, Object> query;
 
     public void executeHttpDefaultService(ConfigurationInstance ci, String resultName) {
         HttpQueryResponse response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
-        body = body == null ? new HashMap<>() : body;
         body.put("statusCode", response.getStatus().toString());
         body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
         body.put("failedRequestId", MDC.get("spanId"));
