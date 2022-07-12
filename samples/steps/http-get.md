@@ -12,7 +12,7 @@ get_step:
 
 **Mandatory fields:**
 
-* `call`, with value `http.get` - determines the HTTP method type as GET
+* `call`, with value `http.get` - determines the step type
 * `args`
     * `url` - the desired resource to query
 

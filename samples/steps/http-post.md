@@ -14,7 +14,7 @@ post_step:
 
 **Mandatory fields:**
 
-* `call`, with value `http.post` - determines the HTTP method type as POST
+* `call`, with value `http.post` - determines the step type
 * `args`
     * `url` - the desired resource to query
     * `body`
