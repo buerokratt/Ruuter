@@ -1,11 +1,19 @@
 # Assign Step
 
+The assign step allows to assign different types of variables, and in its most basic form, looks like this:
+
 ```
-step_1:
+assign_step:
   assign:
-    stringValue: "Bürokratt"
-    integerValue: 2021
+    variableName: "variable value"
 ```
+
+**Mandatory fields:**
+
+* `assign` - determines the step type
+    * *...desired variables* - scripts can be used for variable values
+
+## Examples
 
 ### Assigning variables and using them
 

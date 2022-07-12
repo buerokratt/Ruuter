@@ -1,6 +1,6 @@
 # Skip
 
-Skips the whole step in case `skip: true` is present.
+Every type of step may contain the `skip` field, which accepts a boolean value. If the value is set as `true`, then the step is not executed and is skipped.
 
 ```
 first_step:
@@ -19,4 +19,5 @@ third_step:
     args:
       url: https://example.com/callC
 ```
+
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

@@ -1,12 +1,35 @@
 # Return step
 
+The return step allows to assign return values for the DSL query.
+
+```
+return_step:
+    return "result"
+```
+
+**Mandatory fields:**
+
+* `return` - assigns the value as the final response of the processed DSL. Scripts can be used.
+
+**Optional fields:**
+
+* `headers`
+    * *..desired header values* - assigns the headers to the response of the processed DSL. Scripts can be used.
+
+***Note - Assigning a return value does not end the processing of the DSL - additionally, an assigned return value/headers can be overwritten by another return
+step***
+
+## Examples
+
 ### Assign return value
+
 ```
 return_value:
     return "result"
 ```
 
 ### Assign return value with script
+
 ```
 assign_step:
     assign:
@@ -16,8 +39,8 @@ return_value:
     return ${variable}
 ```
 
-### Set custom cookies to response
-`set-cookies.yaml`
+### Assign a Set-Cookie and a custom header to response
+
 ```
 return_value:
     headers:
@@ -30,8 +53,8 @@ return_value:
     return "result"
 ```
 
-### Set custom cookies to response with script
-`set-cookies-with-script.yaml`
+### Assign a Set-Cookie and a custom header to response through script
+
 ```
 assign_step:
     assign:

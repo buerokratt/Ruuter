@@ -1,6 +1,7 @@
 # Sleep
 
-A step can be made to sleep for input amount of time in `ms`.
+Every type of step may contain the `sleep` field, which accepts a long value. The value of the field designates an amount of time in `ms`, which when present, 
+will make the step *sleep* for that amount of time.
 
 ```
 first_step:
@@ -19,4 +20,5 @@ third_step:
     args:
       url: https://example.com/callC
 ```
+
 [Back to Guide](../GUIDE.md#Writing-DSL-files)
