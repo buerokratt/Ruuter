@@ -50,7 +50,7 @@ public class ReturnStep extends ConfigurationStep {
 
     private String entryToKeyValueString(Entry<?, ?> innerEntry) {
         if (innerEntry.getValue() instanceof Boolean bool) {
-            return bool ? "%s; ".formatted(innerEntry.getKey()) : "";
+            return Boolean.TRUE.equals(bool) ? "%s; ".formatted(innerEntry.getKey()) : "";
         }
         return "%s=%s; ".formatted(innerEntry.getKey(), innerEntry.getValue());
     }

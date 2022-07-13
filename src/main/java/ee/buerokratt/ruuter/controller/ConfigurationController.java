@@ -35,7 +35,12 @@ public class ConfigurationController {
             return status(HttpStatus.METHOD_NOT_ALLOWED).body(new RuuterResponse());
         }
         ConfigurationInstance ci = configurationService.execute(configuration, request.getMethod(),  requestBody, requestParams, request.getRemoteAddr());
-        return status(HttpStatus.OK)
+        HttpStatus finalStatus = HttpStatus.OK;
+        Integer finalResponseStatusCode = ci.getProperties().getFinalResponse().getHttpStatusCode();
+        if (finalResponseStatusCode != null) {
+            finalStatus = HttpStatus.valueOf(finalResponseStatusCode);
+        }
+        return status(finalStatus)
             .headers(httpHeaders -> ci.getReturnHeaders().forEach(httpHeaders::add))
             .body(new RuuterResponse(ci.getReturnValue()));
     }

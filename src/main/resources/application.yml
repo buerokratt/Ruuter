@@ -13,6 +13,8 @@ application:
       someVal: "Hello World"
     query:
       anotherVal: 123
+  finalResponse:
+      httpStatusCode: 200
   httpPost:
     headers:
       Content-Type: "application/json"
