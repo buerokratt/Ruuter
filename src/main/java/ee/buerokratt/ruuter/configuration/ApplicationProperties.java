@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.configuration;
 
+import ee.buerokratt.ruuter.domain.steps.http.DefaultHttpService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,7 +16,7 @@ public class ApplicationProperties {
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
     private HttpPost httpPost = new HttpPost();
-    private DefaultAction defaultAction = new DefaultAction();
+    private DefaultHttpService defaultServiceInCaseOfException = new DefaultHttpService();
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
     private FinalResponse finalResponse = new FinalResponse();
@@ -67,13 +68,5 @@ public class ApplicationProperties {
     @Setter
     public static class HttpPost {
         private Map<String, String> headers;
-    }
-
-    @Getter
-    @Setter
-    public static class DefaultAction {
-        private String service;
-        private Map<String, Object> body;
-        private Map<String, Object> query;
     }
 }

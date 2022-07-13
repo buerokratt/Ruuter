@@ -15,9 +15,6 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import java.util.Map;
 
 @Slf4j
 @Data
@@ -36,13 +33,14 @@ public abstract class HttpStep extends ConfigurationStep {
     protected String resultName;
     protected HttpQueryArgs args;
     protected String call;
+    protected DefaultHttpService localHttpExceptionService;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         ResponseEntity<Object> response = getRequestResponse(ci);
         ci.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
 
-        if (!isAllowedHttpStatusCode(ci, response)) {
+        if (!isAllowedHttpStatusCode(ci, response.getStatusCodeValue())) {
             throw new IllegalArgumentException();
         }
     }
@@ -50,14 +48,13 @@ public abstract class HttpStep extends ConfigurationStep {
     @Override
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
-        ApplicationProperties.DefaultAction defaultAction = ci.getProperties().getDefaultAction();
-        if (defaultAction != null && defaultAction.getService() != null) {
-            ResponseEntity<Object> response = ((HttpStepResult) ci.getContext().get(resultName)).getResponse();
-            Map<String, Object> body = defaultAction.getBody();
-            body.put("statusCode", response.getStatusCodeValue());
-            body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
-            body.put("failedRequestId", MDC.get("spanId"));
-            ci.getConfigurationService().execute(defaultAction.getService(), "POST", defaultAction.getBody(), defaultAction.getQuery(), ci.getRequestOrigin());
+        if (!isAllowedHttpStatusCode(ci, ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatusCodeValue())) {
+            DefaultHttpService globalHttpExceptionService = ci.getProperties().getDefaultServiceInCaseOfException();
+            if (localHttpExceptionServiceExists()) {
+                localHttpExceptionService.executeHttpDefaultService(ci, resultName);
+            } else if (globalHttpExceptionServiceExists(globalHttpExceptionService)) {
+                globalHttpExceptionService.executeHttpDefaultService(ci, resultName);
+            }
         }
     }
 
@@ -72,8 +69,16 @@ public abstract class HttpStep extends ConfigurationStep {
         LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
 
-    private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, ResponseEntity<Object> response) {
-        return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response.getStatusCodeValue());
+    private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, Integer response) {
+        return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response);
+    }
+
+    private boolean localHttpExceptionServiceExists() {
+        return localHttpExceptionService != null && localHttpExceptionService.getService() != null;
+    }
+
+    private boolean globalHttpExceptionServiceExists(DefaultHttpService globalHttpExceptionConfiguration) {
+        return globalHttpExceptionConfiguration != null && globalHttpExceptionConfiguration.getService() != null;
     }
 
     protected abstract ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci);

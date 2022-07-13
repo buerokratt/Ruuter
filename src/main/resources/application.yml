@@ -1,5 +1,5 @@
 application:
-  config-path: ${user.dir}/services
+  config-path: ${user.dir}/DSL
   stopInCaseOfException: true
   logging:
     displayRequestContent: false
@@ -7,12 +7,12 @@ application:
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
   httpCodesAllowList: [ 200, 201, 202 ]
-  defaultAction:
-    service: default-action
+  defaultServiceInCaseOfException:
+    service: default-service
     body:
-      some_val: "Hello World"
+      someVal: "Hello World"
     query:
-      another_val: 123
+      anotherVal: 123
   finalResponse:
       httpStatusCode: 200
   httpPost:

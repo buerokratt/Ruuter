@@ -1,0 +1,17 @@
+first_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value
+
+second_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value
+
+third_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value

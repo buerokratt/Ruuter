@@ -1,0 +1,8 @@
+post_message:
+  call: http.post
+  args:
+    url: http://localhost:8090/endpoint
+    body:
+      some_val: "Hello World"
+      another_val: 123
+  result: the_message
