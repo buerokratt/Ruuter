@@ -15,9 +15,6 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import java.util.Map;
 
 @Slf4j
 @Data
@@ -51,7 +48,7 @@ public abstract class HttpStep extends ConfigurationStep {
     @Override
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
-        if (!isAllowedHttpStatusCode(ci, ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus())) {
+        if (!isAllowedHttpStatusCode(ci, ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatusCodeValue())) {
             DefaultHttpService globalHttpExceptionService = ci.getProperties().getDefaultServiceInCaseOfException();
             if (localHttpExceptionServiceExists()) {
                 localHttpExceptionService.executeHttpDefaultService(ci, resultName);
