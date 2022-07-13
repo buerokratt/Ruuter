@@ -84,6 +84,11 @@ defaultServiceInCaseOfException:
 ```
 
 
+### Http request default headers
+
+There is an example for POST requests. To add default headers to other requests in application.yml, define it in application.yml, also in
+ApplicationProperties class the same way as HttpPost is defined and use addHeaders method from HttpQueryArgs to add these default headers to the request.
+
 
 ## License
 

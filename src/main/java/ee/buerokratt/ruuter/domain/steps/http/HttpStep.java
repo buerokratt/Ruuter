@@ -17,6 +17,8 @@ import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.Map;
+
 @Slf4j
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -39,8 +41,7 @@ public abstract class HttpStep extends ConfigurationStep {
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         ResponseEntity<Object> response = getRequestResponse(ci);
-        HttpQueryResponse httpQueryResponse = new HttpQueryResponse(response.getBody(), response.getHeaders(), response.getStatusCodeValue(), MDC.get("spanId"));
-        ci.getContext().put(resultName, new HttpStepResult(args, httpQueryResponse));
+        ci.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
 
         if (!isAllowedHttpStatusCode(ci, response.getStatusCodeValue())) {
             throw new IllegalArgumentException();
@@ -64,7 +65,7 @@ public abstract class HttpStep extends ConfigurationStep {
     protected void logStep(Long elapsedTime, ConfigurationInstance ci) {
         ApplicationProperties properties = ci.getProperties();
         MappingHelper mappingHelper = ci.getMappingHelper();
-        Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatus();
+        Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatusCodeValue();
         String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody());
         String responseContent = responseBody != null && properties.getLogging().getDisplayResponseContent() ? responseBody : "-";
         String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";

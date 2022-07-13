@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -14,12 +15,13 @@ public class ApplicationProperties {
     private String configPath;
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
+    private HttpPost httpPost = new HttpPost();
     private DefaultHttpService defaultServiceInCaseOfException = new DefaultHttpService();
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
 
-    @Setter
     @Getter
+    @Setter
     public static class Logging {
         private Boolean displayRequestContent;
         private Boolean displayResponseContent;
@@ -53,5 +55,11 @@ public class ApplicationProperties {
                 private List<String> httpStatusCode;
             }
         }
+    }
+
+    @Getter
+    @Setter
+    public static class HttpPost {
+        private Map<String, String> headers;
     }
 }

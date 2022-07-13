@@ -20,25 +20,27 @@ import java.util.Map;
 @Data
 @RequiredArgsConstructor
 public class ConfigurationInstance {
-    private final ConfigurationService configurationService;
-    private final ScriptingHelper scriptingHelper;
-    private final ApplicationProperties properties;
     private final Map<String, ConfigurationStep> steps;
     private final Map<String, Object> requestBody;
     private final Map<String, Object> requestParams;
-    private final MappingHelper mappingHelper;
-    private final HashMap<String, Object> context = new HashMap<>();
     private final String requestOrigin;
-    private final Tracer tracer;
+    private final ConfigurationService configurationService;
+    private final ApplicationProperties properties;
+    private final ScriptingHelper scriptingHelper;
+    private final MappingHelper mappingHelper;
     private final HttpHelper httpHelper;
+    private final Tracer tracer;
+    private final Map<String, Object> context = new HashMap<>();
+
     private Object returnValue;
+    private Map<String, String> returnHeaders = new HashMap<>();
 
     public void execute(String configurationName) {
         List<String> stepNames = steps.keySet().stream().toList();
         try {
             executeStep(stepNames.get(0), stepNames);
         } catch (Exception e) {
-            LoggingUtils.logRequestError(log, configurationName, requestOrigin, e);
+            LoggingUtils.logError(log, "Error executing configuration: %s".formatted(configurationName), requestOrigin, "", e);
             setReturnValue(null);
         }
     }

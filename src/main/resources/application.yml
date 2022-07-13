@@ -13,6 +13,9 @@ application:
       someVal: "Hello World"
     query:
       anotherVal: 123
+  httpPost:
+    headers:
+      Content-Type: "application/json"
 
 spring:
   application:

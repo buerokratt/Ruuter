@@ -72,7 +72,7 @@ class ConfigurationInstanceIT extends BaseIntegrationTest {
             .isEqualTo("http://localhost:8090/endpoint")
             .jsonPath("$..response.body")
             .isEqualTo(result)
-            .jsonPath("$..response.status")
+            .jsonPath("$..response.statusCodeValue")
             .isEqualTo(HttpStatus.OK.value());
     }
 

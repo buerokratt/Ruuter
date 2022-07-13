@@ -1,8 +1,10 @@
 get_message:
   call: http.get
   args:
-    url: http://localhost:8090/endpoint
+    url: https://example.com/endpoint
+    query:
+      some_val: "Hello World"
+      another_val: 123
+    headers:
+      Connection: keep-alive
   result: the_response
-
-return_value:
-  return: ${the_response}
