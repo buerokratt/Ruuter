@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,9 +35,6 @@ class HttpPostStepTest extends StepTestBase {
 
     @Mock
     private ScriptingHelper scriptingHelper;
-
-    @Mock
-    private ApplicationProperties.DefaultAction defaultAction;
 
     @Mock
     private ConfigurationService configurationService;
@@ -81,7 +79,12 @@ class HttpPostStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldExecuteDefaultActionWhenRequestIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) {
+    void execute_shouldExecuteDefaultActionWhenResponseCodeIsNotInWhitelist(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        DefaultHttpService defaultHttpService = Mockito.spy(new DefaultHttpService() {{
+            setService("default-action");
+            setBody(new HashMap<>());
+            setQuery(new HashMap<>());
+        }});
         HashMap<String, Object> testContext = new HashMap<>();
         HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
             setBody(new HashMap<>() {{
@@ -91,34 +94,31 @@ class HttpPostStepTest extends StepTestBase {
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
             setHeaders(new HashMap<>());
         }};
-        HttpStep expectedPostStep = new HttpPostStep() {{
+        HttpStep failingPostStep = new HttpPostStep() {{
             setName("post_message");
             setArgs(expectedPostArgs);
             setResultName("the_response");
         }};
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
+        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
+        when(ci.getConfigurationService()).thenReturn(configurationService);
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getRequestOrigin()).thenReturn("");
-        when(ci.getConfigurationService()).thenReturn(configurationService);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(properties.getHttpPost()).thenReturn(httpPost);
-        when(httpPost.getHeaders()).thenReturn(new HashMap<>());
-        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
-        when(properties.getDefaultAction()).thenReturn(defaultAction);
         when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        when(defaultAction.getService()).thenReturn("default-action");
-        when(defaultAction.getBody()).thenReturn(new HashMap<>());
-        when(defaultAction.getQuery()).thenReturn(new HashMap<>());
+        when(properties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
 
-        expectedPostStep.execute(ci);
+        failingPostStep.execute(ci);
 
         verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
     }
 
     @Test
     void execute_shouldAddDefaultHeadersDefinedInSettingsFileToRequest(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        HashMap<String, Object> testContext = new HashMap<>();
         HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
             setHeaders(new HashMap<>() {{
@@ -135,8 +135,12 @@ class HttpPostStepTest extends StepTestBase {
                 put("header2", "value2");
             }});
         }};
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
+        when(ci.getContext()).thenReturn(testContext);
         when(properties.getHttpPost()).thenReturn(httpPost);
+        when(scriptingHelper.evaluateScripts(any(), anyMap(), anyMap(), anyMap())).thenReturn(null);
+        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         expectedPostStep.execute(ci);
 
         assertEquals("value2", expectedPostStep.getArgs().getHeaders().get("header2"));

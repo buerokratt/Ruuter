@@ -49,6 +49,22 @@ gradlew -Pprod -Pwar clean bootWar
 ```
 
 ## Configuration
+### Default service
+
+Default service is a service file that will be executed when the request status code is not within the allowlist of HTTP response codes.
+
+Default service can be defined in the `application.yml` file by the name of `defaultServiceInCaseOfException`. The service itself is yet another service in `/dsl/POST` folder. Both `body` and `query` parameters are optional and covered here as an example.
+
+```
+defaultServiceInCaseOfException:
+    service: default-service
+    body:
+      someVal: "Hello World"
+    query:
+      anotherVal: 123
+```
+
+
 ### Http request default headers
 
 There is an example for POST requests. To add default headers to other requests in application.yml, define it in application.yml, also in
