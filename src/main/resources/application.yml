@@ -1,5 +1,5 @@
 application:
-  config-path: ${user.dir}/services
+  config-path: ${user.dir}/DSL
   stopInCaseOfException: true
   logging:
     displayRequestContent: false
