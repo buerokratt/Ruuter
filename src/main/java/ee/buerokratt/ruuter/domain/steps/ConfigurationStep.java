@@ -21,12 +21,16 @@ public abstract class ConfigurationStep {
     @JsonAlias({"next"})
     private String nextStepName;
     private Boolean skip;
+    private Long sleep;
 
     public final void execute(ConfigurationInstance ci) {
         Span newSpan = ci.getTracer().nextSpan().name(name);
         long startTime = System.currentTimeMillis();
 
         try (Tracer.SpanInScope ws = ci.getTracer().withSpan(newSpan.start())) {
+            if (sleep != null) {
+                Thread.sleep(sleep);
+            }
             if (!Boolean.TRUE.equals(skip)) {
                 executeStepAction(ci);
             }
