@@ -1,0 +1,46 @@
+name: Build and publish Ruuter
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  PackageDeploy:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Docker Setup BuildX
+      uses: docker/setup-buildx-action@v2
+
+    - name: Set image tag
+      run: |
+        LOWER_CASE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
+        echo "DOCKER_TAG_SHA=ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:${GITHUB_SHA}" >> $GITHUB_ENV
+    
+    - name: Docker Build
+      working-directory: src/MockBot.Api/
+      run: docker image build --tag $DOCKER_TAG_SHA .
+
+    - name: Install cosign
+      uses: sigstore/cosign-installer@7e0881f8fe90b25e305bbf0309761e9314607e25
+
+    - name: Log in to GitHub container registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+    - name: Push Docker image to ghcr
+      run: docker push $DOCKER_TAG_SHA
+
+    - name: Sign Docker image
+      run: |
+        cosign sign \
+          -a "ref=${{ github.sha }}" \
+          --upload=true \
+          $DOCKER_TAG_SHA
+      env:
+        COSIGN_EXPERIMENTAL: "true"
