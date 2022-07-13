@@ -65,7 +65,7 @@ second_step:
     call: http.get
     args:
       url: https://example.com/callC
-      next: end
+    next: end
   
 this_step_is_not_executed:
     call: http.get

@@ -35,9 +35,9 @@ getCurrentTime:
 
 conditionalSwitch:
   switch:
-    - condition: ${currentTime.body.dayOfTheWeek === "Friday"}
+    - condition: ${currentTime.response.body.dayOfTheWeek === "Friday"}
       next: friday
-    - condition: ${currentTime.body.dayOfTheWeek === "Saturday" || currentTime.body.dayOfTheWeek === "Sunday"}
+    - condition: ${currentTime.response.body.dayOfTheWeek === "Saturday" || currentTime.response.body.dayOfTheWeek === "Sunday"}
       next: weekend
   next: workWeek
 

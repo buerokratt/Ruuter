@@ -22,10 +22,12 @@ public class ReturnStep extends ConfigurationStep {
     @JsonAlias({"return"})
     private String returnValue;
     private Map<String, Object> headers = new LinkedHashMap<>();
+    private Integer status;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         ci.setReturnHeaders(formatHeaders(ci));
+        ci.setReturnStatus(status);
         ci.setReturnValue(ci.getScriptingHelper().evaluateScripts(returnValue, ci.getContext(), ci.getRequestBody(), ci.getRequestParams()));
     }
 
