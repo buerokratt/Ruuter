@@ -31,8 +31,8 @@ class ReturnStepTest extends StepTestBase {
             setReturnValue(expectedResult);
         }};
 
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         returnStep.execute(ci);
 
         verify(ci, times(1)).setReturnValue(expectedResult);
@@ -45,8 +45,8 @@ class ReturnStepTest extends StepTestBase {
             setReturnValue("${value}");
         }};
 
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         returnStep.execute(ci);
 
         verify(ci, times(1)).setReturnValue(expectedResult);
@@ -71,10 +71,10 @@ class ReturnStepTest extends StepTestBase {
         Map<String, String> expectedResult = new HashMap<>();
         expectedResult.put("Set-Cookie", "cookieName=headerName; Domain=localhost; Secure; stringBoolean=false; Max-Age=300; Expires=2022-08-08T10:08:39.159Z; ");
 
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(headers);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(headers);
         returnStep.execute(ci);
 
-        verify(scriptingHelper, times(1)).evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap());
+        verify(scriptingHelper, times(1)).evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap());
         verify(ci, times(1)).setReturnHeaders(expectedResult);
     }
 }

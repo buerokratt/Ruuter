@@ -51,9 +51,9 @@ class SwitchStepTest extends StepTestBase {
         }};
 
         when(ci.getContext()).thenReturn(testContext);
-        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Sunday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(true);
-        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Saturday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(false);
-        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Friday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(false);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Sunday\"}"), eq(testContext), anyMap(), anyMap(), anyMap())).thenReturn(true);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Saturday\"}"), eq(testContext), anyMap(), anyMap(), anyMap())).thenReturn(false);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Friday\"}"), eq(testContext), anyMap(), anyMap(), anyMap())).thenReturn(false);
         switchStep.execute(ci);
 
         assertEquals("fourth_step", switchStep.getNextStepName());

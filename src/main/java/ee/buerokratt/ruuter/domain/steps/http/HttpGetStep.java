@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -15,7 +17,8 @@ public class HttpGetStep extends HttpStep {
 
     @Override
     public ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci) {
-        return ci.getHttpHelper().doGet(args.getUrl(), args.getQuery(), args.getHeaders());
+        Map<String, Map<String, Object>> evaluatedParameters = ci.getScriptingHelper().evaluateRequestParameters(ci, args.getBody(), args.getQuery(), args.getHeaders());
+        return ci.getHttpHelper().doGet(args.getUrl(), evaluatedParameters.get("query"), ci.getMappingHelper().convertMapObjectValuesToString(evaluatedParameters.get("headers")));
     }
 
     @Override

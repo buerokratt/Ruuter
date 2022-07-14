@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.helper;
 
+import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.helper.exception.ScriptEvaluationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,20 +26,31 @@ public class ScriptingHelper {
         return Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(s).find();
     }
 
-    public Map<String, Object> evaluateScripts(Map<String, Object> map, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
-        return map == null || map.isEmpty() ? map : map.entrySet().stream()
-            .collect(toMap(Map.Entry::getKey, objectEntry -> evaluateScripts(objectEntry.getValue(), context, requestBody, requestParams), (x, y) -> y, LinkedHashMap::new));
+    public Map<String, Map<String, Object>> evaluateRequestParameters(ConfigurationInstance ci, Map<String, Object> body, Map<String, Object> query, Map<String, Object> headers) {
+        Map<String, Map<String, Object>> evaluatedParameters = new HashMap<>();
+        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(body, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedQuery = ci.getScriptingHelper().evaluateScripts(query, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedHeaders = ci.getScriptingHelper().evaluateScripts(headers, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        evaluatedParameters.put("body", evaluatedBody != null ? evaluatedBody : new HashMap<>());
+        evaluatedParameters.put("query", evaluatedQuery != null ? evaluatedQuery : new HashMap<>());
+        evaluatedParameters.put("headers", evaluatedHeaders != null ? evaluatedHeaders : new HashMap<>());
+        return evaluatedParameters;
     }
 
-    public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
+    public Map<String, Object> evaluateScripts(Map<String, Object> map, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
+        return map == null || map.isEmpty() ? map : map.entrySet().stream()
+            .collect(toMap(Map.Entry::getKey, objectEntry -> evaluateScripts(objectEntry.getValue(), context, requestBody, requestQuery, requestHeaders), (x, y) -> y, LinkedHashMap::new));
+    }
+
+    public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         if (toEval instanceof Map map) {
-            return evaluateScripts(map, context, requestBody, requestParams);
+            return evaluateScripts(map, context, requestBody, requestQuery, requestHeaders);
         }
         if (toEval == null || !containsScript(toEval.toString())) {
             return toEval;
         }
 
-        Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestParams);
+        Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestQuery, requestHeaders);
         Bindings bindings = createBindingsWithContext(evalContext);
 
         List<String> nonScriptSlices = Arrays.stream(toEval.toString().split(SCRIPT_REGEX)).toList();
@@ -56,13 +68,16 @@ public class ScriptingHelper {
             .reduce("", (s, s2) -> s + s2);
     }
 
-    private Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestParams) {
+    private Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         Map<String, Object> incoming = new HashMap<>();
-        if (requestParams != null) {
-            incoming.put("params", new HashMap<>(requestParams));
+        if (requestQuery != null) {
+            incoming.put("params", new HashMap<>(requestQuery));
         }
         if (requestBody != null) {
             incoming.put("body", new HashMap<>(requestBody));
+        }
+        if (requestHeaders != null) {
+            incoming.put("headers", new HashMap<>(requestHeaders));
         }
         HashMap<String, Object> evalContext = new HashMap<>(context);
         evalContext.put("incoming", incoming);

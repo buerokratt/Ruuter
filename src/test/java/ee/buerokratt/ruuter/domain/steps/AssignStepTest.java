@@ -34,7 +34,7 @@ class AssignStepTest extends StepTestBase {
         }};
 
         when(ci.getContext()).thenReturn(testContext);
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         assignStep.execute(ci);
 
         assertEquals(expectedResult, ci.getContext().get("key"));
@@ -50,7 +50,7 @@ class AssignStepTest extends StepTestBase {
             }});
         }};
 
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         when(ci.getContext()).thenReturn(testContext);
         assignStep.execute(ci);
 

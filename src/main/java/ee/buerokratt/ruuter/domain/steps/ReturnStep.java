@@ -26,7 +26,7 @@ public class ReturnStep extends ConfigurationStep {
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
         ci.setReturnHeaders(formatHeaders(ci));
-        ci.setReturnValue(ci.getScriptingHelper().evaluateScripts(returnValue, ci.getContext(), ci.getRequestBody(), ci.getRequestParams()));
+        ci.setReturnValue(ci.getScriptingHelper().evaluateScripts(returnValue, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders()));
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ReturnStep extends ConfigurationStep {
     }
 
     private Map<String, String> formatHeaders(ConfigurationInstance ci) {
-        Map<String, Object> evaluatedMap = ci.getScriptingHelper().evaluateScripts(headers, ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
+        Map<String, Object> evaluatedMap = ci.getScriptingHelper().evaluateScripts(headers, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
         return evaluatedMap.entrySet().stream().collect(toMap(Entry::getKey, this::entryValueToHeaderString));
     }
 

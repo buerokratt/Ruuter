@@ -24,7 +24,7 @@ public class SwitchStep extends ConfigurationStep {
     protected void executeStepAction(ConfigurationInstance ci) {
         ScriptingHelper scriptingHelper = ci.getScriptingHelper();
         Optional<Condition> correctStatement = conditions.stream()
-            .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), ci.getContext(), ci.getRequestBody(), ci.getRequestParams())))
+            .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders())))
             .findFirst();
         correctStatement.ifPresent(condition -> this.setNextStepName(condition.getNextStepName()));
     }

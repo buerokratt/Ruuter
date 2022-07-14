@@ -2,7 +2,6 @@ package ee.buerokratt.ruuter.domain.steps;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
-import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -21,15 +20,13 @@ public class TemplateStep extends ConfigurationStep {
     private String resultName;
     private String requestType;
     private Map<String, Object> body;
-    private Map<String, Object> params;
+    private Map<String, Object> query;
+    private Map<String, Object> headers;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        ScriptingHelper scriptingHelper = ci.getScriptingHelper();
-        Map<String, Object> templateBody = scriptingHelper.evaluateScripts(body, ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-        Map<String, Object> templateParams = scriptingHelper.evaluateScripts(params, ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-
-        ConfigurationInstance templateInstance = ci.getConfigurationService().execute(templateToCall, requestType, templateBody, templateParams, ci.getRequestOrigin());
+        Map<String, Map<String, Object>> evaluatedParameters = ci.getScriptingHelper().evaluateRequestParameters(ci, body, query, headers);
+        ConfigurationInstance templateInstance = ci.getConfigurationService().execute(templateToCall, requestType, evaluatedParameters.get("body"), evaluatedParameters.get("query"), ci.getMappingHelper().convertMapObjectValuesToString(evaluatedParameters.get("headers")), ci.getRequestOrigin());
         ci.getContext().put(resultName, templateInstance.getReturnValue());
     }
 
