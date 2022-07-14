@@ -33,6 +33,7 @@ public class ConfigurationInstance {
     private final Map<String, Object> context = new HashMap<>();
 
     private Object returnValue;
+    private Integer returnStatus;
     private Map<String, String> returnHeaders = new HashMap<>();
 
     public void execute(String configurationName) {

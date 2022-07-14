@@ -13,6 +13,7 @@ return_step:
 
 **Optional fields:**
 
+* `status` - if defined, sets the status of the final response, as the assigned status.
 * `headers`
     * *..desired header values* - assigns the headers to the response of the processed DSL. Scripts can be used.
 

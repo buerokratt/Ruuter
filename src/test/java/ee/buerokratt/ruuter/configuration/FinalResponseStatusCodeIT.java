@@ -17,4 +17,14 @@ class FinalResponseStatusCodeIT extends BaseIntegrationTest {
             .jsonPath("$.response")
             .isEqualTo("return_value_post");
     }
+
+    @Test
+    void queryConfiguration_shouldSetFinalResponseStatusBasedOnDSLStatusValue() {
+        client.get()
+            .uri("/test-status")
+            .exchange().expectStatus().isEqualTo(HttpStatus.ACCEPTED)
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("return_value_get");
+    }
 }
