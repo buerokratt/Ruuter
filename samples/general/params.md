@@ -12,13 +12,11 @@ through the following keywords:
 https://ruuter/passing-get-parameters?passedVariable=passedValue
 ```
 
-```
-passing-get-parameters.yml
-```
+[`passing-get-parameters.yml`](../../DSL/GET/scripting/passing-get-parameters.yml)
 
 ```
 first_step:
-    return: ${incoming.params.passedVariable}
+  return: ${incoming.params.passedVariable}
     
 --------------------------------------------
 Expected result: "passedValue" 
@@ -32,13 +30,11 @@ curl https://ruuter/passing-post-parameters \
     -d '{"project": "Bürokratt", "website": "www.kratid.ee"}'
 ```
 
-```
-passing-post-parameters.yml
-```
+[`passing-post-parameters.yml`](../../DSL/POST/scripting/passing-post-parameters.yml)
 
 ```        
 first_step:
-    return: ${incoming.body.project} - ${incoming.body.website}
+  return: ${incoming.body.project} - ${incoming.body.website}
     
 --------------------------------------------
 Expected result: "Bürokratt - www.kratid.ee" 

@@ -1,0 +1,6 @@
+first_step:
+  assign:
+    variable: "myVariable"
+
+second_step:
+  return: ${variable}

@@ -87,10 +87,10 @@ Notes:
 
 ### Step types
 
+* [return](steps/return.md)
+* [assign](steps/assign-variables.md)
+* [mock](steps/mock.md)
 * [http-get](steps/http-get.md)
 * [http-post](steps/http-post.md)
-* [assign](steps/assign-variables.md)
 * [conditional-jump](steps/conditional-jump.md)
-* [return](steps/return.md)
 * [template](steps/template.md)
-* [mock](steps/mock.md)

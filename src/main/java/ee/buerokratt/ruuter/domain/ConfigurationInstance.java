@@ -20,6 +20,7 @@ import java.util.Map;
 @Data
 @RequiredArgsConstructor
 public class ConfigurationInstance {
+    private final String name;
     private final Map<String, ConfigurationStep> steps;
     private final Map<String, Object> requestBody;
     private final Map<String, Object> requestParams;
@@ -36,13 +37,13 @@ public class ConfigurationInstance {
     private Integer returnStatus;
     private Map<String, String> returnHeaders = new HashMap<>();
 
-    public void execute(String configurationName) {
+    public void execute() {
         List<String> stepNames = steps.keySet().stream().toList();
         try {
             executeStep(stepNames.get(0), stepNames);
         } catch (Exception e) {
-            LoggingUtils.logError(log, "Error executing configuration: %s".formatted(configurationName), requestOrigin, "", e);
-            setReturnValue(null);
+            LoggingUtils.logError(log, "Error executing configuration: %s".formatted(name), requestOrigin, "", e);
+            clearReturnValues();
         }
     }
 
@@ -53,7 +54,7 @@ public class ConfigurationInstance {
     }
 
     private void executeNextStep(ConfigurationStep previousStep, List<String> stepNames) {
-        if (previousStep.getNextStepName() == null) {
+        if (Boolean.TRUE.equals(previousStep.getSkip()) || previousStep.getNextStepName() == null) {
             int nextStepIndex = stepNames.indexOf(previousStep.getName()) + 1;
             if (nextStepIndex >= stepNames.size()) {
                 return;
@@ -62,5 +63,11 @@ public class ConfigurationInstance {
         } else if (!previousStep.getNextStepName().equals("end")) {
             executeStep(previousStep.getNextStepName(), stepNames);
         }
+    }
+
+    private void clearReturnValues() {
+        setReturnValue(null);
+        setReturnStatus(null);
+        setReturnHeaders(new HashMap<>());
     }
 }

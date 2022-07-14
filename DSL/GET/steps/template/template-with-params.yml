@@ -1,0 +1,12 @@
+call_template:
+  template: passing-post-parameters
+  requestType: post
+  body:
+    project: "byk"
+    website: "krat.ee"
+  params:
+    var1: "var"
+  result: templateResult
+
+return_result:
+  return: ${templateResult}

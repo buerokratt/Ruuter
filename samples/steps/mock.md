@@ -8,13 +8,13 @@ The mock step allows to imitate to-be API calls, that do not yet exist.
 * `args`
     * response
         * *...response values*
-* `result` - name of the variable to store the response of the mock in, for use in other steps
 
 **Optional fields:**
 
 * `args`
     * request
         * *...request values*
+* `result` - name of the variable to store the response of the mock in, for use in other steps
 
 #### How responses are stored with the result field
 
@@ -23,21 +23,40 @@ steps: [GET step responses](./http-get.md#How-responses-are-stored-with-the-resu
 
 ## Examples
 
-###
+### Mock response
+
+[`mock-response.yml`](../../DSL/GET/steps/mock/mock-response.yml)
 
 ```
 step_1:
-    call: reflect.mock
-    args:
-        request:
-            some: "request"
-        response:
-            project: "Bürokratt"
-            website: "www.kratid.ee"
-    result: reflected_request
+  call: reflect.mock
+  args:
+    response:
+      project: "Bürokratt"
+      website: "www.kratid.ee"
+  result: reflected_request
 
 step_2:
-    return: ${reflected_request.response}
+  return: ${reflected_request.response}
+```
+
+### Mock response and request
+
+[`mock-response-and-request.yml`](../../DSL/GET/steps/mock/mock-response-and-request.yml)
+
+```
+step_1:
+  call: reflect.mock
+  args:
+    request:
+      some: "request"
+    response:
+      project: "Bürokratt"
+      website: "www.kratid.ee"
+  result: reflected_request
+
+step_2:
+  return: ${reflected_request}
 ```
 
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

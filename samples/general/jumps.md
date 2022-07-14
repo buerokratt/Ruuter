@@ -13,64 +13,83 @@ If the user wishes to determine when the processing of a DSL should end, they ca
 
 ### Example of jump with end
 
+[`jump-with-end.yml`](../../DSL/GET/order/jump-with-end.yml)
+
 ```
 first_step:
-    call: http.get
-    args:
-      url: https://example.com/callA
-    next: second_step
-  
+  call: reflect.mock
+  args:
+    response:
+      test: value
+  next: second_step
+
 third_step:
-    call: http.get
-    args:
-      url: https://example.com/callB
-    next: end
+  call: reflect.mock
+  args:
+    response:
+      test: value
+  next: end
 
 second_step:
-    call: http.get
-    args:
-      url: https://example.com/callC
-    next: third_step
+  call: reflect.mock
+  args:
+    response:
+      test: value
+  next: third_step
 ```
 
 ### Example of jump over step
 
+[`jump-over-step.yml`](../../DSL/GET/order/jump-over-step.yml)
+
 ```
 first_step:
-    call: http.get
-    args:
-      url: https://example.com/callA
-    next: second_step
-  
+  call: reflect.mock
+  args:
+    response:
+      test: value
+  next: second_step
+
 this_step_is_jumped_over_and_not_executed:
-    call: http.get
-    args:
-      url: https://example.com/callB
+  call: http.get
+  args:
+    url: https://example.com/callB
 
 second_step:
-    call: http.get
-    args:
-      url: https://example.com/callC
+  call: reflect.mock
+  args:
+    response:
+      test: value
+
+third_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value
 ```
 
 ### Example of end
 
+[`end-execution.yml`](../../DSL/GET/order/end-execution.yml)
+
 ```
 first_step:
-    call: http.get
-    args:
-      url: https://example.com/callA
-  
+  call: reflect.mock
+  args:
+    response:
+      test: value
+
 second_step:
-    call: http.get
-    args:
-      url: https://example.com/callC
-    next: end
-  
+  call: reflect.mock
+  args:
+    response:
+      test: value
+  next: end
+
 this_step_is_not_executed:
-    call: http.get
-    args:
-      url: https://example.com/callB
+  call: http.get
+  args:
+    url: https://example.com/callB
 ```
 
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

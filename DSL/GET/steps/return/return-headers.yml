@@ -1,0 +1,9 @@
+return_value:
+  headers:
+    Set-Cookie:
+      customCookieName: "customCookieValue"
+      Domain: "https://example.com"
+      Secure: false
+      HttpOnly: true
+    custom-header: "customValue"
+  return: "result"

@@ -60,12 +60,12 @@ public class ConfigurationService {
     }
 
     public ConfigurationInstance execute(String configuration, String requestType, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
-        ConfigurationInstance ci = new ConfigurationInstance(configurations.get(requestType.toUpperCase()).get(configuration), requestBody, requestParams, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+        ConfigurationInstance ci = new ConfigurationInstance(configuration, configurations.get(requestType.toUpperCase()).get(configuration), requestBody, requestParams, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
         if (ci.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for configuration: %s".formatted(configuration), requestOrigin, INCOMING_REQUEST);
             if (allowedToExecuteConfiguration(requestBody, requestParams)) {
-                ci.execute(configuration);
+                ci.execute();
             }
             LoggingUtils.logInfo(log, "Request processed for configuration: %s".formatted(configuration), requestOrigin, INCOMING_RESPONSE);
         } else {

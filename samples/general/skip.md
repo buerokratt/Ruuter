@@ -2,22 +2,28 @@
 
 Every type of step may contain the `skip` field, which accepts a boolean value. If the value is set as `true`, then the step is not executed and is skipped.
 
+[`skip.yml`](../../DSL/GET/common/skip.yml)
+
 ```
 first_step:
-    call: http.get
-    args:
-      url: https://example.com/callA
+  call: reflect.mock
+  args:
+    response:
+      test: value
 
-this_step_is_skipped:
-    skip: true
-    call: http.get
-    args:
-      url: https://example.com/callB
+skipped_step:
+  skip: true
+  call: reflect.mock
+  args:
+    response:
+      test: value
+  next: end
 
-third_step:
-    call: http.get
-    args:
-      url: https://example.com/callC
+second_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value
 ```
 
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

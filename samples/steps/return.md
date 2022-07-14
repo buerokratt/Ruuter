@@ -24,53 +24,71 @@ step***
 
 ### Assign return value
 
+[`return.yml`](../../DSL/GET/steps/return/return.yml)
+
 ```
 return_value:
-    return "result"
+  return: "result"
 ```
 
 ### Assign return value with script
 
+[`return-with-script.yml`](../../DSL/GET/steps/return/return-with-script.yml)
+
 ```
 assign_step:
-    assign:
-        variable: "result"
+  assign:
+    variable: "result"
 
 return_value:
-    return ${variable}
+  return: ${variable}
+```
+
+### Assign a status to response
+
+[`return-status.yml`](../../DSL/GET/steps/return/return-status.yml)
+
+```
+return_with_status:
+  return: "my_response"
+  status: 201
 ```
 
 ### Assign a Set-Cookie and a custom header to response
 
+[`return-headers.yml`](../../DSL/GET/steps/return/return-headers.yml)
+
 ```
 return_value:
-    headers:
-        Set-Cookie:
-            customCookieName: "customCookieValue"
-            Domain: "https://example.com"
-            Secure: false
-            HttpOnly: true
-        custom-header: "customValue"
-    return "result"
+  headers:
+    Set-Cookie:
+      customCookieName: "customCookieValue"
+      Domain: "https://example.com"
+      Secure: false
+      HttpOnly: true
+    custom-header: "customValue"
+  return: "result"
 ```
 
 ### Assign a Set-Cookie and a custom header to response through script
 
+[`return-headers-with-script.yml`](../../DSL/GET/steps/return/return-headers-with-script.yml)
+
 ```
 assign_step:
-    assign:
-        setCookie:
-            customCookieName: "customCookieValue"
-            Domain: "https://example.com"
-            Secure: false
-            HttpOnly: true
-        customHeader: "customValue"
+  assign:
+    setCookie:
+      customCookieName: "customCookieValue"
+      Domain: "https://example.com"
+      Secure: false
+      HttpOnly: true
+    customHeader: "customValue"
 
 return_value:
-    headers:
-        Set-Cookie: ${setCookie}
-        custom-header: ${customHeader}
-    return "result"
+  headers:
+    Set-Cookie: ${setCookie}
+    custom-header: ${customHeader}
+  return: "result"
 ```
 
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

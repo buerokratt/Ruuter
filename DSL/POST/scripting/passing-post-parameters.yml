@@ -1,0 +1,2 @@
+first_step:
+  return: ${incoming.body.project} - ${incoming.body.website}
