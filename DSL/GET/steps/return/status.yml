@@ -1,3 +1,0 @@
-return_with_status:
-  return: "my_response"
-  status: 201

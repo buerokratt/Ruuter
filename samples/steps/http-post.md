@@ -35,14 +35,16 @@ post_step:
 
 ### Standard POST step with its result used in other step
 
+[`post-with-used-response.yml`](../../DSL/POST/steps/post/post-with-used-response.yml)
+
 ```
 post_step:
   call: http.post
   args:
-    url: https://example.com/endpoint
+    url: http://localhost:8080/passing-post-parameters
     body:
-      some_val: "Hello World"
-      another_val: 123
+      project: "byk"
+      website: "krat.ee"
   result: the_message
 
 return_value:
