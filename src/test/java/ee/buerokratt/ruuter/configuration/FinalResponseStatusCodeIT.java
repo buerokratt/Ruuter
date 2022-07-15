@@ -9,7 +9,7 @@ import org.springframework.test.context.TestPropertySource;
 class FinalResponseStatusCodeIT extends BaseIntegrationTest {
 
     @Test
-    void queryConfiguration_shouldSetFinalResponseStatusCodeToRuuterResponse() {
+    void queryDsl_shouldSetFinalResponseStatusCodeToRuuterResponse() {
         client.post()
             .uri("/test-call")
             .exchange().expectStatus().isEqualTo(HttpStatus.CREATED)
@@ -19,7 +19,7 @@ class FinalResponseStatusCodeIT extends BaseIntegrationTest {
     }
 
     @Test
-    void queryConfiguration_shouldSetFinalResponseStatusBasedOnDSLStatusValue() {
+    void queryDsl_shouldSetFinalResponseStatusBasedOnDSLStatusValue() {
         client.get()
             .uri("/test-status")
             .exchange().expectStatus().isEqualTo(HttpStatus.ACCEPTED)

@@ -1,9 +1,9 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.StepTestBase;
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
-import ee.buerokratt.ruuter.service.ConfigurationService;
+import ee.buerokratt.ruuter.service.DslService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -16,18 +16,18 @@ import static org.mockito.Mockito.when;
 class TemplateStepTest extends StepTestBase {
 
     @Mock
-    private ConfigurationService configurationService;
+    private DslService dslService;
 
     @Mock
     private ScriptingHelper scriptingHelper;
 
     @Mock
-    ConfigurationInstance templateInstance;
+    DslInstance templateInstance;
 
     @BeforeEach
     protected void mockDependencies() {
-        when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getDslService()).thenReturn(dslService);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
     @Test
@@ -43,12 +43,12 @@ class TemplateStepTest extends StepTestBase {
             setRequestType("POST");
         }};
 
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getRequestOrigin()).thenReturn(requestOrigin);
+        when(di.getContext()).thenReturn(testContext);
+        when(di.getRequestOrigin()).thenReturn(requestOrigin);
         when(templateInstance.getReturnValue()).thenReturn(expectedResult);
-        when(configurationService.execute(templateToCall, "POST", new HashMap<>(), new HashMap<>(), requestOrigin)).thenReturn(templateInstance);
-        templateStep.execute(ci);
+        when(dslService.execute(templateToCall, "POST", new HashMap<>(), new HashMap<>(), requestOrigin)).thenReturn(templateInstance);
+        templateStep.execute(di);
 
-        assertEquals(expectedResult, ci.getContext().get(resultName));
+        assertEquals(expectedResult, di.getContext().get(resultName));
     }
 }

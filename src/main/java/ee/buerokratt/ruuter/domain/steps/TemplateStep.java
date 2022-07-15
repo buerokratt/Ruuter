@@ -1,7 +1,7 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,7 +14,7 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
-public class TemplateStep extends ConfigurationStep {
+public class TemplateStep extends DslStep {
     @JsonAlias({"template"})
     private String templateToCall;
     @JsonAlias({"result"})
@@ -24,13 +24,13 @@ public class TemplateStep extends ConfigurationStep {
     private Map<String, Object> params;
 
     @Override
-    protected void executeStepAction(ConfigurationInstance ci) {
-        ScriptingHelper scriptingHelper = ci.getScriptingHelper();
-        Map<String, Object> templateBody = scriptingHelper.evaluateScripts(body, ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-        Map<String, Object> templateParams = scriptingHelper.evaluateScripts(params, ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
+    protected void executeStepAction(DslInstance di) {
+        ScriptingHelper scriptingHelper = di.getScriptingHelper();
+        Map<String, Object> templateBody = scriptingHelper.evaluateScripts(body, di.getContext(), di.getRequestBody(), di.getRequestParams());
+        Map<String, Object> templateParams = scriptingHelper.evaluateScripts(params, di.getContext(), di.getRequestBody(), di.getRequestParams());
 
-        ConfigurationInstance templateInstance = ci.getConfigurationService().execute(templateToCall, requestType, templateBody, templateParams, ci.getRequestOrigin());
-        ci.getContext().put(resultName, templateInstance.getReturnValue());
+        DslInstance templateInstance = di.getDslService().execute(templateToCall, requestType, templateBody, templateParams, di.getRequestOrigin());
+        di.getContext().put(resultName, templateInstance.getReturnValue());
     }
 
     @Override

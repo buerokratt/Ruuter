@@ -1,6 +1,6 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,10 +16,10 @@ import java.util.Map;
 public class HttpPostStep extends HttpStep {
 
     @Override
-    protected ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci) {
-        args.addHeaders(ci.getProperties().getHttpPost().getHeaders());
-        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(args.getBody(), ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-        return ci.getHttpHelper().doPost(args.getUrl(), evaluatedBody, args.getQuery(), args.getHeaders());
+    protected ResponseEntity<Object> getRequestResponse(DslInstance di) {
+        args.addHeaders(di.getProperties().getHttpPost().getHeaders());
+        Map<String, Object> evaluatedBody = di.getScriptingHelper().evaluateScripts(args.getBody(), di.getContext(), di.getRequestBody(), di.getRequestParams());
+        return di.getHttpHelper().doPost(args.getUrl(), evaluatedBody, args.getQuery(), args.getHeaders());
     }
 
     @Override

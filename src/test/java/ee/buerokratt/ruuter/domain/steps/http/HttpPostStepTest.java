@@ -7,7 +7,7 @@ import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
-import ee.buerokratt.ruuter.service.ConfigurationService;
+import ee.buerokratt.ruuter.service.DslService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -37,16 +37,16 @@ class HttpPostStepTest extends StepTestBase {
     private ScriptingHelper scriptingHelper;
 
     @Mock
-    private ConfigurationService configurationService;
+    private DslService dslService;
 
     @Mock
     private ApplicationProperties.HttpPost httpPost;
 
     @BeforeEach
     protected void mockDependencies() {
-        when(ci.getProperties()).thenReturn(properties);
-        when(ci.getHttpHelper()).thenReturn(httpHelper);
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getProperties()).thenReturn(properties);
+        when(di.getHttpHelper()).thenReturn(httpHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
     @Test
@@ -67,21 +67,22 @@ class HttpPostStepTest extends StepTestBase {
         }};
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
-        when(ci.getContext()).thenReturn(testContext);
+        when(di.getContext()).thenReturn(testContext);
         when(properties.getHttpPost()).thenReturn(httpPost);
         when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
 
-        expectedPostStep.execute(ci);
+        expectedPostStep.execute(di);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
     }
 
     @Test
     void execute_shouldExecuteDefaultActionWhenResponseCodeIsNotInWhitelist(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        DefaultHttpService defaultHttpService = Mockito.spy(new DefaultHttpService() {{
-            setService("default-action");
+        DefaultHttpDsl defaultHttpDsl = Mockito.spy(new DefaultHttpDsl() {{
+            setDsl("default-action");
+            setRequestType("POST");
             setBody(new HashMap<>());
             setQuery(new HashMap<>());
         }});
@@ -102,18 +103,18 @@ class HttpPostStepTest extends StepTestBase {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
-        when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getRequestOrigin()).thenReturn("");
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(di.getDslService()).thenReturn(dslService);
+        when(di.getContext()).thenReturn(testContext);
+        when(di.getRequestOrigin()).thenReturn("");
+        when(di.getMappingHelper()).thenReturn(mappingHelper);
         when(properties.getHttpPost()).thenReturn(httpPost);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
         when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        when(properties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
+        when(properties.getDefaultDslInCaseOfException()).thenReturn(defaultHttpDsl);
 
-        failingPostStep.execute(ci);
+        failingPostStep.execute(di);
 
-        verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
+        verify(dslService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
     }
 
     @Test
@@ -137,11 +138,11 @@ class HttpPostStepTest extends StepTestBase {
         }};
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
-        when(ci.getContext()).thenReturn(testContext);
+        when(di.getContext()).thenReturn(testContext);
         when(properties.getHttpPost()).thenReturn(httpPost);
         when(scriptingHelper.evaluateScripts(any(), anyMap(), anyMap(), anyMap())).thenReturn(null);
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
-        expectedPostStep.execute(ci);
+        expectedPostStep.execute(di);
 
         assertEquals("value2", expectedPostStep.getArgs().getHeaders().get("header2"));
     }

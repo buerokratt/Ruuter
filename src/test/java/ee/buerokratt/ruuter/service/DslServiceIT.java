@@ -2,7 +2,7 @@ package ee.buerokratt.ruuter.service;
 
 import ee.buerokratt.ruuter.BaseIntegrationTest;
 import ee.buerokratt.ruuter.domain.steps.AssignStep;
-import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpGetStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpPostStep;
@@ -22,16 +22,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestPropertySource(properties = { "application.config-path=${user.dir}/src/test/resources/service" })
-class ConfigurationServiceIT extends BaseIntegrationTest {
+class DslServiceIT extends BaseIntegrationTest {
 
     @Autowired
-    private ConfigurationService configurationService;
+    private DslService dslService;
 
     @Value("${application.config-path}")
     private String configPath;
 
     @Test
-    void getConfigurations_shouldReturnConfigurationsMap() {
+    void getDsls_shouldReturnDslsMap() {
         HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");
@@ -68,23 +68,23 @@ class ConfigurationServiceIT extends BaseIntegrationTest {
             setReturnValue("return_value");
         }};
 
-        Map<String, Map<String, Map<String, ConfigurationStep>>> configurations = configurationService.getConfigurations(configPath);
-        List<String> stepNames = new ArrayList<>(configurations.get("POST").get("test-conf").keySet());
+        Map<String, Map<String, Map<String, DslStep>>> dsls = dslService.getDsls(configPath);
+        List<String> stepNames = new ArrayList<>(dsls.get("POST").get("test-conf").keySet());
 
         assertEquals("get_message", stepNames.get(0));
         assertEquals("post_message", stepNames.get(1));
         assertEquals("assign_value", stepNames.get(2));
         assertEquals("return_value", stepNames.get(3));
-        assertEquals(expectedGetStep, configurations.get("POST").get("test-conf").get("get_message"));
-        assertEquals(expectedPostStep, configurations.get("POST").get("test-conf").get("post_message"));
-        assertEquals(expectedAssignStep, configurations.get("POST").get("test-conf").get("assign_value"));
-        assertEquals(expectedReturnStep, configurations.get("POST").get("test-conf").get("return_value"));
+        assertEquals(expectedGetStep, dsls.get("POST").get("test-conf").get("get_message"));
+        assertEquals(expectedPostStep, dsls.get("POST").get("test-conf").get("post_message"));
+        assertEquals(expectedAssignStep, dsls.get("POST").get("test-conf").get("assign_value"));
+        assertEquals(expectedReturnStep, dsls.get("POST").get("test-conf").get("return_value"));
     }
 
     @Test
-    void getConfigurations_shouldAddDefinedHeadersToHttpSteps() {
-        Map<String, Map<String, Map<String, ConfigurationStep>>> configurations = configurationService.getConfigurations(configPath);
-        Map<String, ConfigurationStep> steps = new HashMap<>(configurations.get("POST").get("pass-headers-with-request"));
+    void getDsls_shouldAddDefinedHeadersToHttpSteps() {
+        Map<String, Map<String, Map<String, DslStep>>> dsls = dslService.getDsls(configPath);
+        Map<String, DslStep> steps = new HashMap<>(dsls.get("POST").get("pass-headers-with-request"));
 
         HttpGetStep httpGetStep = (HttpGetStep) steps.get("get_message");
         HttpPostStep httpPostStep = (HttpPostStep) steps.get("post_message");
@@ -101,11 +101,11 @@ class ConfigurationServiceIT extends BaseIntegrationTest {
     }
 
     @Test
-    void getConfigurations_shouldPutAllConfigurationsToPostAndGetKeys() {
-        Map<String, Map<String, Map<String, ConfigurationStep>>> configurations = configurationService.getConfigurations(configPath);
+    void getDsls_shouldPutAllDslsToPostAndGetKeys() {
+        Map<String, Map<String, Map<String, DslStep>>> dsls = dslService.getDsls(configPath);
 
-        assertEquals(2, configurations.keySet().size());
-        assertTrue(configurations.containsKey("POST"));
-        assertTrue(configurations.containsKey("GET"));
+        assertEquals(2, dsls.keySet().size());
+        assertTrue(dsls.containsKey("POST"));
+        assertTrue(dsls.containsKey("GET"));
     }
 }

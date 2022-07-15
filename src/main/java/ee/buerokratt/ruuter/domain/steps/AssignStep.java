@@ -1,6 +1,6 @@
 package ee.buerokratt.ruuter.domain.steps;
 
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -12,12 +12,12 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
-public class AssignStep<T> extends ConfigurationStep {
+public class AssignStep<T> extends DslStep {
     private Map<String, T> assign;
 
     @Override
-    protected void executeStepAction(ConfigurationInstance ci) {
-        assign.forEach((k, v) -> ci.getContext().put(k, ci.getScriptingHelper().evaluateScripts(v, ci.getContext(), ci.getRequestBody(), ci.getRequestParams())));
+    protected void executeStepAction(DslInstance di) {
+        assign.forEach((k, v) -> di.getContext().put(k, di.getScriptingHelper().evaluateScripts(v, di.getContext(), di.getRequestBody(), di.getRequestParams())));
     }
 
     @Override
