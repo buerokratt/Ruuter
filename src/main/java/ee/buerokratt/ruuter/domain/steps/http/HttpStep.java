@@ -40,7 +40,7 @@ public abstract class HttpStep extends DslStep {
         ResponseEntity<Object> response = getRequestResponse(di);
         di.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
 
-        if (isNotAllowedHttpStatusCode(di, response.getStatusCodeValue())) {
+        if (!isAllowedHttpStatusCode(di, response.getStatusCodeValue())) {
             throw new IllegalArgumentException();
         }
     }
@@ -48,7 +48,7 @@ public abstract class HttpStep extends DslStep {
     @Override
     public void handleFailedResult(DslInstance di) {
         super.handleFailedResult(di);
-        if (isNotAllowedHttpStatusCode(di, ((HttpStepResult) di.getContext().get(resultName)).getResponse().getStatusCodeValue())) {
+        if (!isAllowedHttpStatusCode(di, ((HttpStepResult) di.getContext().get(resultName)).getResponse().getStatusCodeValue())) {
             DefaultHttpDsl globalHttpExceptionDsl = di.getProperties().getDefaultDslInCaseOfException();
             if (localHttpExceptionDslExists()) {
                 localHttpExceptionDsl.executeHttpDefaultDsl(di, resultName);
@@ -69,8 +69,8 @@ public abstract class HttpStep extends DslStep {
         LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
 
-    private boolean isNotAllowedHttpStatusCode(DslInstance di, Integer response) {
-        return !di.getProperties().getHttpCodesAllowList().isEmpty() && !di.getProperties().getHttpCodesAllowList().contains(response);
+    private boolean isAllowedHttpStatusCode(DslInstance di, Integer response) {
+        return di.getProperties().getHttpCodesAllowList().isEmpty() || di.getProperties().getHttpCodesAllowList().contains(response);
     }
 
     private boolean localHttpExceptionDslExists() {

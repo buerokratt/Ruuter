@@ -30,7 +30,7 @@ public class DslController {
                                                    @RequestParam(required = false) Map<String, Object> requestParams,
                                                    HttpServletRequest request) {
         if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
-            String errorMsg = "Request received with invalid method type %s for dsl: %s".formatted(request.getMethod(), dsl);
+            String errorMsg = "Request received with invalid method type %s for DSL: %s".formatted(request.getMethod(), dsl);
             LoggingUtils.logError(log, errorMsg, request.getRemoteAddr(), INCOMING_REQUEST);
             return status(HttpStatus.METHOD_NOT_ALLOWED).body(new RuuterResponse());
         }

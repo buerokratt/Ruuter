@@ -63,13 +63,13 @@ public class DslService {
         DslInstance di = new DslInstance(dsls.get(requestType.toUpperCase()).get(dsl), requestBody, requestParams, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
         if (di.getSteps() != null) {
-            LoggingUtils.logInfo(log, "Request received for dsl: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
+            LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
             if (allowedToExecuteDsl(requestBody, requestParams)) {
                 di.execute(dsl);
             }
-            LoggingUtils.logInfo(log, "Request processed for dsl: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
+            LoggingUtils.logInfo(log, "Request processed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
         } else {
-            LoggingUtils.logError(log, "Received request for non existent dsl: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
+            LoggingUtils.logError(log, "Received request for non existent DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
         }
 
         return di;

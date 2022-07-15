@@ -41,7 +41,7 @@ public class DslInstance {
         try {
             executeStep(stepNames.get(0), stepNames);
         } catch (Exception e) {
-            LoggingUtils.logError(log, "Error executing dsl: %s".formatted(dslName), requestOrigin, "", e);
+            LoggingUtils.logError(log, "Error executing DSL: %s".formatted(dslName), requestOrigin, "", e);
             setReturnValue(null);
         }
     }
