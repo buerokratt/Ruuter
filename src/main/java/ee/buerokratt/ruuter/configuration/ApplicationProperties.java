@@ -31,7 +31,8 @@ public class ApplicationProperties {
     @Setter
     @Getter
     public static class FinalResponse {
-        private Integer httpStatusCode;
+        private Integer dslWithResponseHttpStatusCode;
+        private Integer dslWithoutResponseHttpStatusCode;
     }
 
     @Getter

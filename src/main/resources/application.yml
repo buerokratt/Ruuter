@@ -14,7 +14,8 @@ application:
     query:
       anotherVal: 123
   finalResponse:
-      httpStatusCode: 200
+      dslWithResponseHttpStatusCode: 200
+      dslWithoutResponseHttpStatusCode: 300
   httpPost:
     headers:
       Content-Type: "application/json"
