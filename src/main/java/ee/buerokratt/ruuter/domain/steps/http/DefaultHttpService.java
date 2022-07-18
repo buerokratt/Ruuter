@@ -22,7 +22,10 @@ public class DefaultHttpService {
         body.put("statusCode", response.getStatusCodeValue());
         body.put("responseBody", ci.getMappingHelper().convertObjectToString(response.getBody()));
         body.put("failedRequestId", MDC.get("spanId"));
-        Map<String, Map<String, Object>> evaluatedParameters = ci.getScriptingHelper().evaluateRequestParameters(ci, body, query, headers);
-        ci.getConfigurationService().execute(service, "POST", evaluatedParameters.get("body"), evaluatedParameters.get("query"), ci.getMappingHelper().convertMapObjectValuesToString(evaluatedParameters.get("headers")), ci.getRequestOrigin());
+        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(body, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedQuery = ci.getScriptingHelper().evaluateScripts(query, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedHeaders = ci.getScriptingHelper().evaluateScripts(headers, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, String> mappedHeaders = ci.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
+        ci.getConfigurationService().execute(service, "POST", evaluatedBody, evaluatedQuery, mappedHeaders, ci.getRequestOrigin());
     }
 }

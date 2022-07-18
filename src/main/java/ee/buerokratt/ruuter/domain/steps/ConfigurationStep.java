@@ -38,6 +38,7 @@ public abstract class ConfigurationStep {
         }  catch (Exception e) {
             handleFailedResult(ci);
             if (ci.getProperties().getStopInCaseOfException() != null && ci.getProperties().getStopInCaseOfException()) {
+                Thread.currentThread().interrupt();
                 throw new StepExecutionException(name, e);
             }
         } finally {

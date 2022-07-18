@@ -7,27 +7,25 @@ import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
-import ee.buerokratt.ruuter.service.ConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.when;
 
 @WireMockTest
 class HttpGetStepTest extends StepTestBase {
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private ApplicationProperties properties;
 
     @Mock
     private HttpHelper httpHelper;
@@ -38,21 +36,18 @@ class HttpGetStepTest extends StepTestBase {
     @Mock
     private ScriptingHelper scriptingHelper;
 
-    @Mock
-    private ConfigurationService configurationService;
-
     private HttpQueryArgs getArgs;
 
     private HttpStep getStep;
 
-    private Map<String, Map<String, Object>> evaluatedParameters;
+    private Map<String, Object> testContext;
 
     @BeforeEach
     protected void mockDependencies() {
         when(ci.getHttpHelper()).thenReturn(httpHelper);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
-        when(ci.getProperties()).thenReturn(applicationProperties);
+        when(ci.getProperties()).thenReturn(properties);
     }
 
     @BeforeEach
@@ -69,19 +64,16 @@ class HttpGetStepTest extends StepTestBase {
             setArgs(getArgs);
             setResultName("the_response");
         }};
-        evaluatedParameters = new HashMap<>() {{
-            put("query", getArgs.getQuery());
-        }};
+        testContext = new HashMap<>();
     }
 
     @Test
     void execute_shouldQueryEndpointAndStoreResponse() {
-        Map<String, Object> testContext = new HashMap<>();
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
         when(ci.getContext()).thenReturn(testContext);
         when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateRequestParameters(ci, null, getArgs.getQuery(), new HashMap<>())).thenReturn(evaluatedParameters);
+        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
         getStep.execute(ci);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
@@ -89,55 +81,14 @@ class HttpGetStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldExecuteDefaultActionWhenRequestIsInvalidAndStopInCaseOfExceptionIsTrue() {
-        DefaultHttpService defaultHttpService = Mockito.spy(new DefaultHttpService() {{
-            setService("default-action");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-        }});
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
+    void execute_shouldThrowErrorWhenUrlIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        getStep.getArgs().setUrl("http://notFounUrl:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
 
-        when(ci.getContext()).thenReturn(new HashMap<>());
-        when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateRequestParameters(ci, null, getArgs.getQuery(), new HashMap<>())).thenReturn(evaluatedParameters);
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        when(applicationProperties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
-        getStep.execute(ci);
+        when(ci.getContext()).thenReturn(testContext);
+        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
+        when(properties.getStopInCaseOfException()).thenReturn(true);
+        doCallRealMethod().when(httpHelper).doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>());
 
-        verify(configurationService, times(1)).execute("default-action", "POST", null, null, new HashMap<>(), null);
-    }
-
-    @Test
-    void execute_shouldExecuteStepSpecificDefaultActionWhenRequestIsInvalidAndStopInCaseOfExceptionIsTrue() {
-        DefaultHttpService defaultHttpService2 = Mockito.spy(new DefaultHttpService() {{
-            setService("default-action2");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-        }});
-        getStep.setLocalHttpExceptionService(defaultHttpService2);
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
-
-        when(ci.getContext()).thenReturn(new HashMap<>());
-        when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateRequestParameters(ci, null, getArgs.getQuery(), new HashMap<>())).thenReturn(evaluatedParameters);
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        getStep.execute(ci);
-
-        verify(configurationService, times(1)).execute("default-action2", "POST", null, null, new HashMap<>(), null);
-    }
-
-    @Test
-    void execute_shouldNotExecuteDefaultActionWhenRequestIsInvalidButDefaultActionIsNotDefined() {
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
-
-        when(ci.getContext()).thenReturn(new HashMap<>());
-        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateRequestParameters(ci, null, getArgs.getQuery(), new HashMap<>())).thenReturn(evaluatedParameters);
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        getStep.execute(ci);
-
-        verify(configurationService, times(0)).execute(anyString(), anyString(), anyMap(), anyMap(), anyMap(), anyString());
+        assertThrows(IllegalArgumentException.class, () -> getStep.execute(ci));
     }
 }

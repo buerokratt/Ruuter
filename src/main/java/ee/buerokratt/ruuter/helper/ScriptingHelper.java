@@ -1,6 +1,5 @@
 package ee.buerokratt.ruuter.helper;
 
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
 import ee.buerokratt.ruuter.helper.exception.ScriptEvaluationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,17 +23,6 @@ public class ScriptingHelper {
 
     public boolean containsScript(String s) {
         return Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(s).find();
-    }
-
-    public Map<String, Map<String, Object>> evaluateRequestParameters(ConfigurationInstance ci, Map<String, Object> body, Map<String, Object> query, Map<String, Object> headers) {
-        Map<String, Map<String, Object>> evaluatedParameters = new HashMap<>();
-        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(body, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
-        Map<String, Object> evaluatedQuery = ci.getScriptingHelper().evaluateScripts(query, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
-        Map<String, Object> evaluatedHeaders = ci.getScriptingHelper().evaluateScripts(headers, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
-        evaluatedParameters.put("body", evaluatedBody != null ? evaluatedBody : new HashMap<>());
-        evaluatedParameters.put("query", evaluatedQuery != null ? evaluatedQuery : new HashMap<>());
-        evaluatedParameters.put("headers", evaluatedHeaders != null ? evaluatedHeaders : new HashMap<>());
-        return evaluatedParameters;
     }
 
     public Map<String, Object> evaluateScripts(Map<String, Object> map, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {

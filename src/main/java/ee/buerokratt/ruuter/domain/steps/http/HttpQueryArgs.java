@@ -10,9 +10,9 @@ import java.util.Map;
 @NoArgsConstructor
 public class HttpQueryArgs {
     private String url;
-    private Map<String, Object> query;
+    private Map<String, Object> query = new HashMap<>();
     private Map<String, Object> headers = new HashMap<>();
-    private Map<String, Object> body;
+    private Map<String, Object> body = new HashMap<>();
 
     public void addHeaders(Map<String, Object> newHeaders) {
         newHeaders.forEach(headers::putIfAbsent);

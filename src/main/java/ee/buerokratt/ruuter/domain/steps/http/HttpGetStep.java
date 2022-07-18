@@ -17,8 +17,10 @@ public class HttpGetStep extends HttpStep {
 
     @Override
     public ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci) {
-        Map<String, Map<String, Object>> evaluatedParameters = ci.getScriptingHelper().evaluateRequestParameters(ci, args.getBody(), args.getQuery(), args.getHeaders());
-        return ci.getHttpHelper().doGet(args.getUrl(), evaluatedParameters.get("query"), ci.getMappingHelper().convertMapObjectValuesToString(evaluatedParameters.get("headers")));
+        Map<String, Object> evaluatedQuery = ci.getScriptingHelper().evaluateScripts(args.getQuery(), ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedHeaders = ci.getScriptingHelper().evaluateScripts(args.getHeaders(), ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, String> mappedHeaders = ci.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
+        return ci.getHttpHelper().doGet(args.getUrl(), evaluatedQuery, mappedHeaders);
     }
 
     @Override

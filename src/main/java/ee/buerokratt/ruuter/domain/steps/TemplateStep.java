@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -21,12 +22,15 @@ public class TemplateStep extends ConfigurationStep {
     private String requestType;
     private Map<String, Object> body;
     private Map<String, Object> query;
-    private Map<String, Object> headers;
+    private Map<String, Object> headers = new HashMap<>();
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        Map<String, Map<String, Object>> evaluatedParameters = ci.getScriptingHelper().evaluateRequestParameters(ci, body, query, headers);
-        ConfigurationInstance templateInstance = ci.getConfigurationService().execute(templateToCall, requestType, evaluatedParameters.get("body"), evaluatedParameters.get("query"), ci.getMappingHelper().convertMapObjectValuesToString(evaluatedParameters.get("headers")), ci.getRequestOrigin());
+        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(body, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedQuery = ci.getScriptingHelper().evaluateScripts(query, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedHeaders = ci.getScriptingHelper().evaluateScripts(headers, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, String> mappedHeaders = ci.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
+        ConfigurationInstance templateInstance = ci.getConfigurationService().execute(templateToCall, requestType, evaluatedBody, evaluatedQuery, mappedHeaders, ci.getRequestOrigin());
         ci.getContext().put(resultName, templateInstance.getReturnValue());
     }
 

@@ -51,7 +51,7 @@ class TemplateStepTest extends StepTestBase {
         when(ci.getRequestOrigin()).thenReturn(requestOrigin);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(templateInstance.getReturnValue()).thenReturn(expectedResult);
-        when(configurationService.execute(templateToCall, "POST", null, null, new HashMap<>(), requestOrigin)).thenReturn(templateInstance);
+        when(configurationService.execute(templateToCall, "POST", new HashMap<>(), new HashMap<>(), new HashMap<>(), requestOrigin)).thenReturn(templateInstance);
         templateStep.execute(ci);
 
         assertEquals(expectedResult, ci.getContext().get(resultName));

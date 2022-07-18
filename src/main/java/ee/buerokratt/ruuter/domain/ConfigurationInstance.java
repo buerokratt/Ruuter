@@ -67,7 +67,6 @@ public class ConfigurationInstance {
 
     private void addGlobalIncomingHeadersToRequestHeaders() {
         Map<String, Object> evaluatedHeaders = scriptingHelper.evaluateScripts(properties.getIncomingRequests().getHeaders(), context, requestBody, requestQuery, requestHeaders);
-        Map<String, String> evaluatedGlobalHeaders = mappingHelper.convertMapObjectValuesToString(evaluatedHeaders);
-        requestHeaders.putAll(evaluatedGlobalHeaders);
+        requestHeaders.putAll(mappingHelper.convertMapObjectValuesToString(evaluatedHeaders));
     }
 }
