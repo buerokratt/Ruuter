@@ -1,6 +1,6 @@
 # Assign Step
 
-The assign step allows to assign different types of variables.
+The assign step allows to assign different types of variables into the application context, for later use.
 
 ```
 assign_step:

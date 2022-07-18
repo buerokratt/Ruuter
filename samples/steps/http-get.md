@@ -23,7 +23,7 @@ get_step:
         * *..desired query values* - Scripts can be used for query values
     * `headers`
         * *..desired header values* - Scripts can be used for headers values
-    * `result` - name of the variable to store the response of the query in, for use in other steps
+* `result` - name of the variable to store the response of the query in, for use in other steps
 
 #### How responses are stored with the result field
 
@@ -33,16 +33,16 @@ Request parameters are stored under the `request` field
 
 Request response is stored under the `response` field
 
-The resulting object looks like this, assuming that the field is named `getStepResult`:
+The resulting object looks like this, assuming that the `result` field is valued `getStepResult`:
 
 ```
 {
     "getStepResult": {
         "request": {
-            "url": "https://www.example-url.com",
-            "query": null,
-            "headers": null,
-            "body": null
+            "url": ...,
+            "query": ...,
+            "headers": ...,
+            "body": ...
         },
         "response": {
             "body": {
@@ -51,7 +51,7 @@ The resulting object looks like this, assuming that the field is named `getStepR
             "headers": {
                 ...headers
             },
-            "status": 200
+            "status": ...
         }
     }
 }

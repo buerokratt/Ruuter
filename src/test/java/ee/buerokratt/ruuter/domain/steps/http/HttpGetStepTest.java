@@ -20,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @WireMockTest
 class HttpGetStepTest extends StepTestBase {
@@ -90,5 +93,31 @@ class HttpGetStepTest extends StepTestBase {
         doCallRealMethod().when(httpHelper).doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>());
 
         assertThrows(IllegalArgumentException.class, () -> getStep.execute(ci));
+    }
+
+    @Test
+    void execute_shouldThrowIllegalArgumentExceptionWhenHttpStatusCodeIsNotinWhitelist(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        HashMap<String, Object> testContext = new HashMap<>();
+        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
+            setQuery(new HashMap<>() {{
+                put("some_val", "Hello World");
+                put("another_val", 123);
+            }});
+            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
+        }};
+        HttpStep expectedGetStep = new HttpGetStep() {{
+            setName("get_message");
+            setArgs(expectedGetArgs);
+            setResultName("the_response");
+        }};
+        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
+
+        when(ci.getContext()).thenReturn(testContext);
+        when(ci.getProperties()).thenReturn(applicationProperties);
+        when(applicationProperties.getStopInCaseOfException()).thenReturn(true);
+        when(ci.getHttpHelper().doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
+        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
+
+        assertThrows(IllegalArgumentException.class, () -> expectedGetStep.execute(ci));
     }
 }

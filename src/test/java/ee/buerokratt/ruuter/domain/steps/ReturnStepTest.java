@@ -1,7 +1,10 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.StepTestBase;
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.domain.steps.http.HttpStepResult;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import org.springframework.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -10,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -18,6 +22,9 @@ class ReturnStepTest extends StepTestBase {
 
     @Mock
     private ScriptingHelper scriptingHelper;
+
+    @Mock
+    private ApplicationProperties properties;
 
     @BeforeEach
     protected void mockScriptingHelper() {

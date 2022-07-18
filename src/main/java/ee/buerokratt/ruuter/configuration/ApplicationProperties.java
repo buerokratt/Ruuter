@@ -20,12 +20,19 @@ public class ApplicationProperties {
     private DefaultHttpService defaultServiceInCaseOfException = new DefaultHttpService();
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
+    private FinalResponse finalResponse = new FinalResponse();
 
     @Getter
     @Setter
     public static class Logging {
         private Boolean displayRequestContent;
         private Boolean displayResponseContent;
+    }
+
+    @Setter
+    @Getter
+    public static class FinalResponse {
+        private Integer httpStatusCode;
     }
 
     @Getter

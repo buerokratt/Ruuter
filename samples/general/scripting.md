@@ -9,7 +9,7 @@ Many steps allow the DSL writer to utilise scripting. The main purpose of script
 
 Scripting is done in **JavaScript**. Step fields use the following syntax to define where a script begins and ends: `${ script goes between here }`.
 
-***Note: scripting can only be done in certain steps, on certain fields.*** 
+***Note: scripting can only be done in certain steps, on certain fields - these fields are indicated in individual step type guides under [Step Types](../GUIDE.md#Step-types).*** 
 
 ### Using a variable from previous steps
 
