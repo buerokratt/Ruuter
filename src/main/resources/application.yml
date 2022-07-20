@@ -8,7 +8,7 @@ application:
     allowedMethodTypes: [ POST, GET ]
   httpCodesAllowList: [ 200, 201, 202 ]
   defaultServiceInCaseOfException:
-    service: default-service
+    service: default-dsl
     body:
       someVal: "Hello World"
     query:

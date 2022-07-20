@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.Logging;
 import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.util.LoggingUtils;
@@ -34,6 +35,7 @@ public abstract class HttpStep extends ConfigurationStep {
     protected HttpQueryArgs args;
     protected String call;
     protected DefaultHttpService localHttpExceptionService;
+    protected Logging logging;
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
@@ -64,8 +66,8 @@ public abstract class HttpStep extends ConfigurationStep {
         MappingHelper mappingHelper = ci.getMappingHelper();
         Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatusCodeValue();
         String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody());
-        String responseContent = responseBody != null && properties.getLogging().getDisplayResponseContent() ? responseBody : "-";
-        String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";
+        String responseContent = responseBody != null && displayResponseContent(properties) ? responseBody : "-";
+        String requestContent = args.getBody() != null && displayRequestContent(properties) ? args.getBody().toString() : "-";
         LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
 
@@ -79,6 +81,24 @@ public abstract class HttpStep extends ConfigurationStep {
 
     private boolean globalHttpExceptionServiceExists(DefaultHttpService globalHttpExceptionConfiguration) {
         return globalHttpExceptionConfiguration != null && globalHttpExceptionConfiguration.getService() != null;
+    }
+
+    private boolean displayResponseContent(ApplicationProperties properties) {
+        if (logging != null && Boolean.TRUE.equals(logging.getDisplayResponseContent())) {
+            return true;
+        } else if (logging == null || logging.getDisplayResponseContent() == null) {
+            return Boolean.TRUE.equals(properties.getLogging().getDisplayResponseContent());
+        }
+        return false;
+    }
+
+    private boolean displayRequestContent(ApplicationProperties properties) {
+        if (logging != null && Boolean.TRUE.equals(logging.getDisplayRequestContent())) {
+            return true;
+        } else if (logging == null || logging.getDisplayRequestContent() == null) {
+            return Boolean.TRUE.equals(properties.getLogging().getDisplayRequestContent());
+        }
+        return false;
     }
 
     protected abstract ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci);

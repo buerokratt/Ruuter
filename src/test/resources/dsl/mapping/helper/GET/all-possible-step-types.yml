@@ -1,0 +1,47 @@
+get_step:
+  call: http.get
+  args:
+    url: http://localhost:8090/endpoint
+  result: the_response
+
+post_step:
+  call: http.post
+  args:
+    url: http://localhost:8090/endpoint
+  result: the_response
+
+conditional_step:
+  switch:
+    - condition: ${ ...condition }
+      next: step_name_1
+    - condition: ${ ...condition }
+      next: step_name_2
+  next: step_name_3
+
+mock_step:
+  call: reflect.mock
+  args:
+    request:
+      query:
+        url: http://localhost:8090/endpoint
+    response:
+      project: "Bürokratt"
+      website: "www.kratid.ee"
+  result: reflected_request
+
+assign_step:
+  assign:
+    variableName: "variable value"
+
+template_step:
+  template: template-to-call
+  requestType: post
+  body:
+    var1: ${incoming.body.element1}
+    var2: "2.0"
+  params:
+    var3: ${incoming.params.element2}
+  result: templateResult
+
+return_step:
+  return: ${the_response}

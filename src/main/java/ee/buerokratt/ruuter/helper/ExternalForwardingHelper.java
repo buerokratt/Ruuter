@@ -1,6 +1,7 @@
 package ee.buerokratt.ruuter.helper;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.helper.exception.InvalidHttpMethodTypeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
@@ -28,28 +30,29 @@ public class ExternalForwardingHelper {
 
     public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestParams) {
         String forwardingUrl = properties.getIncomingRequests().getExternalForwarding().getEndpoint();
-        Map<String, Object> params = shouldAddParams() ? requestParams : new HashMap<>();
+        String methodType = properties.getIncomingRequests().getExternalForwarding().getMethod().toUpperCase(Locale.ROOT);
+        Map<String, Object> params = shouldAddParams(requestParams) ? requestParams : new HashMap<>();
         Map<String, Object> body = shouldAddBody(requestBody) ? requestBody : new HashMap<>();
 
-        if (properties.getIncomingRequests().getExternalForwarding().getMethod().equals(HttpMethod.POST.name())) {
+        if (methodType.equals(HttpMethod.POST.name())) {
             return httpHelper.doPost(forwardingUrl, body, params, new HashMap<>());
         }
-        if (properties.getIncomingRequests().getExternalForwarding().getMethod().equals(HttpMethod.GET.name())) {
+        if (methodType.equals(HttpMethod.GET.name())) {
             return httpHelper.doGet(forwardingUrl, params, new HashMap<>());
         }
-        throw new IllegalArgumentException();
+        throw new InvalidHttpMethodTypeException(methodType);
     }
 
-    public boolean isAllowedForwardingResponse(Integer requestStatus) {
+    public boolean isAllowedForwardingResponse(Integer responseStatus) {
         return properties.getIncomingRequests().getExternalForwarding().getProceedPredicate().getHttpStatusCode().stream()
             .anyMatch(status -> status.contains(REGION_CHARACTERS) ?
-                Integer.parseInt(status.split(REGION_REGEX)[0]) <= requestStatus && requestStatus <= Integer.parseInt(status.split(REGION_REGEX)[1]) :
-                Integer.valueOf(status).equals(requestStatus)
+                Integer.parseInt(status.split(REGION_REGEX)[0]) <= responseStatus && responseStatus <= Integer.parseInt(status.split(REGION_REGEX)[1]) :
+                Integer.valueOf(status).equals(responseStatus)
             );
     }
 
-    private boolean shouldAddParams() {
-        return Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getGet());
+    private boolean shouldAddParams(Map<String, Object> requestParams) {
+        return requestParams != null && Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getGet());
     }
 
     private boolean shouldAddBody(Map<String, Object> requestBody) {

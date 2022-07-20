@@ -11,9 +11,9 @@ import ee.buerokratt.ruuter.service.ConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,17 +42,22 @@ class HttpPostStepTest extends StepTestBase {
     @Mock
     private ApplicationProperties.HttpPost httpPost;
 
+    private HashMap<String, Object> testContext;
+    private HttpQueryArgs expectedPostArgs;
+    private HttpStep expectedPostStep;
+
     @BeforeEach
     protected void mockDependencies() {
+        when(ci.getContext()).thenReturn(testContext);
         when(ci.getProperties()).thenReturn(properties);
         when(ci.getHttpHelper()).thenReturn(httpHelper);
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
-    @Test
-    void execute_shouldSendPostRequestAndStoreResponse(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HashMap<String, Object> testContext = new HashMap<>();
-        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
+    @BeforeEach
+    protected void initializeObjects(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        testContext = new HashMap<>();
+        expectedPostArgs = new HttpQueryArgs() {{
             setBody(new HashMap<>() {{
                 put("some_val", "Hello World");
                 put("another_val", 123);
@@ -60,18 +65,21 @@ class HttpPostStepTest extends StepTestBase {
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
             setHeaders(new HashMap<>());
         }};
-        HttpStep expectedPostStep = new HttpPostStep() {{
+        expectedPostStep = new HttpPostStep() {{
             setName("post_message");
             setArgs(expectedPostArgs);
             setResultName("the_response");
         }};
+    }
+
+    @Test
+    void execute_shouldSendPostRequestAndStoreResponse() {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
-        when(ci.getContext()).thenReturn(testContext);
-        when(properties.getHttpPost()).thenReturn(httpPost);
-        when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
+        when(httpPost.getHeaders()).thenReturn(new HashMap<>());
+        when(properties.getHttpPost()).thenReturn(httpPost);
 
         expectedPostStep.execute(ci);
 
@@ -79,57 +87,32 @@ class HttpPostStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldExecuteDefaultActionWhenResponseCodeIsNotInWhitelist(WireMockRuntimeInfo wireMockRuntimeInfo) {
+    void execute_shouldExecuteDefaultActionWhenResponseCodeIsNotInWhitelist() {
         DefaultHttpService defaultHttpService = Mockito.spy(new DefaultHttpService() {{
             setService("default-action");
             setBody(new HashMap<>());
             setQuery(new HashMap<>());
         }});
-        HashMap<String, Object> testContext = new HashMap<>();
-        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
-            setBody(new HashMap<>() {{
-                put("some_val", "Hello World");
-                put("another_val", 123);
-            }});
-            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-            setHeaders(new HashMap<>());
-        }};
-        HttpStep failingPostStep = new HttpPostStep() {{
-            setName("post_message");
-            setArgs(expectedPostArgs);
-            setResultName("the_response");
-        }};
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
-        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getRequestOrigin()).thenReturn("");
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(properties.getHttpPost()).thenReturn(httpPost);
+        when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedPostArgs.getBody());
+        when(properties.getHttpPost()).thenReturn(httpPost);
         when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
         when(properties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
 
-        failingPostStep.execute(ci);
+        expectedPostStep.execute(ci);
 
-        verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
+        verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), eq(null));
     }
 
     @Test
-    void execute_shouldAddDefaultHeadersDefinedInSettingsFileToRequest(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HashMap<String, Object> testContext = new HashMap<>();
-        HttpQueryArgs expectedPostArgs = new HttpQueryArgs() {{
-            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-            setHeaders(new HashMap<>() {{
-                put("header1", "value1");
-            }});
-        }};
-        HttpStep expectedPostStep = new HttpPostStep() {{
-            setName("post_message");
-            setArgs(expectedPostArgs);
-            setResultName("the_response");
-        }};
+    void execute_shouldAddDefaultHeadersDefinedInSettingsFileToRequest() {
+        expectedPostArgs.setHeaders(new HashMap<>() {{
+            put("header1", "value1");
+        }});
         ApplicationProperties.HttpPost httpPost = new ApplicationProperties.HttpPost() {{
             setHeaders(new HashMap<>() {{
                 put("header2", "value2");
@@ -137,10 +120,9 @@ class HttpPostStepTest extends StepTestBase {
         }};
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
-        when(ci.getContext()).thenReturn(testContext);
-        when(properties.getHttpPost()).thenReturn(httpPost);
-        when(scriptingHelper.evaluateScripts(any(), anyMap(), anyMap(), anyMap())).thenReturn(null);
         when(httpHelper.doPost(expectedPostArgs.getUrl(), expectedPostArgs.getBody(), expectedPostArgs.getQuery(), expectedPostArgs.getHeaders())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(expectedPostArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(expectedPostArgs.getBody());
+        when(properties.getHttpPost()).thenReturn(httpPost);
         expectedPostStep.execute(ci);
 
         assertEquals("value2", expectedPostStep.getArgs().getHeaders().get("header2"));
