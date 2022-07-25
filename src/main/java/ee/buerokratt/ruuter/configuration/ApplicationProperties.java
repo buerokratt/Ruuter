@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ public class ApplicationProperties {
     public static class IncomingRequests {
         private List<String> allowedMethodTypes;
         private ExternalForwarding externalForwarding = new ExternalForwarding();
+        private Map<String, Object> headers = new HashMap<>();
 
         @Getter
         @Setter
@@ -68,6 +70,6 @@ public class ApplicationProperties {
     @Getter
     @Setter
     public static class HttpPost {
-        private Map<String, String> headers;
+        private Map<String, Object> headers;
     }
 }
