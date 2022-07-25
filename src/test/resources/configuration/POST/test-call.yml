@@ -1,0 +1,7 @@
+assign_value:
+  assign:
+    stringValue: "Bürokratt"
+    integerValue: 2021
+
+return_value:
+  return: "return_value_post"

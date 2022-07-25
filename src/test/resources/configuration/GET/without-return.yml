@@ -1,0 +1,4 @@
+assign_value:
+  assign:
+    stringValue: "Bürokratt"
+    integerValue: 2021

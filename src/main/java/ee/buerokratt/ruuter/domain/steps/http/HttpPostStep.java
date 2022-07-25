@@ -18,8 +18,11 @@ public class HttpPostStep extends HttpStep {
     @Override
     protected ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci) {
         args.addHeaders(ci.getProperties().getHttpPost().getHeaders());
-        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(args.getBody(), ci.getContext(), ci.getRequestBody(), ci.getRequestParams());
-        return ci.getHttpHelper().doPost(args.getUrl(), evaluatedBody, args.getQuery(), args.getHeaders());
+        Map<String, Object> evaluatedBody = ci.getScriptingHelper().evaluateScripts(args.getBody(), ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedQuery = ci.getScriptingHelper().evaluateScripts(args.getQuery(), ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, Object> evaluatedHeaders = ci.getScriptingHelper().evaluateScripts(args.getHeaders(), ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+        Map<String, String> mappedHeaders = ci.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
+        return ci.getHttpHelper().doPost(args.getUrl(), evaluatedBody, evaluatedQuery, mappedHeaders);
     }
 
     @Override

@@ -27,22 +27,24 @@ public class ConfigurationController {
     @RequestMapping(value = "/{configuration}")
     public ResponseEntity<RuuterResponse> queryConfiguration(@PathVariable String configuration,
                                                              @RequestBody(required = false) Map<String, Object> requestBody,
-                                                             @RequestParam(required = false) Map<String, Object> requestParams,
+                                                             @RequestParam(required = false) Map<String, Object> requestQuery,
+                                                             @RequestHeader(required = false) Map<String, String> requestHeaders,
                                                              HttpServletRequest request) {
         if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
             String errorMsg = "Request received with invalid method type %s for configuration: %s".formatted(request.getMethod(), configuration);
             LoggingUtils.logError(log, errorMsg, request.getRemoteAddr(), INCOMING_REQUEST);
             return status(HttpStatus.METHOD_NOT_ALLOWED).body(new RuuterResponse());
         }
-        ConfigurationInstance ci = configurationService.execute(configuration, request.getMethod(),  requestBody, requestParams, request.getRemoteAddr());
-
-        return status(ci.getReturnStatus() == null ? getReturnStatus() : HttpStatus.valueOf(ci.getReturnStatus()))
+        ConfigurationInstance ci = configurationService.execute(configuration, request.getMethod(),  requestBody, requestQuery, requestHeaders, request.getRemoteAddr());
+        return status(ci.getReturnStatus() == null ? getReturnStatus(ci.getReturnValue()) : HttpStatus.valueOf(ci.getReturnStatus()))
             .headers(httpHeaders -> ci.getReturnHeaders().forEach(httpHeaders::add))
             .body(new RuuterResponse(ci.getReturnValue()));
     }
 
-    private HttpStatus getReturnStatus() {
-        Integer finalResponseStatusCode = properties.getFinalResponse().getHttpStatusCode();
+    private HttpStatus getReturnStatus(Object response) {
+        Integer dslWithResponseStatusCode = properties.getFinalResponse().getDslWithResponseHttpStatusCode();
+        Integer dslWithoutResponseStatusCode = properties.getFinalResponse().getDslWithoutResponseHttpStatusCode();
+        Integer finalResponseStatusCode = response == null ? dslWithoutResponseStatusCode : dslWithResponseStatusCode;
         return finalResponseStatusCode != null ? HttpStatus.valueOf(finalResponseStatusCode) : HttpStatus.OK;
     }
 }

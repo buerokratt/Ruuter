@@ -28,17 +28,18 @@ public class ExternalForwardingHelper {
             properties.getIncomingRequests().getExternalForwarding().getProceedPredicate().getHttpStatusCode() != null;
     }
 
-    public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestParams) {
+    public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         String forwardingUrl = properties.getIncomingRequests().getExternalForwarding().getEndpoint();
         String methodType = properties.getIncomingRequests().getExternalForwarding().getMethod().toUpperCase(Locale.ROOT);
-        Map<String, Object> params = shouldAddParams(requestParams) ? requestParams : new HashMap<>();
+        Map<String, Object> query = shouldAddQuery(requestQuery) ? requestQuery : new HashMap<>();
         Map<String, Object> body = shouldAddBody(requestBody) ? requestBody : new HashMap<>();
+        Map<String, String> headers = shouldAddHeaders(requestHeaders) ? requestHeaders : new HashMap<>();
 
         if (methodType.equals(HttpMethod.POST.name())) {
-            return httpHelper.doPost(forwardingUrl, body, params, new HashMap<>());
+            return httpHelper.doPost(forwardingUrl, body, query, headers);
         }
         if (methodType.equals(HttpMethod.GET.name())) {
-            return httpHelper.doGet(forwardingUrl, params, new HashMap<>());
+            return httpHelper.doGet(forwardingUrl, query, headers);
         }
         throw new InvalidHttpMethodTypeException(methodType);
     }
@@ -51,11 +52,15 @@ public class ExternalForwardingHelper {
             );
     }
 
-    private boolean shouldAddParams(Map<String, Object> requestParams) {
+    private boolean shouldAddQuery(Map<String, Object> requestParams) {
         return requestParams != null && Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getGet());
     }
 
     private boolean shouldAddBody(Map<String, Object> requestBody) {
         return requestBody != null && Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getPost());
+    }
+
+    private boolean shouldAddHeaders(Map<String, String> requestHeaders) {
+        return requestHeaders != null && Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getHeaders());
     }
 }
