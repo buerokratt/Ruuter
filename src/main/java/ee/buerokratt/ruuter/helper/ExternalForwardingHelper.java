@@ -26,16 +26,17 @@ public class ExternalForwardingHelper {
             properties.getIncomingRequests().getExternalForwarding().getProceedPredicate().getHttpStatusCode() != null;
     }
 
-    public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestParams) {
+    public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         String forwardingUrl = properties.getIncomingRequests().getExternalForwarding().getEndpoint();
-        Map<String, Object> params = shouldAddParams() ? requestParams : new HashMap<>();
+        Map<String, Object> query = shouldAddParams() ? requestQuery : new HashMap<>();
         Map<String, Object> body = shouldAddBody(requestBody) ? requestBody : new HashMap<>();
+        Map<String, String> headers = shouldAddHeaders(requestHeaders) ? requestHeaders : new HashMap<>();
 
         if (properties.getIncomingRequests().getExternalForwarding().getMethod().equals(HttpMethod.POST.name())) {
-            return httpHelper.doPost(forwardingUrl, body, params, new HashMap<>());
+            return httpHelper.doPost(forwardingUrl, body, query, headers);
         }
         if (properties.getIncomingRequests().getExternalForwarding().getMethod().equals(HttpMethod.GET.name())) {
-            return httpHelper.doGet(forwardingUrl, params, new HashMap<>());
+            return httpHelper.doGet(forwardingUrl, query, headers);
         }
         throw new IllegalArgumentException();
     }
@@ -54,5 +55,9 @@ public class ExternalForwardingHelper {
 
     private boolean shouldAddBody(Map<String, Object> requestBody) {
         return requestBody != null && Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getPost());
+    }
+
+    private boolean shouldAddHeaders(Map<String, String> requestHeaders) {
+        return requestHeaders != null && Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getHeaders());
     }
 }

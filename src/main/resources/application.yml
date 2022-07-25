@@ -6,6 +6,8 @@ application:
     displayResponseContent: false
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
+    headers:
+      header: value
   httpCodesAllowList: [ 200, 201, 202 ]
   defaultServiceInCaseOfException:
     service: default-service

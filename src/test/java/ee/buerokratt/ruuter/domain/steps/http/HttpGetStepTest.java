@@ -6,27 +6,27 @@ import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
-import ee.buerokratt.ruuter.service.ConfigurationService;
+import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.when;
 
 @WireMockTest
 class HttpGetStepTest extends StepTestBase {
 
     @Mock
-    private ApplicationProperties applicationProperties;
+    private ApplicationProperties properties;
 
     @Mock
     private HttpHelper httpHelper;
@@ -35,156 +35,72 @@ class HttpGetStepTest extends StepTestBase {
     private MappingHelper mappingHelper;
 
     @Mock
-    private ConfigurationService configurationService;
+    private ScriptingHelper scriptingHelper;
+
+    private HttpQueryArgs getArgs;
+
+    private HttpStep getStep;
+
+    private Map<String, Object> testContext;
 
     @BeforeEach
     protected void mockDependencies() {
         when(ci.getHttpHelper()).thenReturn(httpHelper);
-        when(ci.getProperties()).thenReturn(applicationProperties);
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(ci.getProperties()).thenReturn(properties);
+        when(ci.getContext()).thenReturn(testContext);
     }
 
-    @Test
-    void execute_shouldQueryEndpointAndStoreResponse(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HashMap<String, Object> testContext = new HashMap<>();
-        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
+    @BeforeEach
+    protected void initializeObjects(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        getArgs = new HttpQueryArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");
                 put("another_val", 123);
             }});
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
         }};
-        HttpStep expectedGetStep = new HttpGetStep() {{
+        getStep = new HttpGetStep() {{
             setName("get_message");
-            setArgs(expectedGetArgs);
+            setArgs(getArgs);
             setResultName("the_response");
         }};
+        testContext = new HashMap<>();
+    }
+
+    @Test
+    void execute_shouldQueryEndpointAndStoreResponse() {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(ci.getContext()).thenReturn(testContext);
-        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
-        expectedGetStep.execute(ci);
+        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
+        getStep.execute(ci);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
         assertEquals(httpResponse.getBody(), ((HttpStepResult) testContext.get("the_response")).getResponse().getBody());
     }
 
     @Test
-    void execute_shouldExecuteDefaultActionWhenRequestIsInvalidAndStopInCaseOfExceptionIsTrue(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        DefaultHttpService defaultHttpService = Mockito.spy(new DefaultHttpService() {{
-            setService("default-action");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-        }});
-        HashMap<String, Object> testContext = new HashMap<>();
-        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
-            setQuery(new HashMap<>() {{
-                put("some_val", "Hello World");
-                put("another_val", 123);
-            }});
-            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-        }};
-        HttpStep failingGetStep = new HttpGetStep() {{
-            setName("get_message");
-            setArgs(expectedGetArgs);
-            setResultName("the_response");
-        }};
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
+    void execute_shouldThrowIllegalArgumentExceptionWhenUrlIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        getStep.getArgs().setUrl("http://notFounUrl:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
 
-        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
-        when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getRequestOrigin()).thenReturn("");
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        when(applicationProperties.getDefaultServiceInCaseOfException()).thenReturn(defaultHttpService);
-        failingGetStep.execute(ci);
+        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
+        when(properties.getStopInCaseOfException()).thenReturn(true);
+        doCallRealMethod().when(httpHelper).doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>());
 
-        verify(configurationService, times(1)).execute(eq("default-action"), anyString(), anyMap(), anyMap(), anyString());
+        assertThrows(IllegalArgumentException.class, () -> getStep.execute(ci));
     }
 
     @Test
-    void execute_shouldExecuteStepSpecificDefaultActionWhenRequestIsInvalidAndStopInCaseOfExceptionIsTrue(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        DefaultHttpService defaultHttpService2 = Mockito.spy(new DefaultHttpService() {{
-            setService("default-action2");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-        }});
-        HashMap<String, Object> testContext = new HashMap<>();
-        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
-            setQuery(new HashMap<>() {{
-                put("some_val", "Hello World");
-                put("another_val", 123);
-            }});
-            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-        }};
-        HttpStep failingGetStep = new HttpGetStep() {{
-            setName("get_message");
-            setArgs(expectedGetArgs);
-            setResultName("the_response");
-            setLocalHttpExceptionService(defaultHttpService2);
-        }};
+    void execute_shouldThrowIllegalArgumentExceptionWhenHttpStatusCodeIsNotinWhitelist() {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
-        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
-        when(ci.getConfigurationService()).thenReturn(configurationService);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getRequestOrigin()).thenReturn("");
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        failingGetStep.execute(ci);
+        when(ci.getHttpHelper().doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
+        when(properties.getStopInCaseOfException()).thenReturn(true);
+        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
 
-        verify(configurationService, times(1)).execute(eq("default-action2"), eq("POST"), anyMap(), anyMap(), anyString());
-    }
-
-    @Test
-    void execute_shouldNotExecuteDefaultActionWhenRequestIsInvalidButDefaultActionIsNotDefined(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HashMap<String, Object> testContext = new HashMap<>();
-        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
-            setQuery(new HashMap<>() {{
-                put("some_val", "Hello World");
-                put("another_val", 123);
-            }});
-            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-        }};
-        HttpStep expectedGetStep = new HttpGetStep() {{
-            setName("get_message");
-            setArgs(expectedGetArgs);
-            setResultName("the_response");
-        }};
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
-
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getHttpHelper().doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        expectedGetStep.execute(ci);
-
-        verify(configurationService, times(0)).execute(anyString(), anyString(), anyMap(), anyMap(), anyString());
-    }
-
-    @Test
-    void execute_shouldThrowIllegalArgumentExceptionWhenHttpStatusCodeIsNotinWhitelist(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        HashMap<String, Object> testContext = new HashMap<>();
-        HttpQueryArgs expectedGetArgs = new HttpQueryArgs() {{
-            setQuery(new HashMap<>() {{
-                put("some_val", "Hello World");
-                put("another_val", 123);
-            }});
-            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-        }};
-        HttpStep expectedGetStep = new HttpGetStep() {{
-            setName("get_message");
-            setArgs(expectedGetArgs);
-            setResultName("the_response");
-        }};
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
-
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getProperties()).thenReturn(applicationProperties);
-        when(applicationProperties.getStopInCaseOfException()).thenReturn(true);
-        when(ci.getHttpHelper().doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), expectedGetArgs.getHeaders())).thenReturn(httpResponse);
-        when(applicationProperties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-
-        assertThrows(IllegalArgumentException.class, () -> expectedGetStep.execute(ci));
+        assertThrows(IllegalArgumentException.class, () -> getStep.execute(ci));
     }
 }

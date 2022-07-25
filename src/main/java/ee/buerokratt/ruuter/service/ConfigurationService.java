@@ -59,12 +59,12 @@ public class ConfigurationService {
         }));
     }
 
-    public ConfigurationInstance execute(String configuration, String requestType, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
-        ConfigurationInstance ci = new ConfigurationInstance(configurations.get(requestType.toUpperCase()).get(configuration), requestBody, requestParams, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+    public ConfigurationInstance execute(String configuration, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
+        ConfigurationInstance ci = new ConfigurationInstance(configurations.get(requestType.toUpperCase()).get(configuration), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
         if (ci.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for configuration: %s".formatted(configuration), requestOrigin, INCOMING_REQUEST);
-            if (allowedToExecuteConfiguration(requestBody, requestParams)) {
+            if (allowedToExecuteConfiguration(requestBody, requestQuery, requestHeaders)) {
                 ci.execute(configuration);
             }
             LoggingUtils.logInfo(log, "Request processed for configuration: %s".formatted(configuration), requestOrigin, INCOMING_RESPONSE);
@@ -75,9 +75,9 @@ public class ConfigurationService {
         return ci;
     }
 
-    private boolean allowedToExecuteConfiguration(Map<String, Object> requestBody, Map<String, Object> requestParams) {
+    private boolean allowedToExecuteConfiguration(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         if (externalForwardingHelper.shouldForwardRequest()) {
-            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestParams);
+            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestQuery, requestHeaders);
             return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
         }
         return true;

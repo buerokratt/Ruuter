@@ -17,7 +17,7 @@ public class AssignStep<T> extends ConfigurationStep {
 
     @Override
     protected void executeStepAction(ConfigurationInstance ci) {
-        assign.forEach((k, v) -> ci.getContext().put(k, ci.getScriptingHelper().evaluateScripts(v, ci.getContext(), ci.getRequestBody(), ci.getRequestParams())));
+        assign.forEach((k, v) -> ci.getContext().put(k, ci.getScriptingHelper().evaluateScripts(v, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders())));
     }
 
     @Override

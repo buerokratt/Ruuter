@@ -48,7 +48,8 @@ public abstract class HttpStep extends ConfigurationStep {
     @Override
     public void handleFailedResult(ConfigurationInstance ci) {
         super.handleFailedResult(ci);
-        if (!isAllowedHttpStatusCode(ci, ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatusCodeValue())) {
+        HttpStepResult stepResult = (HttpStepResult) ci.getContext().get(resultName);
+        if (stepResult != null && !isAllowedHttpStatusCode(ci, stepResult.getResponse().getStatusCodeValue())) {
             DefaultHttpService globalHttpExceptionService = ci.getProperties().getDefaultServiceInCaseOfException();
             if (localHttpExceptionServiceExists()) {
                 localHttpExceptionService.executeHttpDefaultService(ci, resultName);
