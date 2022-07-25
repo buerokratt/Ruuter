@@ -39,7 +39,7 @@ template_step:
   body:
     var1: ${incoming.body.element1}
     var2: "2.0"
-  params:
+  query:
     var3: ${incoming.params.element2}
   result: templateResult
 

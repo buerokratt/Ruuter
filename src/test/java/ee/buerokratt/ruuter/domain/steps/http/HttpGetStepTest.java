@@ -38,17 +38,15 @@ class HttpGetStepTest extends StepTestBase {
     private ScriptingHelper scriptingHelper;
 
     private HttpQueryArgs getArgs;
-
     private HttpStep getStep;
-
     private Map<String, Object> testContext;
-    private HttpQueryArgs expectedGetArgs;
-    private HttpStep expectedGetStep;
 
     @BeforeEach
     protected void mockDependencies() {
         when(ci.getContext()).thenReturn(testContext);
+        when(ci.getMappingHelper()).thenReturn(mappingHelper);
         when(ci.getHttpHelper()).thenReturn(httpHelper);
+        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
         when(ci.getProperties()).thenReturn(properties);
     }
 
@@ -64,7 +62,7 @@ class HttpGetStepTest extends StepTestBase {
         }};
         getStep = new HttpGetStep() {{
             setName("get_message");
-            setArgs(expectedGetArgs);
+            setArgs(getArgs);
             setResultName("the_response");
         }};
     }
@@ -73,14 +71,15 @@ class HttpGetStepTest extends StepTestBase {
     void execute_shouldQueryEndpointAndStoreResponse() {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.OK);
 
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(httpHelper.doGet(expectedGetArgs.getUrl(), expectedGetArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
+        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
         getStep.execute(ci);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
         assertEquals(httpResponse.getBody(), ((HttpStepResult) testContext.get("the_response")).getResponse().getBody());
     }
+
+    @Test
     void execute_shouldThrowIllegalArgumentExceptionWhenUrlIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) {
         getStep.getArgs().setUrl("http://notFounUrl:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
 

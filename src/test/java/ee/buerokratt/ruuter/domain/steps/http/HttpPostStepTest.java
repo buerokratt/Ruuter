@@ -10,7 +10,6 @@ import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -39,9 +38,6 @@ class HttpPostStepTest extends StepTestBase {
 
     @Mock
     private ApplicationProperties.HttpPost httpPost;
-
-    @Mock
-    private ApplicationProperties.Logging logging;
 
     private HttpQueryArgs postArgs;
     private HttpStep postStep;
@@ -80,13 +76,14 @@ class HttpPostStepTest extends StepTestBase {
     void execute_shouldSendPostRequestAndStoreResponse() {
         when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
-//        when(properties.getLogging()).thenReturn(logging);
         when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(properties.getHttpPost()).thenReturn(httpPost);
         postStep.execute(ci);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
     }
+
+    @Test
     void execute_shouldAddDefaultHeadersDefinedInSettingsFileToRequest() {
         postArgs.setHeaders(new HashMap<>() {{
             put("header1", "value1");

@@ -73,14 +73,17 @@ class ExternalForwardingHelperTest {
         Map<String, Object> requestBody = new HashMap<>() {{
             put("key", "value");
         }};
-        Map<String, Object> requestParams = new HashMap<>() {{
+        Map<String, Object> requestQuery = new HashMap<>() {{
             put("key2", "value2");
+        }};
+        Map<String, String> requestHeaders = new HashMap<>() {{
+            put("key3", "value3");
         }};
 
         when(spyProperties.getIncomingRequests()).thenReturn(incomingRequests);
-        helper.forwardRequest(requestBody, requestParams);
+        helper.forwardRequest(requestBody, requestQuery, requestHeaders);
 
-        verify(spyHttpHelper, times(1)).doPost(externalForwarding.getEndpoint(), requestBody, requestParams, new HashMap<>());
+        verify(spyHttpHelper, times(1)).doPost(externalForwarding.getEndpoint(), requestBody, requestQuery, new HashMap<>());
     }
 
     @Test
@@ -94,14 +97,17 @@ class ExternalForwardingHelperTest {
         }};
         ApplicationProperties.IncomingRequests incomingRequests = new ApplicationProperties.IncomingRequests();
         incomingRequests.setExternalForwarding(externalForwarding);
-        Map<String, Object> requestParams = new HashMap<>() {{
+        Map<String, Object> requestQuery = new HashMap<>() {{
             put("key", "value");
+        }};
+        Map<String, String> requestHeaders = new HashMap<>() {{
+            put("key3", "value3");
         }};
 
         when(spyProperties.getIncomingRequests()).thenReturn(incomingRequests);
-        helper.forwardRequest(new HashMap<>(), requestParams);
+        helper.forwardRequest(new HashMap<>(), requestQuery, requestHeaders);
 
-        verify(spyHttpHelper, times(1)).doGet(externalForwarding.getEndpoint(), requestParams, new HashMap<>());
+        verify(spyHttpHelper, times(1)).doGet(externalForwarding.getEndpoint(), requestQuery, new HashMap<>());
     }
 
     @Test
@@ -115,7 +121,7 @@ class ExternalForwardingHelperTest {
 
         when(spyProperties.getIncomingRequests()).thenReturn(incomingRequests);
 
-        assertThrows(IllegalArgumentException.class, () -> helper.forwardRequest(new HashMap<>(), new HashMap<>()));
+        assertThrows(IllegalArgumentException.class, () -> helper.forwardRequest(new HashMap<>(), new HashMap<>(), new HashMap<>()));
     }
 
     @Test

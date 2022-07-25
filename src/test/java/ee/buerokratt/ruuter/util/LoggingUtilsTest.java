@@ -56,6 +56,7 @@ class LoggingUtilsTest extends StepTestBase {
         when(ci.getContext()).thenReturn(testContext);
         when(ci.getProperties()).thenReturn(properties);
         when(ci.getHttpHelper()).thenReturn(httpHelper);
+        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
     @BeforeEach
@@ -95,7 +96,8 @@ class LoggingUtilsTest extends StepTestBase {
         mappingHelper = new MappingHelper(new ObjectMapper());
 
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), getArgs.getHeaders())).thenReturn(httpResponse);
+        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
         when(properties.getLogging()).thenReturn(globalLogging);
 
         try (MockedStatic<LoggingUtils> mockedLoggingUtils = mockStatic(LoggingUtils.class)) {
@@ -112,8 +114,8 @@ class LoggingUtilsTest extends StepTestBase {
 
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), postArgs.getQuery(), postArgs.getHeaders())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(postArgs.getBody());
+        when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getLogging()).thenReturn(globalLogging);
         when(properties.getHttpPost()).thenReturn(httpPost);
 
@@ -132,8 +134,8 @@ class LoggingUtilsTest extends StepTestBase {
 
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), postArgs.getQuery(), postArgs.getHeaders())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(postArgs.getBody());
+        when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getHttpPost()).thenReturn(httpPost);
 
         try(MockedStatic<LoggingUtils> mockedLoggingUtils = mockStatic(LoggingUtils.class)) {
@@ -151,8 +153,8 @@ class LoggingUtilsTest extends StepTestBase {
 
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), postArgs.getQuery(), postArgs.getHeaders())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(postArgs.getBody());
+        when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getHttpPost()).thenReturn(httpPost);
 
         try(MockedStatic<LoggingUtils> mockedLoggingUtils = mockStatic(LoggingUtils.class)) {
