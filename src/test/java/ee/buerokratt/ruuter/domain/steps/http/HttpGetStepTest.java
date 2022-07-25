@@ -38,22 +38,21 @@ class HttpGetStepTest extends StepTestBase {
     private ScriptingHelper scriptingHelper;
 
     private HttpQueryArgs getArgs;
-
     private HttpStep getStep;
-
     private Map<String, Object> testContext;
 
     @BeforeEach
     protected void mockDependencies() {
-        when(ci.getHttpHelper()).thenReturn(httpHelper);
+        when(ci.getContext()).thenReturn(testContext);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(ci.getHttpHelper()).thenReturn(httpHelper);
         when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
         when(ci.getProperties()).thenReturn(properties);
-        when(ci.getContext()).thenReturn(testContext);
     }
 
     @BeforeEach
     protected void initializeObjects(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        testContext = new HashMap<>();
         getArgs = new HttpQueryArgs() {{
             setQuery(new HashMap<>() {{
                 put("some_val", "Hello World");
@@ -66,7 +65,6 @@ class HttpGetStepTest extends StepTestBase {
             setArgs(getArgs);
             setResultName("the_response");
         }};
-        testContext = new HashMap<>();
     }
 
     @Test

@@ -39,9 +39,6 @@ class HttpPostStepTest extends StepTestBase {
     @Mock
     private ApplicationProperties.HttpPost httpPost;
 
-    @Mock
-    private ApplicationProperties.Logging logging;
-
     private HttpQueryArgs postArgs;
     private HttpStep postStep;
     private Map<String, Object> testContext;
@@ -49,6 +46,7 @@ class HttpPostStepTest extends StepTestBase {
 
     @BeforeEach
     protected void mockDependencies() {
+        when(ci.getContext()).thenReturn(testContext);
         when(ci.getProperties()).thenReturn(properties);
         when(ci.getHttpHelper()).thenReturn(httpHelper);
         when(ci.getMappingHelper()).thenReturn(mappingHelper);
@@ -76,11 +74,10 @@ class HttpPostStepTest extends StepTestBase {
 
     @Test
     void execute_shouldSendPostRequestAndStoreResponse() {
-        when(ci.getContext()).thenReturn(testContext);
         when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
-        when(properties.getLogging()).thenReturn(logging);
         when(httpPost.getHeaders()).thenReturn(new HashMap<>());
+        when(properties.getHttpPost()).thenReturn(httpPost);
         postStep.execute(ci);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
@@ -97,7 +94,6 @@ class HttpPostStepTest extends StepTestBase {
             }});
         }};
 
-        when(ci.getContext()).thenReturn(new HashMap<>());
         when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getHttpPost()).thenReturn(httpPost);

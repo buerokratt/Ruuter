@@ -1,0 +1,5 @@
+invalidStep:
+  invalidStepType: http.get
+  args:
+    url: http://localhost:8090/endpoint
+  result: the_response

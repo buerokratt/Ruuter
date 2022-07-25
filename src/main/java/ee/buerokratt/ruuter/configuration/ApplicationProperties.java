@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.configuration;
 
+import ee.buerokratt.ruuter.domain.Logging;
 import ee.buerokratt.ruuter.domain.steps.http.DefaultHttpService;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,13 +22,6 @@ public class ApplicationProperties {
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
     private FinalResponse finalResponse = new FinalResponse();
-
-    @Getter
-    @Setter
-    public static class Logging {
-        private Boolean displayRequestContent;
-        private Boolean displayResponseContent;
-    }
 
     @Setter
     @Getter

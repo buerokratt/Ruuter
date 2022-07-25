@@ -2,7 +2,6 @@ package ee.buerokratt.ruuter.domain.steps.http;
 
 import ee.buerokratt.ruuter.StepTestBase;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
