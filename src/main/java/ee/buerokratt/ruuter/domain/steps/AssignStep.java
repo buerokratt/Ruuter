@@ -17,7 +17,7 @@ public class AssignStep<T> extends DslStep {
 
     @Override
     protected void executeStepAction(DslInstance di) {
-        assign.forEach((k, v) -> di.getContext().put(k, di.getScriptingHelper().evaluateScripts(v, di.getContext(), di.getRequestBody(), di.getRequestParams())));
+        assign.forEach((k, v) -> di.getContext().put(k, di.getScriptingHelper().evaluateScripts(v, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders())));
     }
 
     @Override

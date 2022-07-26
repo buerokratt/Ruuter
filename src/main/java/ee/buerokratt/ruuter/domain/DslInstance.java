@@ -22,7 +22,8 @@ import java.util.Map;
 public class DslInstance {
     private final Map<String, DslStep> steps;
     private final Map<String, Object> requestBody;
-    private final Map<String, Object> requestParams;
+    private final Map<String, Object> requestQuery;
+    private final Map<String, String> requestHeaders;
     private final String requestOrigin;
     private final DslService dslService;
     private final ApplicationProperties properties;
@@ -37,6 +38,7 @@ public class DslInstance {
     private Map<String, String> returnHeaders = new HashMap<>();
 
     public void execute(String dslName) {
+        addGlobalIncomingHeadersToRequestHeaders();
         List<String> stepNames = steps.keySet().stream().toList();
         try {
             executeStep(stepNames.get(0), stepNames);
@@ -62,5 +64,10 @@ public class DslInstance {
         } else if (!previousStep.getNextStepName().equals("end")) {
             executeStep(previousStep.getNextStepName(), stepNames);
         }
+    }
+
+    private void addGlobalIncomingHeadersToRequestHeaders() {
+        Map<String, Object> evaluatedHeaders = scriptingHelper.evaluateScripts(properties.getIncomingRequests().getHeaders(), context, requestBody, requestQuery, requestHeaders);
+        requestHeaders.putAll(mappingHelper.convertMapObjectValuesToString(evaluatedHeaders));
     }
 }

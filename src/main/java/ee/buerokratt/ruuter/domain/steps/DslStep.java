@@ -38,6 +38,7 @@ public abstract class DslStep {
         } catch (Exception e) {
             handleFailedResult(di);
             if (di.getProperties().getStopInCaseOfException() != null && di.getProperties().getStopInCaseOfException()) {
+                Thread.currentThread().interrupt();
                 throw new StepExecutionException(name, e);
             }
         } finally {

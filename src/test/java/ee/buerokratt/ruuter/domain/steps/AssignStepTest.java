@@ -17,24 +17,30 @@ class AssignStepTest extends StepTestBase {
 
     @Mock
     private ScriptingHelper scriptingHelper;
+    private HashMap<String, Object> testContext;
+    private String expectedResult;
 
     @BeforeEach
     protected void mockScriptingHelper() {
         when(di.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getContext()).thenReturn(testContext);
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
+    }
+
+    @BeforeEach
+    protected void initializeObjects() {
+        testContext = new HashMap<>();
+        expectedResult = "VALUE";
     }
 
     @Test
     void execute_shouldAssignVariableToContext() {
-        HashMap<String, Object> testContext = new HashMap<>();
-        String expectedResult = "VALUE";
         AssignStep<String> assignStep = new AssignStep<>() {{
             setAssign(new HashMap<>() {{
                 put("key", expectedResult);
             }});
         }};
 
-        when(di.getContext()).thenReturn(testContext);
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
         assignStep.execute(di);
 
         assertEquals(expectedResult, di.getContext().get("key"));
@@ -42,16 +48,12 @@ class AssignStepTest extends StepTestBase {
 
     @Test
     void execute_shouldCallScriptingHelperWhenScriptFound() {
-        HashMap<String, Object> testContext = new HashMap<>();
-        String expectedResult = "EVALUATED";
         AssignStep<String> assignStep = new AssignStep<>() {{
             setAssign(new HashMap<>() {{
                 put("key", "${value}");
             }});
         }};
 
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
-        when(di.getContext()).thenReturn(testContext);
         assignStep.execute(di);
 
         assertEquals(expectedResult, di.getContext().get("key"));

@@ -28,7 +28,7 @@ public class ReturnStep extends DslStep {
     protected void executeStepAction(DslInstance di) {
         di.setReturnHeaders(formatHeaders(di));
         di.setReturnStatus(status);
-        di.setReturnValue(di.getScriptingHelper().evaluateScripts(returnValue, di.getContext(), di.getRequestBody(), di.getRequestParams()));
+        di.setReturnValue(di.getScriptingHelper().evaluateScripts(returnValue, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders()));
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ReturnStep extends DslStep {
     }
 
     private Map<String, String> formatHeaders(DslInstance di) {
-        Map<String, Object> evaluatedMap = di.getScriptingHelper().evaluateScripts(headers, di.getContext(), di.getRequestBody(), di.getRequestParams());
+        Map<String, Object> evaluatedMap = di.getScriptingHelper().evaluateScripts(headers, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         return evaluatedMap.entrySet().stream().collect(toMap(Entry::getKey, this::entryValueToHeaderString));
     }
 

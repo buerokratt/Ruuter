@@ -21,12 +21,12 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class HttpHelper {
 
-    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> params, Map<String, String> headers) {
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers) {
         WebClient client = WebClient.builder()
             .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
             .baseUrl(url)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .defaultUriVariables(params)
+            .defaultUriVariables(query)
             .build();
 
         try {
@@ -41,12 +41,12 @@ public class HttpHelper {
         }
     }
 
-    public ResponseEntity<Object> doGet(String url, Map<String, Object> params, Map<String, String> headers) {
+    public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers) {
         WebClient client = WebClient.builder()
             .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
             .baseUrl(url)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .defaultUriVariables(params)
+            .defaultUriVariables(query)
             .build();
 
         try {

@@ -24,7 +24,7 @@ public class SwitchStep extends DslStep {
     protected void executeStepAction(DslInstance di) {
         ScriptingHelper scriptingHelper = di.getScriptingHelper();
         Optional<Condition> correctStatement = conditions.stream()
-            .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), di.getContext(), di.getRequestBody(), di.getRequestParams())))
+            .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders())))
             .findFirst();
         correctStatement.ifPresent(condition -> this.setNextStepName(condition.getNextStepName()));
     }

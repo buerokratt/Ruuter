@@ -26,23 +26,26 @@ public class DslController {
 
     @RequestMapping(value = "/{dsl}")
     public ResponseEntity<RuuterResponse> queryDsl(@PathVariable String dsl,
-                                                   @RequestBody(required = false) Map<String, Object> requestBody,
-                                                   @RequestParam(required = false) Map<String, Object> requestParams,
-                                                   HttpServletRequest request) {
+                                                             @RequestBody(required = false) Map<String, Object> requestBody,
+                                                             @RequestParam(required = false) Map<String, Object> requestQuery,
+                                                             @RequestHeader(required = false) Map<String, String> requestHeaders,
+                                                             HttpServletRequest request) {
         if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
             String errorMsg = "Request received with invalid method type %s for DSL: %s".formatted(request.getMethod(), dsl);
             LoggingUtils.logError(log, errorMsg, request.getRemoteAddr(), INCOMING_REQUEST);
             return status(HttpStatus.METHOD_NOT_ALLOWED).body(new RuuterResponse());
         }
-        DslInstance di = dslService.execute(dsl, request.getMethod(),  requestBody, requestParams, request.getRemoteAddr());
+        DslInstance di = dslService.execute(dsl, request.getMethod(),  requestBody, requestQuery, requestHeaders, request.getRemoteAddr());
 
-        return status(di.getReturnStatus() == null ? getReturnStatus() : HttpStatus.valueOf(di.getReturnStatus()))
+        return status(di.getReturnStatus() == null ? getReturnStatus(di.getReturnValue()) : HttpStatus.valueOf(di.getReturnStatus()))
             .headers(httpHeaders -> di.getReturnHeaders().forEach(httpHeaders::add))
             .body(new RuuterResponse(di.getReturnValue()));
     }
 
-    private HttpStatus getReturnStatus() {
-        Integer finalResponseStatusCode = properties.getFinalResponse().getHttpStatusCode();
+    private HttpStatus getReturnStatus(Object response) {
+        Integer dslWithResponseStatusCode = properties.getFinalResponse().getDslWithResponseHttpStatusCode();
+        Integer dslWithoutResponseStatusCode = properties.getFinalResponse().getDslWithoutResponseHttpStatusCode();
+        Integer finalResponseStatusCode = response == null ? dslWithoutResponseStatusCode : dslWithResponseStatusCode;
         return finalResponseStatusCode != null ? HttpStatus.valueOf(finalResponseStatusCode) : HttpStatus.OK;
     }
 }

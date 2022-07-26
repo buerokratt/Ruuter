@@ -15,15 +15,15 @@ import java.util.HashMap;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @WireMockTest(httpPort = 8090)
-@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain"})
+@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain", "application.finalResponse.dslWithoutResponseHttpStatusCode=500"})
 class DslInstanceIT extends BaseIntegrationTest {
     public static final String EXPECTED_RESULT = "expected_result";
 
     @Test
-    void execute_shouldReturnNullWhenExceptionEncountered() {
+    void execute_shouldReturnNullWhenExceptionEncounteredAndReturnStatusCodeDefinedInSettings() {
         client.get()
             .uri("/incorrect-next-value")
-            .exchange().expectStatus().isOk()
+            .exchange().expectStatus().is5xxServerError()
             .expectBody()
             .jsonPath("$.response")
             .isEmpty();

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
+import ee.buerokratt.ruuter.domain.Logging;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
@@ -34,6 +35,7 @@ public abstract class HttpStep extends DslStep {
     protected HttpQueryArgs args;
     protected String call;
     protected DefaultHttpDsl localHttpExceptionDsl;
+    protected Logging logging;
 
     @Override
     protected void executeStepAction(DslInstance di) {
@@ -48,7 +50,8 @@ public abstract class HttpStep extends DslStep {
     @Override
     public void handleFailedResult(DslInstance di) {
         super.handleFailedResult(di);
-        if (!isAllowedHttpStatusCode(di, ((HttpStepResult) di.getContext().get(resultName)).getResponse().getStatusCodeValue())) {
+        HttpStepResult stepResult = (HttpStepResult) di.getContext().get(resultName);
+        if (stepResult != null && !isAllowedHttpStatusCode(di, stepResult.getResponse().getStatusCodeValue())) {
             DefaultHttpDsl globalHttpExceptionDsl = di.getProperties().getDefaultDslInCaseOfException();
             if (localHttpExceptionDslExists()) {
                 localHttpExceptionDsl.executeHttpDefaultDsl(di, resultName);
@@ -64,8 +67,8 @@ public abstract class HttpStep extends DslStep {
         MappingHelper mappingHelper = di.getMappingHelper();
         Integer responseStatus = ((HttpStepResult) di.getContext().get(resultName)).getResponse().getStatusCodeValue();
         String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) di.getContext().get(resultName)).getResponse().getBody());
-        String responseContent = responseBody != null && properties.getLogging().getDisplayResponseContent() ? responseBody : "-";
-        String requestContent = args.getBody() != null && properties.getLogging().getDisplayRequestContent() ? args.getBody().toString() : "-";
+        String responseContent = responseBody != null && displayResponseContent(properties) ? responseBody : "-";
+        String requestContent = args.getBody() != null && displayRequestContent(properties) ? args.getBody().toString() : "-";
         LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
 
@@ -79,6 +82,24 @@ public abstract class HttpStep extends DslStep {
 
     private boolean globalHttpExceptionDslExists(DefaultHttpDsl globalHttpExceptionDsl) {
         return globalHttpExceptionDsl != null && globalHttpExceptionDsl.getDsl() != null;
+    }
+
+    private boolean displayResponseContent(ApplicationProperties properties) {
+        if (logging != null && Boolean.TRUE.equals(logging.getDisplayResponseContent())) {
+            return true;
+        } else if (logging == null || logging.getDisplayResponseContent() == null) {
+            return Boolean.TRUE.equals(properties.getLogging().getDisplayResponseContent());
+        }
+        return false;
+    }
+
+    private boolean displayRequestContent(ApplicationProperties properties) {
+        if (logging != null && Boolean.TRUE.equals(logging.getDisplayRequestContent())) {
+            return true;
+        } else if (logging == null || logging.getDisplayRequestContent() == null) {
+            return Boolean.TRUE.equals(properties.getLogging().getDisplayRequestContent());
+        }
+        return false;
     }
 
     protected abstract ResponseEntity<Object> getRequestResponse(DslInstance di);

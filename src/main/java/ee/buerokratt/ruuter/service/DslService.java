@@ -59,12 +59,12 @@ public class DslService {
         }));
     }
 
-    public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestParams, String requestOrigin) {
-        DslInstance di = new DslInstance(dsls.get(requestType.toUpperCase()).get(dsl), requestBody, requestParams, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+    public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
+        DslInstance di = new DslInstance(dsls.get(requestType.toUpperCase()).get(dsl), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
         if (di.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
-            if (allowedToExecuteDsl(requestBody, requestParams)) {
+            if (allowedToExecuteDsl(requestBody, requestQuery, requestHeaders)) {
                 di.execute(dsl);
             }
             LoggingUtils.logInfo(log, "Request processed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
@@ -75,9 +75,9 @@ public class DslService {
         return di;
     }
 
-    private boolean allowedToExecuteDsl(Map<String, Object> requestBody, Map<String, Object> requestParams) {
+    private boolean allowedToExecuteDsl(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         if (externalForwardingHelper.shouldForwardRequest()) {
-            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestParams);
+            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestQuery, requestHeaders);
             return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
         }
         return true;
