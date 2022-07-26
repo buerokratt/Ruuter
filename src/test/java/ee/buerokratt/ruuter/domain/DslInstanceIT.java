@@ -16,7 +16,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @WireMockTest(httpPort = 8090)
 @TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain", "application.finalResponse.dslWithoutResponseHttpStatusCode=500"})
-class ConfigurationInstanceIT extends BaseIntegrationTest {
+class DslInstanceIT extends BaseIntegrationTest {
     public static final String EXPECTED_RESULT = "expected_result";
 
     @Test

@@ -1,7 +1,7 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -18,17 +18,17 @@ import static java.util.stream.Collectors.toMap;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
-public class ReturnStep extends ConfigurationStep {
+public class ReturnStep extends DslStep {
     @JsonAlias({"return"})
     private String returnValue;
     private Map<String, Object> headers = new LinkedHashMap<>();
     private Integer status;
 
     @Override
-    protected void executeStepAction(ConfigurationInstance ci) {
-        ci.setReturnHeaders(formatHeaders(ci));
-        ci.setReturnStatus(status);
-        ci.setReturnValue(ci.getScriptingHelper().evaluateScripts(returnValue, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders()));
+    protected void executeStepAction(DslInstance di) {
+        di.setReturnHeaders(formatHeaders(di));
+        di.setReturnStatus(status);
+        di.setReturnValue(di.getScriptingHelper().evaluateScripts(returnValue, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders()));
     }
 
     @Override
@@ -36,8 +36,8 @@ public class ReturnStep extends ConfigurationStep {
         return "return";
     }
 
-    private Map<String, String> formatHeaders(ConfigurationInstance ci) {
-        Map<String, Object> evaluatedMap = ci.getScriptingHelper().evaluateScripts(headers, ci.getContext(), ci.getRequestBody(), ci.getRequestQuery(), ci.getRequestHeaders());
+    private Map<String, String> formatHeaders(DslInstance di) {
+        Map<String, Object> evaluatedMap = di.getScriptingHelper().evaluateScripts(headers, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         return evaluatedMap.entrySet().stream().collect(toMap(Entry::getKey, this::entryValueToHeaderString));
     }
 

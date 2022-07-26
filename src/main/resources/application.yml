@@ -9,8 +9,9 @@ application:
     headers:
       header: value
   httpCodesAllowList: [ 200, 201, 202 ]
-  defaultServiceInCaseOfException:
-    service: default-dsl
+  defaultDslInCaseOfException:
+    dsl: default-dsl
+    requestType: "POST"
     body:
       someVal: "Hello World"
     query:

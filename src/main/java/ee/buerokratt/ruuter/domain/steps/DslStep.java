@@ -1,7 +1,7 @@
 package ee.buerokratt.ruuter.domain.steps;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.cloud.sleuth.Tracer;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class ConfigurationStep {
+public abstract class DslStep {
     @JsonAlias({"step"})
     private String name;
     @JsonAlias({"next"})
@@ -23,21 +23,21 @@ public abstract class ConfigurationStep {
     private Boolean skip;
     private Long sleep;
 
-    public final void execute(ConfigurationInstance ci) {
-        Span newSpan = ci.getTracer().nextSpan().name(name);
+    public final void execute(DslInstance di) {
+        Span newSpan = di.getTracer().nextSpan().name(name);
         long startTime = System.currentTimeMillis();
 
-        try (Tracer.SpanInScope ws = ci.getTracer().withSpan(newSpan.start())) {
+        try (Tracer.SpanInScope ws = di.getTracer().withSpan(newSpan.start())) {
             if (sleep != null) {
                 Thread.sleep(sleep);
             }
             if (!Boolean.TRUE.equals(skip)) {
-                executeStepAction(ci);
+                executeStepAction(di);
             }
-            logStep(System.currentTimeMillis() - startTime, ci);
+            logStep(System.currentTimeMillis() - startTime, di);
         } catch (Exception e) {
-            handleFailedResult(ci);
-            if (ci.getProperties().getStopInCaseOfException() != null && ci.getProperties().getStopInCaseOfException()) {
+            handleFailedResult(di);
+            if (di.getProperties().getStopInCaseOfException() != null && di.getProperties().getStopInCaseOfException()) {
                 Thread.currentThread().interrupt();
                 throw new StepExecutionException(name, e);
             }
@@ -46,15 +46,15 @@ public abstract class ConfigurationStep {
         }
     }
 
-    protected void handleFailedResult(ConfigurationInstance ci) {
-        LoggingUtils.logError(log, "Error: %s".formatted(name), ci.getRequestOrigin(), getType());
+    protected void handleFailedResult(DslInstance di) {
+        LoggingUtils.logError(log, "Error: %s".formatted(name), di.getRequestOrigin(), getType());
     }
 
-    protected void logStep(Long elapsedTime, ConfigurationInstance ci) {
-        LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, "-", "-", "-", "-");
+    protected void logStep(Long elapsedTime, DslInstance di) {
+        LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, "-", "-", "-", "-");
     }
 
-    protected abstract void executeStepAction(ConfigurationInstance ci);
+    protected abstract void executeStepAction(DslInstance di);
 
     public abstract String getType();
 }

@@ -43,7 +43,7 @@ Notes:
 
 ## Calling/Querying DSL files
 
-All of Ruuter's DSLs are exposed through the `/{configuration}` endpoint, where `${configuration}` is the name of the DSL without its `yaml` extension.
+All of Ruuter's DSLs are exposed through the `/{dsl}` endpoint, where `${dsl}` is the name of the DSL without its `yaml` extension.
 
 Therefore to call a desired DSL, one must simply make an HTTP request to ruuter, with the desired DSLs name, e.g: `www.example-ruuter.com/messages`
 

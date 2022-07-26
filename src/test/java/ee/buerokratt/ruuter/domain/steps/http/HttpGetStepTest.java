@@ -43,11 +43,11 @@ class HttpGetStepTest extends StepTestBase {
 
     @BeforeEach
     protected void mockDependencies() {
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(ci.getHttpHelper()).thenReturn(httpHelper);
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
-        when(ci.getProperties()).thenReturn(properties);
+        when(di.getContext()).thenReturn(testContext);
+        when(di.getMappingHelper()).thenReturn(mappingHelper);
+        when(di.getHttpHelper()).thenReturn(httpHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getProperties()).thenReturn(properties);
     }
 
     @BeforeEach
@@ -73,7 +73,7 @@ class HttpGetStepTest extends StepTestBase {
 
         when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
-        getStep.execute(ci);
+        getStep.execute(di);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
         assertEquals(httpResponse.getBody(), ((HttpStepResult) testContext.get("the_response")).getResponse().getBody());
@@ -87,18 +87,18 @@ class HttpGetStepTest extends StepTestBase {
         when(properties.getStopInCaseOfException()).thenReturn(true);
         doCallRealMethod().when(httpHelper).doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>());
 
-        assertThrows(IllegalArgumentException.class, () -> getStep.execute(ci));
+        assertThrows(IllegalArgumentException.class, () -> getStep.execute(di));
     }
 
     @Test
     void execute_shouldThrowIllegalArgumentExceptionWhenHttpStatusCodeIsNotinWhitelist() {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
 
-        when(ci.getHttpHelper().doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
+        when(di.getHttpHelper().doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
         when(properties.getStopInCaseOfException()).thenReturn(true);
         when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
 
-        assertThrows(IllegalArgumentException.class, () -> getStep.execute(ci));
+        assertThrows(IllegalArgumentException.class, () -> getStep.execute(di));
     }
 }

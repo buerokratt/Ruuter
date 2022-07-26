@@ -1,12 +1,11 @@
 package ee.buerokratt.ruuter.domain;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
-import ee.buerokratt.ruuter.service.ConfigurationService;
+import ee.buerokratt.ruuter.service.DslService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ConfigurationInstanceTest {
 
     @Mock
-    private ConfigurationService configurationService;
+    private DslService dslService;
 
     @Mock
     private ApplicationProperties properties;
@@ -43,8 +42,8 @@ class ConfigurationInstanceTest {
 
     @Test
     void execute_shouldAddGlobalHeadersToRequestHeaders() {
-        ConfigurationInstance ci = new ConfigurationInstance(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), "",
-            configurationService, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+        DslInstance di = new DslInstance(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), "",
+            dslService, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
         ApplicationProperties.IncomingRequests incomingRequests = new ApplicationProperties.IncomingRequests() {{
             setHeaders(new HashMap<>() {{
                 put("header", "headerValue");
@@ -57,8 +56,8 @@ class ConfigurationInstanceTest {
         when(properties.getIncomingRequests()).thenReturn(incomingRequests);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(incomingRequests.getHeaders());
         when(mappingHelper.convertMapObjectValuesToString(anyMap())).thenReturn(incomingRequestsHeaders);
-        ci.execute("random-name");
+        di.execute("random-name");
 
-        assertEquals(incomingRequests.getHeaders(), ci.getRequestHeaders());
+        assertEquals(incomingRequests.getHeaders(), di.getRequestHeaders());
     }
 }

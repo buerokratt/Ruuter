@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.DslInstance;
+import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.Logging;
-import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
@@ -29,59 +29,59 @@ import org.springframework.http.ResponseEntity;
     @JsonSubTypes.Type(value = HttpPostStep.class, name = "http.post"),
 })
 @NoArgsConstructor
-public abstract class HttpStep extends ConfigurationStep {
+public abstract class HttpStep extends DslStep {
     @JsonAlias({"result"})
     protected String resultName;
     protected HttpQueryArgs args;
     protected String call;
-    protected DefaultHttpService localHttpExceptionService;
+    protected DefaultHttpDsl localHttpExceptionDsl;
     protected Logging logging;
 
     @Override
-    protected void executeStepAction(ConfigurationInstance ci) {
-        ResponseEntity<Object> response = getRequestResponse(ci);
-        ci.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
+    protected void executeStepAction(DslInstance di) {
+        ResponseEntity<Object> response = getRequestResponse(di);
+        di.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
 
-        if (!isAllowedHttpStatusCode(ci, response.getStatusCodeValue())) {
+        if (!isAllowedHttpStatusCode(di, response.getStatusCodeValue())) {
             throw new IllegalArgumentException();
         }
     }
 
     @Override
-    public void handleFailedResult(ConfigurationInstance ci) {
-        super.handleFailedResult(ci);
-        HttpStepResult stepResult = (HttpStepResult) ci.getContext().get(resultName);
-        if (stepResult != null && !isAllowedHttpStatusCode(ci, stepResult.getResponse().getStatusCodeValue())) {
-            DefaultHttpService globalHttpExceptionService = ci.getProperties().getDefaultServiceInCaseOfException();
-            if (localHttpExceptionServiceExists()) {
-                localHttpExceptionService.executeHttpDefaultService(ci, resultName);
-            } else if (globalHttpExceptionServiceExists(globalHttpExceptionService)) {
-                globalHttpExceptionService.executeHttpDefaultService(ci, resultName);
+    public void handleFailedResult(DslInstance di) {
+        super.handleFailedResult(di);
+        HttpStepResult stepResult = (HttpStepResult) di.getContext().get(resultName);
+        if (stepResult != null && !isAllowedHttpStatusCode(di, stepResult.getResponse().getStatusCodeValue())) {
+            DefaultHttpDsl globalHttpExceptionDsl = di.getProperties().getDefaultDslInCaseOfException();
+            if (localHttpExceptionDslExists()) {
+                localHttpExceptionDsl.executeHttpDefaultDsl(di, resultName);
+            } else if (globalHttpExceptionDslExists(globalHttpExceptionDsl)) {
+                globalHttpExceptionDsl.executeHttpDefaultDsl(di, resultName);
             }
         }
     }
 
     @Override
-    protected void logStep(Long elapsedTime, ConfigurationInstance ci) {
-        ApplicationProperties properties = ci.getProperties();
-        MappingHelper mappingHelper = ci.getMappingHelper();
-        Integer responseStatus = ((HttpStepResult) ci.getContext().get(resultName)).getResponse().getStatusCodeValue();
-        String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) ci.getContext().get(resultName)).getResponse().getBody());
+    protected void logStep(Long elapsedTime, DslInstance di) {
+        ApplicationProperties properties = di.getProperties();
+        MappingHelper mappingHelper = di.getMappingHelper();
+        Integer responseStatus = ((HttpStepResult) di.getContext().get(resultName)).getResponse().getStatusCodeValue();
+        String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) di.getContext().get(resultName)).getResponse().getBody());
         String responseContent = responseBody != null && displayResponseContent(properties) ? responseBody : "-";
         String requestContent = args.getBody() != null && displayRequestContent(properties) ? args.getBody().toString() : "-";
-        LoggingUtils.logStep(log, this, ci.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
+        LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
     }
 
-    private boolean isAllowedHttpStatusCode(ConfigurationInstance ci, Integer response) {
-        return ci.getProperties().getHttpCodesAllowList().isEmpty() || ci.getProperties().getHttpCodesAllowList().contains(response);
+    private boolean isAllowedHttpStatusCode(DslInstance di, Integer response) {
+        return di.getProperties().getHttpCodesAllowList().isEmpty() || di.getProperties().getHttpCodesAllowList().contains(response);
     }
 
-    private boolean localHttpExceptionServiceExists() {
-        return localHttpExceptionService != null && localHttpExceptionService.getService() != null;
+    private boolean localHttpExceptionDslExists() {
+        return localHttpExceptionDsl != null && localHttpExceptionDsl.getDsl() != null;
     }
 
-    private boolean globalHttpExceptionServiceExists(DefaultHttpService globalHttpExceptionConfiguration) {
-        return globalHttpExceptionConfiguration != null && globalHttpExceptionConfiguration.getService() != null;
+    private boolean globalHttpExceptionDslExists(DefaultHttpDsl globalHttpExceptionDsl) {
+        return globalHttpExceptionDsl != null && globalHttpExceptionDsl.getDsl() != null;
     }
 
     private boolean displayResponseContent(ApplicationProperties properties) {
@@ -102,5 +102,5 @@ public abstract class HttpStep extends ConfigurationStep {
         return false;
     }
 
-    protected abstract ResponseEntity<Object> getRequestResponse(ConfigurationInstance ci);
+    protected abstract ResponseEntity<Object> getRequestResponse(DslInstance di);
 }

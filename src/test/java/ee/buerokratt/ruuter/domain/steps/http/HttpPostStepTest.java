@@ -46,11 +46,11 @@ class HttpPostStepTest extends StepTestBase {
 
     @BeforeEach
     protected void mockDependencies() {
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getProperties()).thenReturn(properties);
-        when(ci.getHttpHelper()).thenReturn(httpHelper);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getContext()).thenReturn(testContext);
+        when(di.getProperties()).thenReturn(properties);
+        when(di.getHttpHelper()).thenReturn(httpHelper);
+        when(di.getMappingHelper()).thenReturn(mappingHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
         when(properties.getHttpPost()).thenReturn(httpPost);
     }
 
@@ -78,7 +78,7 @@ class HttpPostStepTest extends StepTestBase {
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(properties.getHttpPost()).thenReturn(httpPost);
-        postStep.execute(ci);
+        postStep.execute(di);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
     }
@@ -97,7 +97,7 @@ class HttpPostStepTest extends StepTestBase {
         when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getHttpPost()).thenReturn(httpPost);
-        postStep.execute(ci);
+        postStep.execute(di);
 
         assertEquals("value2", postStep.getArgs().getHeaders().get("header2"));
     }
@@ -106,11 +106,10 @@ class HttpPostStepTest extends StepTestBase {
     void execute_shouldThrowErrorWhenUrlIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) {
         postStep.getArgs().setUrl("http://notFounUrl:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
 
-        when(ci.getContext()).thenReturn(testContext);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getStopInCaseOfException()).thenReturn(true);
         doCallRealMethod().when(httpHelper).doPost(postArgs.getUrl(), postArgs.getBody(), postArgs.getQuery(), new HashMap<>());
 
-        assertThrows(IllegalArgumentException.class, () -> postStep.execute(ci));
+        assertThrows(IllegalArgumentException.class, () -> postStep.execute(di));
     }
 }

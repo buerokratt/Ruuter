@@ -22,8 +22,8 @@ class AssignStepTest extends StepTestBase {
 
     @BeforeEach
     protected void mockScriptingHelper() {
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getContext()).thenReturn(testContext);
         when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
     }
 
@@ -41,9 +41,9 @@ class AssignStepTest extends StepTestBase {
             }});
         }};
 
-        assignStep.execute(ci);
+        assignStep.execute(di);
 
-        assertEquals(expectedResult, ci.getContext().get("key"));
+        assertEquals(expectedResult, di.getContext().get("key"));
     }
 
     @Test
@@ -54,8 +54,8 @@ class AssignStepTest extends StepTestBase {
             }});
         }};
 
-        assignStep.execute(ci);
+        assignStep.execute(di);
 
-        assertEquals(expectedResult, ci.getContext().get("key"));
+        assertEquals(expectedResult, di.getContext().get("key"));
     }
 }

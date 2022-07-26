@@ -39,9 +39,9 @@ class HttpMockStepTest extends StepTestBase {
             setResponse(new ResponseEntity<>(mockStepResponse, null, HttpStatus.OK));
         }};
 
-        when(ci.getContext()).thenReturn(testContext);
-        httpMockStep.execute(ci);
+        when(di.getContext()).thenReturn(testContext);
+        httpMockStep.execute(di);
 
-        assertEquals(expectedResult, ci.getContext().get(resultName));
+        assertEquals(expectedResult, di.getContext().get(resultName));
     }
 }
