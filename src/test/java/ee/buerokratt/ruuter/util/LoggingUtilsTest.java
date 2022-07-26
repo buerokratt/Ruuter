@@ -53,10 +53,10 @@ class LoggingUtilsTest extends StepTestBase {
 
     @BeforeEach
     protected void mockDependencies() {
-        when(ci.getContext()).thenReturn(testContext);
-        when(ci.getProperties()).thenReturn(properties);
-        when(ci.getHttpHelper()).thenReturn(httpHelper);
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getContext()).thenReturn(testContext);
+        when(di.getProperties()).thenReturn(properties);
+        when(di.getHttpHelper()).thenReturn(httpHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
     @BeforeEach
@@ -95,13 +95,13 @@ class LoggingUtilsTest extends StepTestBase {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>(3, null, HttpStatus.OK);
         mappingHelper = new MappingHelper(new ObjectMapper());
 
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(di.getMappingHelper()).thenReturn(mappingHelper);
         when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
         when(properties.getLogging()).thenReturn(globalLogging);
 
         try (MockedStatic<LoggingUtils> mockedLoggingUtils = mockStatic(LoggingUtils.class)) {
-            getStep.execute(ci);
+            getStep.execute(di);
             mockedLoggingUtils.verify(() -> LoggingUtils.logStep(any(), any(), any(), anyLong(), anyString(), eq("-"), eq(Objects.requireNonNull(httpResponse.getBody()).toString()), anyString()), times(1));
         }
     }
@@ -112,15 +112,15 @@ class LoggingUtilsTest extends StepTestBase {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>(3, null, HttpStatus.OK);
         mappingHelper = new MappingHelper(new ObjectMapper());
 
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getMappingHelper()).thenReturn(mappingHelper);
         when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getLogging()).thenReturn(globalLogging);
         when(properties.getHttpPost()).thenReturn(httpPost);
 
         try(MockedStatic<LoggingUtils> mockedLoggingUtils = mockStatic(LoggingUtils.class)) {
-            postStep.execute(ci);
+            postStep.execute(di);
             mockedLoggingUtils.verify(() -> LoggingUtils.logStep(any(), any(), any(), anyLong(), anyString(), eq(postArgs.getBody().toString()), eq(Objects.requireNonNull(httpResponse.getBody()).toString()), anyString()), times(1));
         }
     }
@@ -132,14 +132,14 @@ class LoggingUtilsTest extends StepTestBase {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>(3, null, HttpStatus.OK);
         mappingHelper = new MappingHelper(new ObjectMapper());
 
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getMappingHelper()).thenReturn(mappingHelper);
         when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getHttpPost()).thenReturn(httpPost);
 
         try(MockedStatic<LoggingUtils> mockedLoggingUtils = mockStatic(LoggingUtils.class)) {
-            postStep.execute(ci);
+            postStep.execute(di);
             mockedLoggingUtils.verify(() -> LoggingUtils.logStep(any(), any(), any(), anyLong(), anyString(), eq("-"), eq("-"), anyString()), times(1));
         }
     }
@@ -151,14 +151,14 @@ class LoggingUtilsTest extends StepTestBase {
         ResponseEntity<Object> httpResponse = new ResponseEntity<>(3, null, HttpStatus.OK);
         mappingHelper = new MappingHelper(new ObjectMapper());
 
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
-        when(ci.getMappingHelper()).thenReturn(mappingHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getMappingHelper()).thenReturn(mappingHelper);
         when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getHttpPost()).thenReturn(httpPost);
 
         try(MockedStatic<LoggingUtils> mockedLoggingUtils = mockStatic(LoggingUtils.class)) {
-            postStep.execute(ci);
+            postStep.execute(di);
             mockedLoggingUtils.verify(() -> LoggingUtils.logStep(any(), any(), any(), anyLong(), anyString(), eq(postArgs.getBody().toString()), eq(Objects.requireNonNull(httpResponse.getBody()).toString()), anyString()), times(1));
         }
     }
