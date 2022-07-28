@@ -22,6 +22,8 @@ public abstract class DslStep {
     private String nextStepName;
     private Boolean skip;
     private Long sleep;
+    private Integer executionsLimit;
+    private Integer executions = 0;
 
     public final void execute(DslInstance di) {
         Span newSpan = di.getTracer().nextSpan().name(name);
@@ -33,6 +35,7 @@ public abstract class DslStep {
             }
             if (!Boolean.TRUE.equals(skip)) {
                 executeStepAction(di);
+                executions += 1;
             }
             logStep(System.currentTimeMillis() - startTime, di);
         } catch (Exception e) {

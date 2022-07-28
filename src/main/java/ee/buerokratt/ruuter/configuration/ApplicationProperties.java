@@ -22,6 +22,7 @@ public class ApplicationProperties {
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
     private FinalResponse finalResponse = new FinalResponse();
+    private Integer stepExecutionsLimit;
 
     @Setter
     @Getter
