@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/controller"})
-class ConfigurationControllerIT extends BaseIntegrationTest {
+class DslControllerIT extends BaseIntegrationTest {
 
     @Test
-    void queryConfiguration_shouldGet() {
+    void queryDsl_shouldGet() {
         client.get()
             .uri("/test-call")
             .exchange().expectStatus().isOk()
@@ -18,7 +18,7 @@ class ConfigurationControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    void queryConfiguration_shouldPost() {
+    void queryDsl_shouldPost() {
         client.post()
             .uri("/test-call")
             .exchange().expectStatus().isOk()
@@ -28,14 +28,14 @@ class ConfigurationControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    void queryConfiguration_shouldGetMethodNotAllowedErrorWhenInvalidMethodType() {
+    void queryDsl_shouldGetMethodNotAllowedErrorWhenInvalidMethodType() {
         client.put()
             .uri("/test-call")
             .exchange().expectStatus().isEqualTo(405);
     }
 
     @Test
-    void queryConfiguration_shouldSetHeadersToResponse() {
+    void queryDsl_shouldSetHeadersToResponse() {
         client.get()
             .uri("/custom-headers")
             .exchange().expectStatus().isOk()

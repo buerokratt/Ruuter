@@ -13,7 +13,10 @@ The mock step allows to imitate to-be API calls, that do not yet exist.
 
 * `args`
     * request
-        * *...request values*
+        * *url*
+        * *query*
+        * *body*
+        * *headers*
 * `result` - name of the variable to store the response of the mock in, for use in other steps
 
 #### How responses are stored with the result field
@@ -49,7 +52,7 @@ step_1:
   call: reflect.mock
   args:
     request:
-      some: "request"
+      url: https://www.example-url.com
     response:
       project: "Bürokratt"
       website: "www.kratid.ee"

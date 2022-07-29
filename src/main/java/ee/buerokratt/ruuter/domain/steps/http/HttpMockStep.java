@@ -1,8 +1,8 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
-import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.domain.DslInstance;
+import ee.buerokratt.ruuter.domain.steps.DslStep;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,16 +15,16 @@ import org.springframework.http.ResponseEntity;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @NoArgsConstructor
-public class HttpMockStep extends ConfigurationStep {
+public class HttpMockStep extends DslStep {
     private String call;
     private HttpMockArgs args;
     @JsonAlias({"result"})
     private String resultName;
 
     @Override
-    public void executeStepAction(ConfigurationInstance ci) {
+    public void executeStepAction(DslInstance di) {
         ResponseEntity<Object> response = new ResponseEntity<>(args.getResponse(), null, HttpStatus.OK);
-        ci.getContext().put(resultName, new HttpStepResult(args.getRequest(), response, MDC.get("spanId")));
+        di.getContext().put(resultName, new HttpStepResult(args.getRequest(), response, MDC.get("spanId")));
     }
 
     @Override

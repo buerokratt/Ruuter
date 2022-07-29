@@ -5,14 +5,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.domain.steps.AssignStep;
-import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
 import ee.buerokratt.ruuter.domain.steps.TemplateStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpMockStep;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
-import ee.buerokratt.ruuter.helper.exception.InvalidConfigurationException;
-import ee.buerokratt.ruuter.helper.exception.InvalidConfigurationStepException;
+import ee.buerokratt.ruuter.helper.exception.InvalidDslException;
+import ee.buerokratt.ruuter.helper.exception.InvalidDslStepException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,39 +26,43 @@ import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Service
-public class ConfigurationMappingHelper {
+public class DslMappingHelper {
     private final ObjectMapper mapper;
 
-    public ConfigurationMappingHelper(@Qualifier("ymlMapper") ObjectMapper mapper) {
+    public static final String DSL_NOT_YML_FILE_ERROR_MESSAGE = "DSL is not yml file.";
+    public static final String INVALID_STEP_ERROR_MESSAGE = "Invalid step type.";
+
+    public DslMappingHelper(@Qualifier("ymlMapper") ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
-    public Map<String, ConfigurationStep> getConfigurationSteps(Path path) {
+
+    public Map<String, DslStep> getDslSteps(Path path) {
         try {
             if (FileUtils.isYmlFile(path)) {
                 Map<String, JsonNode> nodeMap = mapper.readValue(path.toFile(), new TypeReference<>() {});
                 return convertNodeMapToStepMap(nodeMap);
             } else {
-                throw new IllegalArgumentException("Config not yml file");
+                throw new IllegalArgumentException(DSL_NOT_YML_FILE_ERROR_MESSAGE);
             }
         } catch (Exception e) {
-            throw new InvalidConfigurationException(path.toString(), e);
+            throw new InvalidDslException(path.toString(), e.getMessage(), e);
         }
     }
 
-    private Map<String, ConfigurationStep> convertNodeMapToStepMap(Map<String, JsonNode> stepNodes) {
+    private Map<String, DslStep> convertNodeMapToStepMap(Map<String, JsonNode> stepNodes) {
         return stepNodes.entrySet().stream().collect(toMap(Map.Entry::getKey, map -> {
             try {
-                ConfigurationStep step = convertJsonNodeToConfigurationStep(map.getValue());
+                DslStep step = convertJsonNodeToDslStep(map.getValue());
                 step.setName(map.getKey());
                 return step;
             } catch (Exception e) {
-                throw new InvalidConfigurationStepException(map.getKey(), e);
+                throw new InvalidDslStepException(map.getKey(), e.getMessage(), e);
             }
         }, (x, y) -> y, LinkedHashMap::new));
     }
 
-    private ConfigurationStep convertJsonNodeToConfigurationStep(JsonNode jsonNode) throws JsonProcessingException {
+    private DslStep convertJsonNodeToDslStep(JsonNode jsonNode) throws JsonProcessingException {
         if (jsonNode.get("call") != null) {
             if (jsonNode.get("call").asText().equals("reflect.mock")) {
                 return mapper.treeToValue(jsonNode, HttpMockStep.class);
@@ -77,6 +81,6 @@ public class ConfigurationMappingHelper {
         if (jsonNode.get("switch") != null) {
             return mapper.treeToValue(jsonNode, SwitchStep.class);
         }
-        throw new IllegalArgumentException("No valid step recognised");
+        throw new IllegalArgumentException(INVALID_STEP_ERROR_MESSAGE);
     }
 }

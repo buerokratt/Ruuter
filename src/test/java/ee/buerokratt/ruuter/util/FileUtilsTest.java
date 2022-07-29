@@ -1,4 +1,4 @@
-package ee.buerokratt.ruuter.service.utils;
+package ee.buerokratt.ruuter.util;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,7 @@ class FileUtilsTest {
 
     @Test
     void getFolder_shouldThrowWhenNoDirectory() {
-        String path = FileUtilsTest.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "ConfigurationServiceTest.java";
+        String path = FileUtilsTest.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "DslServiceTest.java";
         assertThrows(RuntimeException.class, () -> getFolderPath(path));
     }
 

@@ -1,11 +1,11 @@
 package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
-import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
-import ee.buerokratt.ruuter.service.ConfigurationService;
+import ee.buerokratt.ruuter.service.DslService;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +19,14 @@ import java.util.Map;
 @Slf4j
 @Data
 @RequiredArgsConstructor
-public class ConfigurationInstance {
+public class DslInstance {
     private final String name;
-    private final Map<String, ConfigurationStep> steps;
+    private final Map<String, DslStep> steps;
     private final Map<String, Object> requestBody;
-    private final Map<String, Object> requestParams;
+    private final Map<String, Object> requestQuery;
+    private final Map<String, String> requestHeaders;
     private final String requestOrigin;
-    private final ConfigurationService configurationService;
+    private final DslService dslService;
     private final ApplicationProperties properties;
     private final ScriptingHelper scriptingHelper;
     private final MappingHelper mappingHelper;
@@ -38,22 +39,23 @@ public class ConfigurationInstance {
     private Map<String, String> returnHeaders = new HashMap<>();
 
     public void execute() {
+        addGlobalIncomingHeadersToRequestHeaders();
         List<String> stepNames = steps.keySet().stream().toList();
         try {
             executeStep(stepNames.get(0), stepNames);
         } catch (Exception e) {
-            LoggingUtils.logError(log, "Error executing configuration: %s".formatted(name), requestOrigin, "", e);
+            LoggingUtils.logError(log, "Error executing DSL: %s".formatted(name), requestOrigin, "", e);
             clearReturnValues();
         }
     }
 
     private void executeStep(String stepName, List<String> stepNames) {
-        ConfigurationStep stepToExecute = steps.get(stepName);
+        DslStep stepToExecute = steps.get(stepName);
         stepToExecute.execute(this);
         executeNextStep(stepToExecute, stepNames);
     }
 
-    private void executeNextStep(ConfigurationStep previousStep, List<String> stepNames) {
+    private void executeNextStep(DslStep previousStep, List<String> stepNames) {
         if (Boolean.TRUE.equals(previousStep.getSkip()) || previousStep.getNextStepName() == null) {
             int nextStepIndex = stepNames.indexOf(previousStep.getName()) + 1;
             if (nextStepIndex >= stepNames.size()) {
@@ -69,5 +71,10 @@ public class ConfigurationInstance {
         setReturnValue(null);
         setReturnStatus(null);
         setReturnHeaders(new HashMap<>());
+    }
+
+    private void addGlobalIncomingHeadersToRequestHeaders() {
+        Map<String, Object> evaluatedHeaders = scriptingHelper.evaluateScripts(properties.getIncomingRequests().getHeaders(), context, requestBody, requestQuery, requestHeaders);
+        requestHeaders.putAll(mappingHelper.convertMapObjectValuesToString(evaluatedHeaders));
     }
 }

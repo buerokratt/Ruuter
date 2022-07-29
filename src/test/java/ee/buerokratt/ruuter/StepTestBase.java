@@ -1,6 +1,6 @@
 package ee.buerokratt.ruuter;
 
-import ee.buerokratt.ruuter.domain.ConfigurationInstance;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,11 +21,11 @@ public class StepTestBase {
     protected Span span;
 
     @Mock
-    protected ConfigurationInstance ci;
+    protected DslInstance di;
 
     @BeforeEach
     protected void mockTracer() {
-        when(ci.getTracer()).thenReturn(tracer);
+        when(di.getTracer()).thenReturn(tracer);
         when(tracer.nextSpan()).thenReturn(span);
         when(span.name(any())).thenReturn(span);
     }

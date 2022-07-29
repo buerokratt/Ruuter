@@ -2,9 +2,7 @@ package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
-import ee.buerokratt.ruuter.domain.steps.http.HttpStepResult;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
-import org.springframework.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -13,7 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -28,7 +25,7 @@ class ReturnStepTest extends StepTestBase {
 
     @BeforeEach
     protected void mockScriptingHelper() {
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
     @Test
@@ -38,11 +35,11 @@ class ReturnStepTest extends StepTestBase {
             setReturnValue(expectedResult);
         }};
 
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
-        returnStep.execute(ci);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
+        returnStep.execute(di);
 
-        verify(ci, times(1)).setReturnValue(expectedResult);
+        verify(di, times(1)).setReturnValue(expectedResult);
     }
 
     @Test
@@ -52,11 +49,11 @@ class ReturnStepTest extends StepTestBase {
             setReturnValue("${value}");
         }};
 
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
-        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
-        returnStep.execute(ci);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(new HashMap<>());
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(expectedResult);
+        returnStep.execute(di);
 
-        verify(ci, times(1)).setReturnValue(expectedResult);
+        verify(di, times(1)).setReturnValue(expectedResult);
     }
 
     @Test
@@ -78,10 +75,10 @@ class ReturnStepTest extends StepTestBase {
         Map<String, String> expectedResult = new HashMap<>();
         expectedResult.put("Set-Cookie", "cookieName=headerName; Domain=localhost; Secure; stringBoolean=false; Max-Age=300; Expires=2022-08-08T10:08:39.159Z; ");
 
-        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(headers);
-        returnStep.execute(ci);
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(headers);
+        returnStep.execute(di);
 
-        verify(scriptingHelper, times(1)).evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap());
-        verify(ci, times(1)).setReturnHeaders(expectedResult);
+        verify(scriptingHelper, times(1)).evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap());
+        verify(di, times(1)).setReturnHeaders(expectedResult);
     }
 }

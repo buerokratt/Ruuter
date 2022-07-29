@@ -23,7 +23,7 @@ class SwitchStepTest extends StepTestBase {
 
     @BeforeEach
     protected void mockScriptingHelper() {
-        when(ci.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
     }
 
     @Test
@@ -50,11 +50,11 @@ class SwitchStepTest extends StepTestBase {
             setName("switch");
         }};
 
-        when(ci.getContext()).thenReturn(testContext);
-        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Sunday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(true);
-        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Saturday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(false);
-        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Friday\"}"), eq(testContext), anyMap(), anyMap())).thenReturn(false);
-        switchStep.execute(ci);
+        when(di.getContext()).thenReturn(testContext);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Sunday\"}"), eq(testContext), anyMap(), anyMap(), anyMap())).thenReturn(true);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Saturday\"}"), eq(testContext), anyMap(), anyMap(), anyMap())).thenReturn(false);
+        when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Friday\"}"), eq(testContext), anyMap(), anyMap(), anyMap())).thenReturn(false);
+        switchStep.execute(di);
 
         assertEquals("fourth_step", switchStep.getNextStepName());
     }

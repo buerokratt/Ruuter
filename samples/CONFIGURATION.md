@@ -28,7 +28,7 @@ If the following values are defined, then every incoming request is forwarded to
 * `paramsToPass.get` - whether to forward query params from incoming request
 * `paramsToPass.post` - whether to forward body from incoming request
 * `paramsToPass.headers` - whether to forward headers from incoming request
-* `proceedPredicate.httpStatusCode` - defines the accepted http statuscodes for proceeding with configuration processing. If the external forwarding request
+* `proceedPredicate.httpStatusCode` - defines the accepted http status codes for proceeding with dsl processing. If the external forwarding request
   receives a response not included in the list, then the request is not processed.
     * values can be defined as single status codes: `200`, `201`, `202`...
     * values can be defined as a range, using `..` special syntax: `200..202`

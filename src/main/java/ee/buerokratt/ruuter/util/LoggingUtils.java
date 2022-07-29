@@ -1,6 +1,6 @@
 package ee.buerokratt.ruuter.util;
 
-import ee.buerokratt.ruuter.domain.steps.ConfigurationStep;
+import ee.buerokratt.ruuter.domain.steps.DslStep;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
@@ -36,7 +36,7 @@ public class LoggingUtils {
         clearLogContext();
     }
 
-    public static void logStep(Logger log, ConfigurationStep step, String requestAuthorIp, Long elapsedTime, String requestTo, String requestContent, String responseContent, String responseStatus) {
+    public static void logStep(Logger log, DslStep step, String requestAuthorIp, Long elapsedTime, String requestTo, String requestContent, String responseContent, String responseStatus) {
         String stepType = Boolean.TRUE.equals(step.getSkip()) ? "skip" : step.getType();
         setLogContext(requestAuthorIp, stepType, elapsedTime.toString(), requestTo, requestContent, responseContent, responseStatus);
         String message = "Executed: %s".formatted(step.getName());

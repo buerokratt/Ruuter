@@ -20,9 +20,9 @@ get_step:
 
 * `args`
     * `query`
-        * *..desired query values*
+        * *..desired query values* - Scripts can be used for query values
     * `headers`
-        * *..desired header values*
+        * *..desired header values* - Scripts can be used for headers values
 * `result` - name of the variable to store the response of the query in, for use in other steps
 
 #### How responses are stored with the result field

@@ -2,7 +2,6 @@ package ee.buerokratt.ruuter.domain.steps.http;
 
 import ee.buerokratt.ruuter.StepTestBase;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -40,9 +39,9 @@ class HttpMockStepTest extends StepTestBase {
             setResponse(new ResponseEntity<>(mockStepResponse, null, HttpStatus.OK));
         }};
 
-        when(ci.getContext()).thenReturn(testContext);
-        httpMockStep.execute(ci);
+        when(di.getContext()).thenReturn(testContext);
+        httpMockStep.execute(di);
 
-        assertEquals(expectedResult, ci.getContext().get(resultName));
+        assertEquals(expectedResult, di.getContext().get(resultName));
     }
 }

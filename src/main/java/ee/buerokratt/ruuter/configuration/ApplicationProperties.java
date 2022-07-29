@@ -1,10 +1,12 @@
 package ee.buerokratt.ruuter.configuration;
 
-import ee.buerokratt.ruuter.domain.steps.http.DefaultHttpService;
+import ee.buerokratt.ruuter.domain.steps.http.DefaultHttpDsl;
+import ee.buerokratt.ruuter.domain.Logging;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,22 +18,16 @@ public class ApplicationProperties {
     private Boolean stopInCaseOfException;
     private List<Integer> httpCodesAllowList;
     private HttpPost httpPost = new HttpPost();
-    private DefaultHttpService defaultServiceInCaseOfException = new DefaultHttpService();
+    private DefaultHttpDsl defaultDslInCaseOfException = new DefaultHttpDsl();
     private Logging logging = new Logging();
     private IncomingRequests incomingRequests = new IncomingRequests();
     private FinalResponse finalResponse = new FinalResponse();
 
-    @Getter
-    @Setter
-    public static class Logging {
-        private Boolean displayRequestContent;
-        private Boolean displayResponseContent;
-    }
-
     @Setter
     @Getter
     public static class FinalResponse {
-        private Integer httpStatusCode;
+        private Integer dslWithResponseHttpStatusCode;
+        private Integer dslWithoutResponseHttpStatusCode;
     }
 
     @Getter
@@ -39,6 +35,7 @@ public class ApplicationProperties {
     public static class IncomingRequests {
         private List<String> allowedMethodTypes;
         private ExternalForwarding externalForwarding = new ExternalForwarding();
+        private Map<String, Object> headers = new HashMap<>();
 
         @Getter
         @Setter
@@ -67,6 +64,6 @@ public class ApplicationProperties {
     @Getter
     @Setter
     public static class HttpPost {
-        private Map<String, String> headers;
+        private Map<String, Object> headers;
     }
 }

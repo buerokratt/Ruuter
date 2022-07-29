@@ -6,15 +6,19 @@ application:
     displayResponseContent: false
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
+    headers:
+      header: value
   httpCodesAllowList: [ 200, 201, 202 ]
-  defaultServiceInCaseOfException:
-    service: default-service
+  defaultDslInCaseOfException:
+    dsl: default-dsl
+    requestType: "POST"
     body:
       someVal: "Hello World"
     query:
       anotherVal: 123
   finalResponse:
-      httpStatusCode: 200
+      dslWithResponseHttpStatusCode: 200
+      dslWithoutResponseHttpStatusCode: 300
   httpPost:
     headers:
       Content-Type: "application/json"
