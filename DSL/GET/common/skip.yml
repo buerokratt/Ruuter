@@ -1,0 +1,19 @@
+first_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value
+
+skipped_step:
+  skip: true
+  call: reflect.mock
+  args:
+    response:
+      test: value
+  next: end
+
+second_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value

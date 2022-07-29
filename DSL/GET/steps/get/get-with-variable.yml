@@ -1,0 +1,13 @@
+assign_values:
+  assign:
+    stringValue: "Bürokratt"
+    integerValue: 2021
+
+get_message:
+  call: http.get
+  args:
+    url: http://localhost:8080/return-with-script
+    query:
+      some_val: ${stringValue}
+      another_val: ${integerValue}
+  result: the_message

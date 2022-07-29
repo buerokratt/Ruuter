@@ -1,0 +1,8 @@
+first_step:
+  assign:
+    variable1:
+      value: "test"
+    variable2: "string"
+
+second_step:
+  return: ${variable1.value} ${variable2}

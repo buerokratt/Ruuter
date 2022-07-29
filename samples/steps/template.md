@@ -21,7 +21,7 @@ template_step:
 * `args`
     * `body`
         * *..desired body values* - emulating HTTP request body params. Scripts can be used.
-    * `params`
+    * `query`
         * *..desired param values* - emulating HTTP request query params. Scripts can be used.
 
 #### How responses are stored with the result field
@@ -30,18 +30,37 @@ Template results are stored "as-is" into the application context.
 
 ## Examples
 
-### Calling out a template with both body and query params
+### Calling out a template
+
+[`template.yml`](../../DSL/GET/steps/template/template.yml)
 
 ```
 call_template:
-  template: template-to-call
+  template: return-with-script
+  requestType: get
+  result: templateResult
+
+return_result:
+  return: {templateResult}
+```
+
+### Calling out a template with both body and query params
+
+[`template-with-params.yml`](../../DSL/GET/steps/template/template-with-params.yml)
+
+```
+call_template:
+  template: passing-post-parameters
   requestType: post
   body:
-    var1: ${incoming.body.element1}
-    var2: "2.0"
-  params:
-    var3: ${incoming.params.element2}
+    project: "byk"
+    website: "krat.ee"
+  query:
+    var1: "var"
   result: templateResult
+
+return_result:
+  return: ${templateResult}
 ```
 
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

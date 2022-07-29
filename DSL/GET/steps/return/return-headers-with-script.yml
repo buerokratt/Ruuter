@@ -1,0 +1,14 @@
+assign_step:
+  assign:
+    setCookie:
+      customCookieName: "customCookieValue"
+      Domain: "https://example.com"
+      Secure: false
+      HttpOnly: true
+    customHeader: "customValue"
+
+return_value:
+  headers:
+    Set-Cookie: ${setCookie}
+    custom-header: ${customHeader}
+  return: "result"

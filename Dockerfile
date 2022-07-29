@@ -19,14 +19,14 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
-ENV application.config-path=/services
+ENV application.config-path=/DSL
 
 RUN adduser -D ruuter
 RUN mkdir logs
-RUN mkdir services
+RUN mkdir DSL
 RUN chown ruuter:ruuter /logs
 RUN chown -R ruuter:ruuter /app
-RUN chown -R ruuter:ruuter /services
+RUN chown -R ruuter:ruuter /DSL
 USER ruuter
 
 ENTRYPOINT ["java","-cp","app:app/lib/*","ee.buerokratt.ruuter.RuuterApplication"]

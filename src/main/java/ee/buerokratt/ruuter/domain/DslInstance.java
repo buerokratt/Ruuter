@@ -20,6 +20,7 @@ import java.util.Map;
 @Data
 @RequiredArgsConstructor
 public class DslInstance {
+    private final String name;
     private final Map<String, DslStep> steps;
     private final Map<String, Object> requestBody;
     private final Map<String, Object> requestQuery;
@@ -37,14 +38,14 @@ public class DslInstance {
     private Integer returnStatus;
     private Map<String, String> returnHeaders = new HashMap<>();
 
-    public void execute(String dslName) {
+    public void execute() {
         addGlobalIncomingHeadersToRequestHeaders();
         List<String> stepNames = steps.keySet().stream().toList();
         try {
             executeStep(stepNames.get(0), stepNames);
         } catch (Exception e) {
-            LoggingUtils.logError(log, "Error executing DSL: %s".formatted(dslName), requestOrigin, "", e);
-            setReturnValue(null);
+            LoggingUtils.logError(log, "Error executing DSL: %s".formatted(name), requestOrigin, "", e);
+            clearReturnValues();
         }
     }
 
@@ -55,7 +56,7 @@ public class DslInstance {
     }
 
     private void executeNextStep(DslStep previousStep, List<String> stepNames) {
-        if (previousStep.getNextStepName() == null) {
+        if (Boolean.TRUE.equals(previousStep.getSkip()) || previousStep.getNextStepName() == null) {
             int nextStepIndex = stepNames.indexOf(previousStep.getName()) + 1;
             if (nextStepIndex >= stepNames.size()) {
                 return;
@@ -64,6 +65,12 @@ public class DslInstance {
         } else if (!previousStep.getNextStepName().equals("end")) {
             executeStep(previousStep.getNextStepName(), stepNames);
         }
+    }
+
+    private void clearReturnValues() {
+        setReturnValue(null);
+        setReturnStatus(null);
+        setReturnHeaders(new HashMap<>());
     }
 
     private void addGlobalIncomingHeadersToRequestHeaders() {

@@ -1,0 +1,11 @@
+post_step:
+  call: http.post
+  args:
+    url: http://localhost:8080/passing-post-parameters
+    body:
+      project: "byk"
+      website: "krat.ee"
+  result: the_message
+
+return_value:
+  return: ${the_message.response}

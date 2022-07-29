@@ -1,0 +1,8 @@
+get_message:
+  call: http.get
+  args:
+    url: http://localhost:8080/return-with-script
+  result: the_message
+
+return_value:
+  return: ${the_message.response}

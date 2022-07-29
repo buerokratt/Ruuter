@@ -60,12 +60,12 @@ public class DslService {
     }
 
     public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
-        DslInstance di = new DslInstance(dsls.get(requestType.toUpperCase()).get(dsl), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+        DslInstance di = new DslInstance(dsl, dsls.get(requestType.toUpperCase()).get(dsl), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
         if (di.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
             if (allowedToExecuteDsl(requestBody, requestQuery, requestHeaders)) {
-                di.execute(dsl);
+                di.execute();
             }
             LoggingUtils.logInfo(log, "Request processed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
         } else {

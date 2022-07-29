@@ -1,0 +1,23 @@
+first_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value
+  next: second_step
+
+this_step_is_jumped_over_and_not_executed:
+  call: http.get
+  args:
+    url: https://example.com/callB
+
+second_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value
+
+third_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value

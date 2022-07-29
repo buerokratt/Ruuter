@@ -26,6 +26,8 @@ conditional_step:
 
 ### Using conditional jump to jump to other steps
 
+[`conditional-jump.yml`](../../DSL/GET/steps/switch/conditional-jump.yml)
+
 ```
 getCurrentTime:
   call: http.get

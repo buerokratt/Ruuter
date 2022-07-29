@@ -1,0 +1,18 @@
+first_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value
+
+this_step_sleeps_for_5_s:
+  sleep: 5000
+  call: reflect.mock
+  args:
+    response:
+      test: value
+
+third_step:
+  call: reflect.mock
+  args:
+    response:
+      test: value

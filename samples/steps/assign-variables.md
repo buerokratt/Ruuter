@@ -17,6 +17,8 @@ assign_step:
 
 ### Assigning variables and using them
 
+[`assign.yml`](../../DSL/GET/steps/assign/assign.yml)
+
 ```
 step_1:
   assign:

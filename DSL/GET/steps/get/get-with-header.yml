@@ -1,0 +1,7 @@
+get_message:
+  call: http.get
+  args:
+    url: http://localhost:8080/return-with-script
+    headers:
+      Content-Type: "text/plain"
+  result: the_message

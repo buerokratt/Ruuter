@@ -13,13 +13,15 @@ Scripting is done in **JavaScript**. Step fields use the following syntax to def
 
 ### Using a variable from previous steps
 
+[`use-variable.yml`](../../DSL/GET/scripting/use-variable.yml)
+
 ```
 first_step:
-    assign: 
-        variable: "myVariable"
+  assign:
+    variable: "myVariable"
 
 second_step:
-    return: ${variable}
+  return: ${variable}
     
 -----------------------------------------------
 Expected result: "myVariable" 
@@ -27,9 +29,11 @@ Expected result: "myVariable"
 
 ### Computation
 
+[`computation.yml`](../../DSL/GET/scripting/computation.yml)
+
 ```
 first_step:
-    return: ${999 + 1}
+  return: ${999 + 1}
     
 -----------------------------------------------
 Expected result: 1000 
@@ -37,9 +41,11 @@ Expected result: 1000
 
 ### Conditional
 
+[`conditional.yml`](../../DSL/GET/scripting/conditional.yml)
+
 ```
 first_step:
-    return: ${"test-string" === "test-string"}
+  return: ${"test-string" === "test-string"}
     
 -----------------------------------------------
 Expected result: true 
@@ -47,41 +53,47 @@ Expected result: true
 
 ### Concatenation
 
+[`concatenation-1.yml`](../../DSL/GET/scripting/concatenation-1.yml)
+
 ```
 first_step:
-    assign: 
-        variable1: 
-            value: "test"
-        variable2: "string"
+  assign:
+    variable1:
+      value: "test"
+    variable2: "string"
 
 second_step:
-    return: ${variable1.value + " " + variable2}
+  return: ${variable1.value + " " + variable2}
     
 -----------------------------------------------
 Expected result: "test string" 
 ```
 
+[`concatenation-2.yml`](../../DSL/GET/scripting/concatenation-2.yml)
+
 ```
 first_step:
-    assign: 
-        variable1: 
-            value: "test"
-        variable2: "string"
+  assign:
+    variable1:
+      value: "test"
+    variable2: "string"
 
 second_step:
-    return: ${variable1.value} ${variable2}
+  return: ${variable1.value} ${variable2}
     
 -----------------------------------------------
 Expected result: "test string" 
 ```
 
+[`concatenation-3.yml`](../../DSL/GET/scripting/concatenation-3.yml)
+
 ```
 first_step:
-    assign: 
-        variable: "test"
-        
+  assign:
+    variable: "test"
+
 second_step:
-    return: PREFIX-${variable}
+  return: PREFIX-${variable}
     
 -----------------------------------------------
 Expected result: "PREFIX-test" 

@@ -61,11 +61,13 @@ The resulting object looks like this, assuming that the `result` field is valued
 
 ### Standard GET request
 
+[`get.yml`](../../DSL/GET/steps/get/get.yml)
+
 ```
 get_message:
   call: http.get
   args:
-    url: https://example.com/endpoint
+    url: http://localhost:8080/return-with-script
     query:
       some_val: "Hello World"
       another_val: 123
@@ -74,11 +76,13 @@ get_message:
 
 ### GET request with custom header and without query parameters
 
+[`get-with-header.yml`](../../DSL/GET/steps/get/get-with-header.yml)
+
 ```
 get_message:
   call: http.get
   args:
-    url: https://example.com/endpoint
+    url: http://localhost:8080/return-with-script
     headers:
       Content-Type: "text/plain"
   result: the_message
@@ -86,31 +90,34 @@ get_message:
 
 ### GET request with variables
 
+[`get-with-variable.yml`](../../DSL/GET/steps/get/get-with-variable.yml)
+
 ```
 assign_values:
-    assign:
-        stringValue: "Bürokratt"
-        integerValue: 2021
+  assign:
+    stringValue: "Bürokratt"
+    integerValue: 2021
 
 get_message:
   call: http.get
   args:
-    url: https://example.com/endpoint
+    url: http://localhost:8080/return-with-script
     query:
       some_val: ${stringValue}
       another_val: ${integerValue}
   result: the_message
+
 ```
 
 ### Using GET request response
+
+[`get-with-used-response.yml`](../../DSL/GET/steps/get/get-with-used-response.yml)
 
 ```
 get_message:
   call: http.get
   args:
-    url: https://example.com/endpoint
-    headers:
-      Content-Type: "text/plain"
+    url: http://localhost:8080/return-with-script
   result: the_message
 
 return_value:
@@ -119,13 +126,15 @@ return_value:
 
 ### Using GET request parameters
 
+[`get-with-used-request.yml`](../../DSL/GET/steps/get/get-with-used-request.yml)
+
 ```
 get_message:
   call: http.get
   args:
-    url: https://example.com/endpoint
-    headers:
-      Content-Type: "text/plain"
+    url: http://localhost:8080/return-with-script
+    query:
+      var: "value"
   result: the_message
 
 return_value:

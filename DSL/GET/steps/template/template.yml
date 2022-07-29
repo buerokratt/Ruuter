@@ -1,0 +1,7 @@
+call_template:
+  template: return-with-script
+  requestType: get
+  result: templateResult
+
+return_result:
+  return: ${templateResult}
