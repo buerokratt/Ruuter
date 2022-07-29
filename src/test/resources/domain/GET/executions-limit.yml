@@ -1,0 +1,12 @@
+step_1:
+  assign:
+    stringValue: ""
+
+step_2:
+  assign:
+    stringValue: ${stringValue + "test"}
+  executionsLimit: 5
+  next: step_2
+
+return_step:
+  return: ${stringValue}
