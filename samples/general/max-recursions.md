@@ -1,10 +1,10 @@
-# Executions limit
+# Max recursions
 
-The executions limit is for executing step a specific number of times and avoiding infinite loops. It can be specified for each step. When a step has reached its maximum executions,
-Ruuter will continue from a next step that was not in a loop. Executions limit can also be defined in an application.yml, but that will apply to all the steps.
-Step specific executions limit overrides the one defined in an application.yml file.
+The max recursions is for executing step a specific number of times and avoiding infinite loops. It can be specified for each step. When a step has reached its maximum recursions,
+Ruuter will continue from a next step that was not in a loop. Max recursions can also be defined in an application.yml, but that will apply to all the steps.
+Step specific max recursions overrides the one defined in an application.yml file.
 
-### Examples of using step specific executions limit
+### Examples of using step specific max recursions
 
 #### First Example
 
@@ -17,7 +17,7 @@ get_step:
     query:
       some_val: "Hello World"
       another_val: 123
-  executionsLimit: 5
+  maxRecursions: 5
   next: get_step
   result: the_message
 
@@ -27,7 +27,7 @@ return_step
 
 #### Second example
 
-In this case get_step has again executions limit 5. The difference is that now there are 3 steps in a loop (assign_step, get_step and post_step).
+In this case get_step has again max recursions 5. The difference is that now there are 3 steps in a loop (assign_step, get_step and post_step).
 These 3 steps will be executed 5 times and when it is done, next step outside the loop will be executed, which in this case is return_step.
 ```
 assign_step:
@@ -42,7 +42,7 @@ get_step:
     query:
       some_val: "Hello World"
       another_val: 123
-  executionsLimit: 5
+  maxRecursions: 5
   next: post_step
   result: the_message
   

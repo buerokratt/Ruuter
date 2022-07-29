@@ -22,7 +22,7 @@ application:
   httpPost:
     headers:
       Content-Type: "application/json"
-  stepExecutionsLimit: 3
+  maxStepRecursions: 10
 
 spring:
   application:

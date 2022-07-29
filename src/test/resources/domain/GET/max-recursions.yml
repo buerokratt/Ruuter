@@ -5,7 +5,7 @@ step_1:
 step_2:
   assign:
     stringValue: ${stringValue + "test"}
-  executionsLimit: 5
+  maxRecursions: 5
   next: step_2
 
 return_step:

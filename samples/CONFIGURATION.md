@@ -22,13 +22,13 @@ application:
     allowedMethodTypes: [ POST, GET ]
 ```
 
-### Step executions limit
-* `stepExecutionsLimit` - defines how many times can one step be executed to execute a step a specific number of times and to avoid infinite loops.
-* When a step has reached its maximum executions, DSL will continue from a next step that was not in a loop.
-* Executions limit can also be defined on a step level which will override this global limit. More information about step level executions limit [here](./general/executions-limit.md).
+### Max step recursions
+* `maxStepRecursions` - defines how many times can one step be executed to execute a step a specific number of times and to avoid infinite loops.
+* When a step has reached its maximum recursions, DSL will continue from a next step that was not in a loop.
+* Max recursions can also be defined on a step level which will override this global limit. More information about step level max recursions [here](./general/max-recursions.md).
 ```
 application:
-    stepExecutionsLimit: 10
+    maxStepRecursions: 10
 ```
 
 ### External forwarding

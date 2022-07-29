@@ -15,7 +15,7 @@ import java.util.HashMap;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @WireMockTest(httpPort = 8090)
-@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain", "application.finalResponse.dslWithoutResponseHttpStatusCode=500", "application.stepExecutionsLimit=3"})
+@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain", "application.finalResponse.dslWithoutResponseHttpStatusCode=500", "application.maxStepRecursions=3"})
 class DslInstanceIT extends BaseIntegrationTest {
     public static final String EXPECTED_RESULT = "expected_result";
 
@@ -109,9 +109,9 @@ class DslInstanceIT extends BaseIntegrationTest {
     }
 
     @Test
-    void execute_shouldExecuteStepFiveTimesWhenExecutionsLimitIsDefinedAsFiveInStepLevel() {
+    void execute_shouldExecuteStepFiveTimesWhenMaxRecursionsIsDefinedAsFiveInStepLevel() {
         client.get()
-            .uri("/executions-limit")
+            .uri("/max-recursions")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -119,9 +119,9 @@ class DslInstanceIT extends BaseIntegrationTest {
     }
 
     @Test
-    void execute_shouldExecuteTwoStepsThreeTimesWhenExecutionsLimitIsDefinedAsThreeInApplication() {
+    void execute_shouldExecuteTwoStepsThreeTimesWhenMaxRecursionsIsDefinedAsThreeInApplication() {
         client.get()
-            .uri("/global-executions-limit")
+            .uri("/global-max-recursions")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -129,9 +129,9 @@ class DslInstanceIT extends BaseIntegrationTest {
     }
 
     @Test
-    void execute_stepLevelExecutionsLimitShouldOverrideGlobalLevelExecutionsLimit() {
+    void execute_stepLevelMaxRecursionsShouldOverrideGlobalLevelMaxRecursions() {
         client.get()
-            .uri("/step-executions-limit")
+            .uri("/step-level-max-recursions")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")

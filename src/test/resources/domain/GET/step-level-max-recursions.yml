@@ -7,13 +7,13 @@ step_2:
   assign:
     stringValue: ${stringValue + "step2"}
   next: step_3
-  executionsLimit: 2
+  maxRecursions: 2
 
 step_3:
   assign:
     stringValue: ${stringValue + "step3"}
   next: step_2
-  executionsLimit: 2
+  maxRecursions: 2
 
 return_step:
   return: ${stringValue}
