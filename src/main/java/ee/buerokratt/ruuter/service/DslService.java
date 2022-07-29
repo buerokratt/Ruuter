@@ -59,8 +59,8 @@ public class DslService {
         }));
     }
 
-    public DslInstance execute(String configuration, String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
-        DslInstance di = new DslInstance(configuration, dsls.get(requestType.toUpperCase()).get(dsl), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+    public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
+        DslInstance di = new DslInstance(dsl, dsls.get(requestType.toUpperCase()).get(dsl), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
         if (di.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);

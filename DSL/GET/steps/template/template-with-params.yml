@@ -4,7 +4,7 @@ call_template:
   body:
     project: "byk"
     website: "krat.ee"
-  params:
+  query:
     var1: "var"
   result: templateResult
 

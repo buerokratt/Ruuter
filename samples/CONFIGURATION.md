@@ -49,13 +49,15 @@ application:
 ### Final Response status code
 
 Final response status code can be defined in application.yml. If defined, all final responses by Ruuter will respond with this status code no matter what.
+There are two options. One is for DSLs that have a response and the other one is for DSLs that do not have a response.
 
 The business value lies in not allowing perpetrators to fish for exceptions, weaknesses, etc in back-end systems via requests from public network.
 
 Nevertheless, applications (including Ruuter's) log files contain actual HTTP response codes, being the appropriate source for debugging, alerting, etc.
 ```
 finalResponse:
-      httpStatusCode: 200
+    dslWithResponseHttpStatusCode: 200
+    dslWithoutResponseHttpStatusCode: 300
 ```
 
 ### Default service

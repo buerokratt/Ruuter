@@ -21,7 +21,7 @@ template_step:
 * `args`
     * `body`
         * *..desired body values* - emulating HTTP request body params. Scripts can be used.
-    * `params`
+    * `query`
         * *..desired param values* - emulating HTTP request query params. Scripts can be used.
 
 #### How responses are stored with the result field
@@ -55,7 +55,7 @@ call_template:
   body:
     project: "byk"
     website: "krat.ee"
-  params:
+  query:
     var1: "var"
   result: templateResult
 

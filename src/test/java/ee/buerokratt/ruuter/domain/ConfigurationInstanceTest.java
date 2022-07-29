@@ -42,7 +42,7 @@ class ConfigurationInstanceTest {
 
     @Test
     void execute_shouldAddGlobalHeadersToRequestHeaders() {
-        DslInstance di = new DslInstance(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), "",
+        DslInstance di = new DslInstance("random-name", new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), "",
             dslService, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
         ApplicationProperties.IncomingRequests incomingRequests = new ApplicationProperties.IncomingRequests() {{
             setHeaders(new HashMap<>() {{
@@ -56,7 +56,7 @@ class ConfigurationInstanceTest {
         when(properties.getIncomingRequests()).thenReturn(incomingRequests);
         when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap())).thenReturn(incomingRequests.getHeaders());
         when(mappingHelper.convertMapObjectValuesToString(anyMap())).thenReturn(incomingRequestsHeaders);
-        di.execute("random-name");
+        di.execute();
 
         assertEquals(incomingRequests.getHeaders(), di.getRequestHeaders());
     }
