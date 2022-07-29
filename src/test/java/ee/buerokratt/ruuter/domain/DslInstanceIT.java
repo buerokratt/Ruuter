@@ -15,7 +15,7 @@ import java.util.HashMap;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @WireMockTest(httpPort = 8090)
-@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain", "application.finalResponse.dslWithoutResponseHttpStatusCode=500"})
+@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain", "application.finalResponse.dslWithoutResponseHttpStatusCode=500", "application.maxStepRecursions=3"})
 class DslInstanceIT extends BaseIntegrationTest {
     public static final String EXPECTED_RESULT = "expected_result";
 
@@ -106,5 +106,35 @@ class DslInstanceIT extends BaseIntegrationTest {
             .expectBody()
             .jsonPath("$..response.body")
             .isEqualTo(expectedMappedValue);
+    }
+
+    @Test
+    void execute_shouldExecuteStepFiveTimesWhenMaxRecursionsIsDefinedAsFiveInStepLevel() {
+        client.get()
+            .uri("/max-recursions")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("testtesttesttesttest");
+    }
+
+    @Test
+    void execute_shouldExecuteTwoStepsThreeTimesWhenMaxRecursionsIsDefinedAsThreeInApplication() {
+        client.get()
+            .uri("/global-max-recursions")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("step2step3step2step3step2step3");
+    }
+
+    @Test
+    void execute_stepLevelMaxRecursionsShouldOverrideGlobalLevelMaxRecursions() {
+        client.get()
+            .uri("/step-level-max-recursions")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("step2step3step2step3");
     }
 }
