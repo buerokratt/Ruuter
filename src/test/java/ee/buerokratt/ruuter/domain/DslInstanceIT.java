@@ -109,32 +109,32 @@ class DslInstanceIT extends BaseIntegrationTest {
     }
 
     @Test
-    void execute_shouldExecuteStepFiveTimesWhenMaxRecursionsIsDefinedAsFiveInStepLevel() {
+    void execute_shouldExecuteStepThreeTimesBecauseGlobalLimitOverridesStepSpecificWhenStepSpecificIsBigger() {
         client.get()
-            .uri("/max-recursions")
+            .uri("/max-recursions-bigger")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
-            .isEqualTo("testtesttesttesttest");
+            .isEqualTo("testtesttest");
     }
 
     @Test
-    void execute_shouldExecuteTwoStepsThreeTimesWhenMaxRecursionsIsDefinedAsThreeInApplication() {
+    void execute_shouldExecuteStepTwoTimesBecauseStepSpecificOverridesGlobalLimitWhenStepSpecificIsSmaller() {
+        client.get()
+            .uri("/max-recursions-smaller")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("testtest");
+    }
+
+    @Test
+    void execute_shouldExecuteTwoStepsThreeTimesWhenMaxRecursionsIsDefinedAsThreeInGlobalLevel() {
         client.get()
             .uri("/global-max-recursions")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
             .isEqualTo("step2step3step2step3step2step3");
-    }
-
-    @Test
-    void execute_stepLevelMaxRecursionsShouldOverrideGlobalLevelMaxRecursions() {
-        client.get()
-            .uri("/step-level-max-recursions")
-            .exchange().expectStatus().isOk()
-            .expectBody()
-            .jsonPath("$.response")
-            .isEqualTo("step2step3step2step3");
     }
 }

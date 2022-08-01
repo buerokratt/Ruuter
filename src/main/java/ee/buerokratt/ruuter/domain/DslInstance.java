@@ -93,8 +93,12 @@ public class DslInstance {
     }
 
     private Integer getStepMaxRecursions(DslStep step) {
-        Integer globalMaxStepRecursions = properties.getMaxStepRecursions() != null ? properties.getMaxStepRecursions() : null;
-        return step.getMaxRecursions() != null ? step.getMaxRecursions() : globalMaxStepRecursions;
+        Integer globalMaxStepRecursions = properties.getMaxStepRecursions();
+        Integer stepSpecificMaxRecursions = step.getMaxRecursions();
+        if (globalMaxStepRecursions == null) {
+            return stepSpecificMaxRecursions;
+        }
+        return stepSpecificMaxRecursions != null && stepSpecificMaxRecursions < globalMaxStepRecursions ? stepSpecificMaxRecursions : globalMaxStepRecursions;
     }
 
     private void executeNextStepOutsideLoop(int nextStepIndex, List<String> stepNames, Integer maxRecursions) {

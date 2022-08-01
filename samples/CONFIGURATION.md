@@ -25,7 +25,8 @@ application:
 ### Max step recursions
 * `maxStepRecursions` - defines how many times can one step be executed to execute a step a specific number of times and to avoid infinite loops.
 * When a step has reached its maximum recursions, DSL will continue from a next step that was not in a loop.
-* Max recursions can also be defined on a step level which will override this global limit. More information about step level max recursions [here](./general/max-recursions.md).
+* Max recursions can also be defined on a step level, which will override this global limit only if it is smaller than the global limit.
+* More information about step level max recursions [here](./general/max-recursions.md).
 ```
 application:
     maxStepRecursions: 10
