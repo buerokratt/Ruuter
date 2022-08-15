@@ -1,0 +1,22 @@
+step_1:
+  assign:
+    stringValue: ""
+  next: step_2
+
+step_2:
+  assign:
+    stringValue: ${stringValue + "step2"}
+  maxRecursions: 3
+
+step_3:
+  assign:
+    stringValue: ${stringValue + "step3"}
+
+step_4:
+  assign:
+    stringValue: ${stringValue + "step4"}
+  maxRecursions: 2
+  next: step_2
+
+return_step:
+  return: ${stringValue}

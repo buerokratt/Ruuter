@@ -1,0 +1,49 @@
+step_1:
+  assign:
+    stringValue: ""
+  next: step_2
+
+step_2:
+  assign:
+    stringValue: ${stringValue + "step2"}
+  maxRecursions: 2
+  next: step_3
+
+step_3:
+  assign:
+    stringValue: ${stringValue + "step3"}
+  maxRecursions: 4
+  next: step_2
+
+step_4:
+  assign:
+    stringValue: ${stringValue + "step4"}
+  maxRecursions: 2
+  next: step_5
+
+step_5:
+  assign:
+    stringValue: ${stringValue + "step5"}
+  maxRecursions: 3
+  next: step_4
+
+step_6:
+  assign:
+    stringValue: ${stringValue + "step6"}
+  maxRecursions: 4
+  next: step_7
+
+step_7:
+  assign:
+    stringValue: ${stringValue + "step7"}
+  maxRecursions: 2
+  next: step_8
+
+step_8:
+  assign:
+    stringValue: ${stringValue + "step8"}
+  maxRecursions: 3
+  next: step_6
+
+return_step:
+  return: ${stringValue}

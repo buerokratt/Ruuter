@@ -36,6 +36,7 @@ public class DslInstance {
 
     private Object returnValue;
     private Integer returnStatus;
+    private int currentLoopMaxRecursions = 1;
     private Map<String, String> returnHeaders = new HashMap<>();
 
     public void execute(String dslName) {
@@ -52,44 +53,48 @@ public class DslInstance {
 
     private void executeStep(String stepName, List<String> stepNames) {
         DslStep stepToExecute = steps.get(stepName);
-        stepToExecute.execute(this);
-        executeNextStep(stepToExecute, stepNames);
+        if (!Objects.equals(stepToExecute.getCurrentRecursions(), getStepMaxRecursions(stepToExecute))) {
+            stepToExecute.execute(this);
+            Integer maxRecursions = getStepMaxRecursions(stepToExecute);
+            if (stepToExecute.getCurrentRecursions() > 1 && maxRecursions != null && maxRecursions > currentLoopMaxRecursions) {
+                setCurrentLoopMaxRecursions(maxRecursions);
+            }
+        }
+        findNextStepToExecute(stepToExecute, stepNames);
     }
 
-    private void executeNextStep(DslStep previousStep, List<String> stepNames) {
+    private void findNextStepToExecute(DslStep previousStep, List<String> stepNames) {
         if (previousStep.getNextStepName() == null) {
             int nextStepIndex = stepNames.indexOf(previousStep.getName()) + 1;
             if (nextStepIndex >= stepNames.size()) {
                 return;
             }
             DslStep nextStep = steps.get(stepNames.get(nextStepIndex));
-            Integer maxRecursions = getStepMaxRecursions(nextStep);
-            Integer currentRecursions = nextStep.getCurrentRecursions();
-            if (Objects.equals(currentRecursions, maxRecursions)) {
-                executeNextStepOutsideLoop(nextStepIndex, stepNames, maxRecursions);
-            } else {
-                executeStep(stepNames.get(nextStepIndex), stepNames);
-            }
+            executeNextStep(nextStep, stepNames);
         } else if (!previousStep.getNextStepName().equals("end")) {
             DslStep nextStep = steps.get(previousStep.getNextStepName());
-            Integer maxRecursions = getStepMaxRecursions(nextStep);
-            Integer currentRecursions = nextStep.getCurrentRecursions();
-            if (Objects.equals(currentRecursions, maxRecursions)) {
-                int nextStepIndex = stepNames.indexOf(nextStep.getName());
-                executeNextStepOutsideLoop(nextStepIndex, stepNames, maxRecursions);
-            } else {
-                executeStep(previousStep.getNextStepName(), stepNames);
-            }
+            executeNextStep(nextStep, stepNames);
         }
     }
 
-    private void addGlobalIncomingHeadersToRequestHeaders() {
-        Map<String, Object> evaluatedHeaders = scriptingHelper.evaluateScripts(properties.getIncomingRequests().getHeaders(), context, requestBody, requestQuery, requestHeaders);
-        requestHeaders.putAll(mappingHelper.convertMapObjectValuesToString(evaluatedHeaders));
+    private void executeNextStep(DslStep nextStep, List<String> stepNames) {
+        if (Objects.equals(nextStep.getCurrentRecursions(), currentLoopMaxRecursions)) {
+            int nextStepIndex = stepNames.indexOf(nextStep.getName());
+            executeNextStepOutsideLoop(nextStepIndex, stepNames);
+        } else {
+            executeStep(nextStep.getName(), stepNames);
+        }
     }
 
-    private void setAllStepsCurrentRecursionsToZero() {
-        steps.forEach((k, v) -> v.setCurrentRecursions(0));
+    private void executeNextStepOutsideLoop(int nextStepIndex, List<String> stepNames) {
+        for (int i = nextStepIndex; i < stepNames.size(); i++) {
+            DslStep nextStep = steps.get(stepNames.get(i));
+            if (!Objects.equals(nextStep.getCurrentRecursions(), getStepMaxRecursions(nextStep))) {
+                setCurrentLoopMaxRecursions(1);
+                executeStep(nextStep.getName(), stepNames);
+                break;
+            }
+        }
     }
 
     private Integer getStepMaxRecursions(DslStep step) {
@@ -101,13 +106,12 @@ public class DslInstance {
         return stepSpecificMaxRecursions != null && stepSpecificMaxRecursions < globalMaxStepRecursions ? stepSpecificMaxRecursions : globalMaxStepRecursions;
     }
 
-    private void executeNextStepOutsideLoop(int nextStepIndex, List<String> stepNames, Integer maxRecursions) {
-        for (int i = nextStepIndex; i < stepNames.size(); i++) {
-            DslStep nextStep = steps.get(stepNames.get(i));
-            if (!Objects.equals(nextStep.getCurrentRecursions(), maxRecursions)) {
-                executeStep(nextStep.getName(), stepNames);
-                break;
-            }
-        }
+    private void addGlobalIncomingHeadersToRequestHeaders() {
+        Map<String, Object> evaluatedHeaders = scriptingHelper.evaluateScripts(properties.getIncomingRequests().getHeaders(), context, requestBody, requestQuery, requestHeaders);
+        requestHeaders.putAll(mappingHelper.convertMapObjectValuesToString(evaluatedHeaders));
+    }
+
+    private void setAllStepsCurrentRecursionsToZero() {
+        steps.forEach((k, v) -> v.setCurrentRecursions(0));
     }
 }
