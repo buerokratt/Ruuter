@@ -22,6 +22,7 @@ public abstract class DslStep {
     private String nextStepName;
     private Boolean skip;
     private Long sleep;
+    private Integer maxRecursions;
 
     public final void execute(DslInstance di) {
         Span newSpan = di.getTracer().nextSpan().name(name);

@@ -59,6 +59,7 @@ class HttpGetStepTest extends StepTestBase {
                 put("another_val", 123);
             }});
             setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
+            setBody(null);
         }};
         getStep = new HttpGetStep() {{
             setName("get_message");

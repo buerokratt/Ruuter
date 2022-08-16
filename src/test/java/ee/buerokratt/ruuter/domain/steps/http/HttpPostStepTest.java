@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.domain.Logging;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
@@ -38,6 +39,9 @@ class HttpPostStepTest extends StepTestBase {
 
     @Mock
     private ApplicationProperties.HttpPost httpPost;
+
+    @Mock
+    private Logging logging;
 
     private HttpQueryArgs postArgs;
     private HttpStep postStep;
@@ -78,6 +82,8 @@ class HttpPostStepTest extends StepTestBase {
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(httpPost.getHeaders()).thenReturn(new HashMap<>());
         when(properties.getHttpPost()).thenReturn(httpPost);
+        when(properties.getLogging()).thenReturn(logging);
+        when(logging.getDisplayRequestContent()).thenReturn(true);
         postStep.execute(di);
 
         assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
@@ -97,6 +103,8 @@ class HttpPostStepTest extends StepTestBase {
         when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
         when(properties.getHttpPost()).thenReturn(httpPost);
+        when(properties.getLogging()).thenReturn(logging);
+        when(logging.getDisplayRequestContent()).thenReturn(true);
         postStep.execute(di);
 
         assertEquals("value2", postStep.getArgs().getHeaders().get("header2"));

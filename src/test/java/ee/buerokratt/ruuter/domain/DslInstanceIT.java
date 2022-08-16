@@ -15,7 +15,7 @@ import java.util.HashMap;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @WireMockTest(httpPort = 8090)
-@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain", "application.finalResponse.dslWithoutResponseHttpStatusCode=500"})
+@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain", "application.finalResponse.dslWithoutResponseHttpStatusCode=500", "application.maxStepRecursions=4"})
 class DslInstanceIT extends BaseIntegrationTest {
     public static final String EXPECTED_RESULT = "expected_result";
 
@@ -106,5 +106,65 @@ class DslInstanceIT extends BaseIntegrationTest {
             .expectBody()
             .jsonPath("$..response.body")
             .isEqualTo(expectedMappedValue);
+    }
+
+    @Test
+    void execute_shouldExecuteStepFourTimesBecauseGlobalLimitOverridesStepSpecificWhenStepSpecificIsBigger() {
+        client.get()
+            .uri("/max-recursions-bigger")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("testtesttesttest");
+    }
+
+    @Test
+    void execute_shouldExecuteStepTwoTimesBecauseStepSpecificOverridesGlobalLimitWhenStepSpecificIsSmaller() {
+        client.get()
+            .uri("/max-recursions-smaller")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("testtest");
+    }
+
+    @Test
+    void execute_shouldExecuteTwoStepsFourTimesWhenMaxRecursionsIsDefinedAsFourInGlobalLevel() {
+        client.get()
+            .uri("/global-max-recursions")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("step2step3step2step3step2step3step2step3");
+    }
+
+    @Test
+    void execute_shouldExecuteEachStepTheAmountOfTimesDefinedForEachStep() {
+        client.get()
+            .uri("/step-specific-max-recursions")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("step2step3step2step3step3");
+    }
+
+    @Test
+    void execute_shouldExecuteEachStepTheAmountOfTimesDefinedForEachStepAndNextStepNameIsNotNecessary() {
+        client.get()
+            .uri("/max-recursions-without-next-step-name")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("step2step3step4step2step3step4step2step3step3");
+    }
+
+    @Test
+    void execute_shouldExecuteDslWithMultipleLoops() {
+        client.get()
+            .uri("/max-recursions-multiple-loops")
+            .exchange().expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.response")
+            .isEqualTo("step2step3step2step3step3step3step4step5step4step5step5step6step7step8step6step7step8step6step8step6");
     }
 }
