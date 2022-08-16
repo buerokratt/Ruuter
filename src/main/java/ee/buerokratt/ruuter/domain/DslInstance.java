@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Data
@@ -38,47 +40,49 @@ public class DslInstance {
     private Integer returnStatus;
     private int currentLoopMaxRecursions = 1;
     private Map<String, String> returnHeaders = new HashMap<>();
+    private Map<String, Integer> recursions;
 
     public void execute(String dslName) {
         addGlobalIncomingHeadersToRequestHeaders();
         List<String> stepNames = steps.keySet().stream().toList();
+        recursions = stepNames.stream().collect(Collectors.toMap(Function.identity(), a -> 0));
         try {
             executeStep(stepNames.get(0), stepNames);
         } catch (Exception e) {
             LoggingUtils.logError(log, "Error executing DSL: %s".formatted(dslName), requestOrigin, "", e);
             setReturnValue(null);
         }
-        setAllStepsCurrentRecursionsToZero();
     }
 
     private void executeStep(String stepName, List<String> stepNames) {
         DslStep stepToExecute = steps.get(stepName);
-        if (!Objects.equals(stepToExecute.getCurrentRecursions(), getStepMaxRecursions(stepToExecute))) {
+        if (!Objects.equals(recursions.get(stepName), getStepMaxRecursions(stepToExecute))) {
             stepToExecute.execute(this);
+            recursions.computeIfPresent(stepName, (k, v) ->  v + 1);
             Integer maxRecursions = getStepMaxRecursions(stepToExecute);
-            if (stepToExecute.getCurrentRecursions() > 1 && maxRecursions != null && maxRecursions > currentLoopMaxRecursions) {
+            if (recursions.get(stepName) > 1 && maxRecursions != null && maxRecursions > currentLoopMaxRecursions) {
                 setCurrentLoopMaxRecursions(maxRecursions);
             }
         }
-        findNextStepToExecute(stepToExecute, stepNames);
+        executeNextStep(stepToExecute, stepNames);
     }
 
-    private void findNextStepToExecute(DslStep previousStep, List<String> stepNames) {
+    private void executeNextStep(DslStep previousStep, List<String> stepNames) {
         if (previousStep.getNextStepName() == null) {
             int nextStepIndex = stepNames.indexOf(previousStep.getName()) + 1;
             if (nextStepIndex >= stepNames.size()) {
                 return;
             }
             DslStep nextStep = steps.get(stepNames.get(nextStepIndex));
-            executeNextStep(nextStep, stepNames);
+            executeNextStepWithoutMaxRecursionsExceeded(nextStep, stepNames);
         } else if (!previousStep.getNextStepName().equals("end")) {
             DslStep nextStep = steps.get(previousStep.getNextStepName());
-            executeNextStep(nextStep, stepNames);
+            executeNextStepWithoutMaxRecursionsExceeded(nextStep, stepNames);
         }
     }
 
-    private void executeNextStep(DslStep nextStep, List<String> stepNames) {
-        if (Objects.equals(nextStep.getCurrentRecursions(), currentLoopMaxRecursions)) {
+    private void executeNextStepWithoutMaxRecursionsExceeded(DslStep nextStep, List<String> stepNames) {
+        if (Objects.equals(recursions.get(nextStep.getName()), currentLoopMaxRecursions)) {
             int nextStepIndex = stepNames.indexOf(nextStep.getName());
             executeNextStepOutsideLoop(nextStepIndex, stepNames);
         } else {
@@ -89,7 +93,7 @@ public class DslInstance {
     private void executeNextStepOutsideLoop(int nextStepIndex, List<String> stepNames) {
         for (int i = nextStepIndex; i < stepNames.size(); i++) {
             DslStep nextStep = steps.get(stepNames.get(i));
-            if (!Objects.equals(nextStep.getCurrentRecursions(), getStepMaxRecursions(nextStep))) {
+            if (!Objects.equals(recursions.get(nextStep.getName()), getStepMaxRecursions(nextStep))) {
                 setCurrentLoopMaxRecursions(1);
                 executeStep(nextStep.getName(), stepNames);
                 break;
@@ -109,9 +113,5 @@ public class DslInstance {
     private void addGlobalIncomingHeadersToRequestHeaders() {
         Map<String, Object> evaluatedHeaders = scriptingHelper.evaluateScripts(properties.getIncomingRequests().getHeaders(), context, requestBody, requestQuery, requestHeaders);
         requestHeaders.putAll(mappingHelper.convertMapObjectValuesToString(evaluatedHeaders));
-    }
-
-    private void setAllStepsCurrentRecursionsToZero() {
-        steps.forEach((k, v) -> v.setCurrentRecursions(0));
     }
 }
