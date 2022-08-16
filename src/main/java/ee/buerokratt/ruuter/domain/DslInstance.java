@@ -84,13 +84,13 @@ public class DslInstance {
     private void executeNextStepWithoutMaxRecursionsExceeded(DslStep nextStep, List<String> stepNames) {
         if (Objects.equals(recursions.get(nextStep.getName()), currentLoopMaxRecursions)) {
             int nextStepIndex = stepNames.indexOf(nextStep.getName());
-            executeNextStepOutsideLoop(nextStepIndex, stepNames);
+            executeNextStepOutsideRecursion(nextStepIndex, stepNames);
         } else {
             executeStep(nextStep.getName(), stepNames);
         }
     }
 
-    private void executeNextStepOutsideLoop(int nextStepIndex, List<String> stepNames) {
+    private void executeNextStepOutsideRecursion(int nextStepIndex, List<String> stepNames) {
         for (int i = nextStepIndex; i < stepNames.size(); i++) {
             DslStep nextStep = steps.get(stepNames.get(i));
             if (!Objects.equals(recursions.get(nextStep.getName()), getStepMaxRecursions(nextStep))) {
