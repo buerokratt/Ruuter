@@ -12,11 +12,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 @WireMockTest
-class ConfigurationMappingHelperTest {
+class DslMappingHelperTest {
 
-    private final String configPath = "C:/Users/ewert.ubaleht/IdeaProjects/ruuter3.0/Ruuter/src/test/resources/dsl/mapping/helper";
+    private final String configPath = System.getProperty("user.dir") + "/src/test/resources/dsl/mapping/helper";
 
     private DslMappingHelper helper;
 
@@ -27,7 +26,7 @@ class ConfigurationMappingHelperTest {
     }
 
     @Test
-    void getConfigurationSteps_shouldReturnConfigurationWithStepsWithAllPossibleStepTypes() {
+    void getDslSteps_shouldReturnDslWithStepsWithAllPossibleStepTypes() {
         Map<String, DslStep> dslSteps = helper.getDslSteps(Path.of(configPath + "/GET/all-possible-step-types.yml"));
 
         assertEquals(7, dslSteps.size());
@@ -41,9 +40,9 @@ class ConfigurationMappingHelperTest {
     }
 
     @Test
-    void getConfigurations_shouldThrowExceptionWhenPathIsNotYmlFile() {
+    void getDslSteps_shouldThrowExceptionWhenPathIsNotYmlFile() {
         Path fullPath = Path.of(configPath + "/GET/get-and-return.json");
-        String expectedErrorMessage = "Encountered error, when loading DSL: C:\\Users\\ewert.ubaleht\\IdeaProjects\\ruuter3.0\\Ruuter\\src\\test\\resources\\dsl\\mapping\\helper\\GET\\get-and-return.json. " +
+        String expectedErrorMessage = "Encountered error, when loading DSL: " + fullPath + ". " +
             DslMappingHelper.DSL_NOT_YML_FILE_ERROR_MESSAGE;
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> helper.getDslSteps(fullPath));
@@ -51,20 +50,18 @@ class ConfigurationMappingHelperTest {
     }
 
     @Test
-    void getConfigurations_shouldThrowExceptionWhenFileContainsInvalidStepType() {
+    void getDslSteps_shouldThrowExceptionWhenFileContainsInvalidStepType() {
         Path fullPath = Path.of(configPath + "/POST/invalid-step-type.yml");
-        String expectedErrorMessage = "Encountered error, when loading DSL: C:\\Users\\ewert.ubaleht\\IdeaProjects\\ruuter3.0\\Ruuter\\src\\test\\resources\\dsl\\mapping\\helper\\POST\\invalid-step-type.yml" +
-            ". Unable to load invalid step: invalidStep. Error message: " + DslMappingHelper.INVALID_STEP_ERROR_MESSAGE;
+        String expectedErrorMessage = "Encountered error, when loading DSL: " + fullPath + ". Unable to load invalid step: invalidStep. Error message: " + DslMappingHelper.INVALID_STEP_ERROR_MESSAGE;
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> helper.getDslSteps(fullPath));
         assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
-    void getConfigurations_shouldThrowExceptionWhenStepHasInvalidParameter() {
+    void getDslSteps_shouldThrowExceptionWhenStepHasInvalidParameter() {
         Path fullPath = Path.of(configPath + "/POST/invalid-step-parameter.yml");
-        String expectedErrorMessage = "Encountered error, when loading DSL: C:\\Users\\ewert.ubaleht\\IdeaProjects\\ruuter3.0\\Ruuter\\src\\test\\resources\\dsl\\mapping\\helper\\POST\\invalid-step-parameter.yml" +
-            ". Unable to load invalid step: invalidStep. Error message: ";
+        String expectedErrorMessage = "Encountered error, when loading DSL: " + fullPath + ". Unable to load invalid step: invalidStep. Error message: ";
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> helper.getDslSteps(fullPath));
         assertTrue(exception.getMessage().contains(expectedErrorMessage));
