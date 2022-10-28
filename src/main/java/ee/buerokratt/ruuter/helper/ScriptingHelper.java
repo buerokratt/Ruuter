@@ -31,11 +31,11 @@ public class ScriptingHelper {
     }
 
     public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
-        if (toEval instanceof Map map) {
-            return evaluateScripts(map, context, requestBody, requestQuery, requestHeaders);
-        }
         if (toEval == null || !containsScript(toEval.toString())) {
             return toEval;
+        }
+        if (toEval instanceof Map) {
+            return evaluateScripts(toEval, context, requestBody, requestQuery, requestHeaders);
         }
 
         Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestQuery, requestHeaders);
