@@ -1,0 +1,2 @@
+return:
+  return: ${incoming.body.somethingRequired}${incoming.body.optional_something}
