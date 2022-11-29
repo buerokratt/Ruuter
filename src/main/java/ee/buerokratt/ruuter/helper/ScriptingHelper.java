@@ -31,11 +31,11 @@ public class ScriptingHelper {
     }
 
     public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
-        if (toEval instanceof Map map) {
-            return evaluateScripts(map, context, requestBody, requestQuery, requestHeaders);
-        }
         if (toEval == null || !containsScript(toEval.toString())) {
             return toEval;
+        }
+        if (toEval instanceof Map) {
+            return evaluateScripts(toEval, context, requestBody, requestQuery, requestHeaders);
         }
 
         Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestQuery, requestHeaders);
@@ -45,7 +45,7 @@ public class ScriptingHelper {
         List<Object> evaluatedScripts = Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(toEval.toString()).results()
             .map(matchResult -> matchResult.group(0))
             .map(scriptToExecute -> setupObjectsInScript(removeScriptWrapper(scriptToExecute), bindings, evalContext))
-            .map(evaluableScript -> evaluate(bindings, evaluableScript))
+            .map(evaluableScript -> filterEmptyOptional(bindings, evaluableScript))
             .collect(toList());
 
         if (nonScriptSlices.isEmpty()) {
@@ -54,6 +54,17 @@ public class ScriptingHelper {
         return nonScriptSlices.stream()
             .map(nonScriptSlice -> evaluatedScripts.isEmpty() ? nonScriptSlice : nonScriptSlice + evaluatedScripts.remove(0))
             .reduce("", (s, s2) -> s + s2);
+    }
+
+    private Object filterEmptyOptional(Bindings bindings, String evaluableScript) {
+        Object foundObject = evaluate(bindings, evaluableScript);
+        boolean isOptional = evaluableScript.contains(".optional.") || evaluableScript.contains(".optional_");
+
+        if (Objects.isNull(foundObject)) {
+            return isOptional ? "" : null;
+        }
+
+        return foundObject;
     }
 
     private Map<String, Object> setupEvalContext(Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {

@@ -64,7 +64,7 @@ So if a GET query is made to the DSL `messages`, Ruuter will try to execute `mes
 
 A DSL query always returns a fixed response in the form of:
 
-```
+```json
 {
     "response": RETURN_VALUE
 }
@@ -73,6 +73,40 @@ A DSL query always returns a fixed response in the form of:
 Notes:
 
 * *RETURN_VALUE* is either null, if a DSL does not have a return value, or the returnable object of the DSL, if it does
+
+### Optional parameters
+
+Any parameter where the name starts with the word `optional_`, can be omitted from requests. For example, `post-with-optional.yml` has one required parameter 
+and one 
+`optional_` type parameter.
+
+```yml
+return:
+  return: ${incoming.body.somethingRequired}${incoming.body.optional_something}
+```
+
+A request made to the endpoint for this file will also require `somethingRequired` in the body, but `optional_something` can be omitted, based on the name.
+
+```http request
+POST http://localhost:8080/post-with-optional
+Content-Type: application/json
+
+{
+  "somethingRequired": "Important data",
+  "optional_something": "This can be omitted from the request"
+}
+```
+
+The above request will give the same result as the one below.
+
+```http request
+POST http://localhost:8080/post-with-optional
+Content-Type: application/json
+
+{
+  "somethingRequired": "Important data"
+}
+```
 
 ## Writing DSL files
 
