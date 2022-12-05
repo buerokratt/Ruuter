@@ -9,15 +9,11 @@ See configuration [here](./samples/CONFIGURATION.md)
 
 ## Docker
 
->PS! Temporarily checkout to the specified commit!
-
-To run the application using Docker, run
+To run the application using Docker, run:
 
 ```
-git checkout c21d3cb82943f124c777d1cef2789a0c2719db0f
 docker-compose up -d
 ```
-
 
 ## Testing
 
