@@ -25,7 +25,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     implementation 'org.graalvm.js:js:22.3.0'
     implementation 'org.graalvm.js:js-scriptengine:22.3.0'
-    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
     implementation 'org.springframework.cloud:spring-cloud-starter-sleuth:3.1.5'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
