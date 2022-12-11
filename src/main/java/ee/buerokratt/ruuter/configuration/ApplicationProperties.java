@@ -23,6 +23,7 @@ public class ApplicationProperties {
     private IncomingRequests incomingRequests = new IncomingRequests();
     private FinalResponse finalResponse = new FinalResponse();
     private Integer maxStepRecursions;
+    private DslParams dslParams;
 
     @Setter
     @Getter
@@ -66,5 +67,12 @@ public class ApplicationProperties {
     @Setter
     public static class HttpPost {
         private Map<String, Object> headers;
+    }
+
+    @Getter
+    @Setter
+    public static class DslParams {
+        private String domainVar;
+        private String domainUrl;
     }
 }

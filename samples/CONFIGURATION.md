@@ -70,6 +70,17 @@ finalResponse:
     dslWithoutResponseHttpStatusCode: 300
 ```
 
+### DSL parameters
+
+To make configuring DSL files easier it's possible to use custom parameters for frequently repeated values, for example domain url.
+
+```
+application:
+    dslParams:
+        domainVar: DOMAIN_URL
+        domainUrl: https://example.com
+```
+
 ### Default service
 
 Default service is a service file that will be executed when the request status code is not within the allowlist of HTTP response codes.

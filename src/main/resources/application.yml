@@ -23,6 +23,9 @@ application:
     headers:
       Content-Type: "application/json"
   maxStepRecursions: 10
+  dslParams:
+    domainVar: DOMAIN_URL
+    domainUrl: https://example.com
 
 spring:
   application:

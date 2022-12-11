@@ -16,11 +16,11 @@ import ee.buerokratt.ruuter.helper.exception.InvalidDslStepException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -32,6 +32,11 @@ public class DslMappingHelper {
     public static final String DSL_NOT_YML_FILE_ERROR_MESSAGE = "DSL is not yml file.";
     public static final String INVALID_STEP_ERROR_MESSAGE = "Invalid step type.";
 
+    @Value("${application.dslParams.domainVar}")
+    private String dslDomainVar;
+    @Value("${application.dslParams.domainUrl}")
+    private String dslDomainUrl;
+
     public DslMappingHelper(@Qualifier("ymlMapper") ObjectMapper mapper) {
         this.mapper = mapper;
     }
@@ -41,6 +46,13 @@ public class DslMappingHelper {
         try {
             if (FileUtils.isYmlFile(path)) {
                 Map<String, JsonNode> nodeMap = mapper.readValue(path.toFile(), new TypeReference<>() {});
+                for (String key : nodeMap.keySet()) {
+                    JsonNode node = nodeMap.get(key);
+                    if (node.toString().contains(this.dslDomainVar)) {
+                        String newDomain = node.toString().replaceAll(this.dslDomainVar, this.dslDomainUrl);
+                        nodeMap.replace(key, node, mapper.readTree(newDomain));
+                    }
+                }
                 return convertNodeMapToStepMap(nodeMap);
             } else {
                 throw new IllegalArgumentException(DSL_NOT_YML_FILE_ERROR_MESSAGE);

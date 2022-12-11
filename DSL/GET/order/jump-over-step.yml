@@ -8,7 +8,7 @@ first_step:
 this_step_is_jumped_over_and_not_executed:
   call: http.get
   args:
-    url: https://example.com/callB
+    url: DOMAIN_URL/callB
 
 second_step:
   call: reflect.mock
