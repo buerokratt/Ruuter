@@ -70,6 +70,17 @@ finalResponse:
     dslWithoutResponseHttpStatusCode: 300
 ```
 
+### CORS
+
+CORS CrossOrigin - whitelists domains which are permitted to access this application.
+CORS configuration reads CrossOrigin URLs from `application.yml`.
+
+```
+application:
+    CORS:
+        allowedOrigins: [https://test.buerokratt.ee, https://admin.test.buerokratt.ee/, https://tim.test.buerokratt.ee/]
+```
+
 ### Default service
 
 Default service is a service file that will be executed when the request status code is not within the allowlist of HTTP response codes.
