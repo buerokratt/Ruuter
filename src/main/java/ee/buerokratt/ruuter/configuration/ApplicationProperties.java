@@ -24,6 +24,7 @@ public class ApplicationProperties {
     private FinalResponse finalResponse = new FinalResponse();
     private Integer maxStepRecursions;
     private DslParams dslParams;
+    private CORS cors;
 
     @Setter
     @Getter
@@ -74,5 +75,11 @@ public class ApplicationProperties {
     public static class DslParams {
         private String domainVar;
         private String domainUrl;
+    }
+    
+    @Getter
+    @Setter
+    public static class CORS {
+        private List<String> allowedOrigins;
     }
 }
