@@ -31,6 +31,8 @@ public class DslController {
                                                              @RequestHeader(required = false) Map<String, String> requestHeaders,
                                                              HttpServletRequest request) {
         String dsl = request.getRequestURI();
+        // Remove '/' from beginning to read DSLs properly
+        if (dsl.startsWith("/")) dsl = dsl.substring(1);
         if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
             String errorMsg = "Request received with invalid method type %s for DSL: %s".formatted(request.getMethod(), dsl);
             LoggingUtils.logError(log, errorMsg, request.getRemoteAddr(), INCOMING_REQUEST);

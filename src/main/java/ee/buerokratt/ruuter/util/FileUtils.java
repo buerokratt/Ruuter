@@ -37,7 +37,7 @@ public class FileUtils {
 
     public static String getFileNameWithPathWithoutSuffix(Path path) {
         String fullPath = path.toAbsolutePath().toString();
-        fullPath = fullPath.substring(fullPath.indexOf('/', fullPath.indexOf('/', fullPath.indexOf('/')+1)+1), fullPath.lastIndexOf('.'));
+        fullPath = fullPath.substring(fullPath.indexOf('/', fullPath.indexOf('/', fullPath.indexOf('/')+1)+1)+1, fullPath.lastIndexOf('.'));
         return fullPath;
     }
 }
