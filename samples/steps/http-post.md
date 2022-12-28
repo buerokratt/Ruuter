@@ -41,7 +41,7 @@ post_step:
 post_step:
   call: http.post
   args:
-    url: http://localhost:8080/passing-post-parameters
+    url: http://localhost:8080/scripting/passing-post-parameters
     body:
       project: "byk"
       website: "krat.ee"

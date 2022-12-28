@@ -36,7 +36,7 @@ Template results are stored "as-is" into the application context.
 
 ```
 call_template:
-  template: return-with-script
+  template: steps/return/return-with-script
   requestType: get
   result: templateResult
 
@@ -50,7 +50,7 @@ return_result:
 
 ```
 call_template:
-  template: passing-post-parameters
+  template: scripting/passing-post-parameters
   requestType: post
   body:
     project: "byk"

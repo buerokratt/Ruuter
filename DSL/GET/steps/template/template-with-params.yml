@@ -1,5 +1,5 @@
 call_template:
-  template: passing-post-parameters
+  template: scripting/passing-post-parameters
   requestType: post
   body:
     project: "byk"

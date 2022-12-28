@@ -67,7 +67,7 @@ The resulting object looks like this, assuming that the `result` field is valued
 get_message:
   call: http.get
   args:
-    url: http://localhost:8080/return-with-script
+    url: http://localhost:8080/steps/return/return-with-script
     query:
       some_val: "Hello World"
       another_val: 123
@@ -82,7 +82,7 @@ get_message:
 get_message:
   call: http.get
   args:
-    url: http://localhost:8080/return-with-script
+    url: http://localhost:8080/steps/return/return-with-script
     headers:
       Content-Type: "text/plain"
   result: the_message
@@ -101,7 +101,7 @@ assign_values:
 get_message:
   call: http.get
   args:
-    url: http://localhost:8080/return-with-script
+    url: http://localhost:8080/steps/return/return-with-script
     query:
       some_val: ${stringValue}
       another_val: ${integerValue}
@@ -117,7 +117,7 @@ get_message:
 get_message:
   call: http.get
   args:
-    url: http://localhost:8080/return-with-script
+    url: http://localhost:8080/steps/return/return-with-script
   result: the_message
 
 return_value:
@@ -132,7 +132,7 @@ return_value:
 get_message:
   call: http.get
   args:
-    url: http://localhost:8080/return-with-script
+    url: http://localhost:8080/steps/return/return-with-script
     query:
       var: "value"
   result: the_message

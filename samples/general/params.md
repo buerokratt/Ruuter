@@ -9,7 +9,7 @@ through the following keywords:
 ### Example of using params
 
 ```
-https://ruuter/passing-get-parameters?passedVariable=passedValue
+https://ruuter/scripting/passing-get-parameters?passedVariable=passedValue
 ```
 
 [`passing-get-parameters.yml`](../../DSL/GET/scripting/passing-get-parameters.yml)
@@ -25,7 +25,7 @@ Expected result: "passedValue"
 ### Example of using body
 
 ```
-curl https://ruuter/passing-post-parameters \
+curl https://ruuter/scripting/passing-post-parameters \
     -H 'Content-Type: application/json' \
     -d '{"project": "Bürokratt", "website": "www.kratid.ee"}'
 ```
