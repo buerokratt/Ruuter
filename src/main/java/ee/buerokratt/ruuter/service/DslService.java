@@ -52,7 +52,7 @@ public class DslService {
             try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))) {
                 return paths
                     .filter(Files::isRegularFile)
-                    .collect(toMap(FileUtils::getFileNameWithoutSuffix, dslMappingHelper::getDslSteps));
+                    .collect(toMap(FileUtils::getFileNameWithPathWithoutSuffix, dslMappingHelper::getDslSteps));
             } catch (Exception e) {
                 throw new LoadDslsException(e);
             }
