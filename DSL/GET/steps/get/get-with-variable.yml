@@ -6,7 +6,7 @@ assign_values:
 get_message:
   call: http.get
   args:
-    url: http://localhost:8080/return-with-script
+    url: http://localhost:8080/steps/return/return-with-script
     query:
       some_val: ${stringValue}
       another_val: ${integerValue}
