@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.AssignStep;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
@@ -15,8 +16,8 @@ import ee.buerokratt.ruuter.helper.exception.InvalidDslException;
 import ee.buerokratt.ruuter.helper.exception.InvalidDslStepException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
@@ -27,20 +28,16 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 @Service
 public class DslMappingHelper {
+    @Autowired
+    private ApplicationProperties properties;
     private final ObjectMapper mapper;
 
     public static final String DSL_NOT_YML_FILE_ERROR_MESSAGE = "DSL is not yml file.";
     public static final String INVALID_STEP_ERROR_MESSAGE = "Invalid step type.";
 
-    @Value("${application.dslParams.domainVar}")
-    private String dslDomainVar;
-    @Value("${application.dslParams.domainUrl}")
-    private String dslDomainUrl;
-
     public DslMappingHelper(@Qualifier("ymlMapper") ObjectMapper mapper) {
         this.mapper = mapper;
     }
-
 
     public Map<String, DslStep> getDslSteps(Path path) {
         try {
@@ -48,10 +45,7 @@ public class DslMappingHelper {
                 Map<String, JsonNode> nodeMap = mapper.readValue(path.toFile(), new TypeReference<>() {});
                 for (String key : nodeMap.keySet()) {
                     JsonNode node = nodeMap.get(key);
-                    if (node.toString().contains(this.dslDomainVar)) {
-                        String newDomain = node.toString().replaceAll(this.dslDomainVar, this.dslDomainUrl);
-                        nodeMap.replace(key, node, mapper.readTree(newDomain));
-                    }
+                    nodeMap.replace(key, node, mapper.readTree(this.replaceDslParametersWithValues(node.toString())));
                 }
                 return convertNodeMapToStepMap(nodeMap);
             } else {
@@ -94,5 +88,27 @@ public class DslMappingHelper {
             return mapper.treeToValue(jsonNode, SwitchStep.class);
         }
         throw new IllegalArgumentException(INVALID_STEP_ERROR_MESSAGE);
+    }
+
+    /**
+     * Replace DSL file parameters with values.
+     * Since DSL parameters look like this "[#PARAMETER]",
+     * then it's not as simple as calling String.replaceAll().
+     *
+     * @param input String to modify
+     * @return Updated string
+     */
+    private String replaceDslParametersWithValues(String input) {
+        Map<String, String> params = properties.getDslParameters();
+        String output = input;
+        for (String key : params.keySet()) {
+            String param = "[#"+key+"]";
+            while (output.contains(param)) {
+                int start = output.indexOf(param);
+                int end = start + param.length();
+                output = output.substring(0, start) + params.get(key) + output.substring(end);
+            }
+        }
+        return output;
     }
 }
