@@ -2,7 +2,7 @@ assign_step:
   assign:
     setCookie:
       customCookieName: "customCookieValue"
-      Domain: DOMAIN_URL
+      Domain: "[#DOMAIN_URL]"
       Secure: false
       HttpOnly: true
     customHeader: "customValue"

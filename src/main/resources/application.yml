@@ -23,9 +23,9 @@ application:
     headers:
       Content-Type: "application/json"
   maxStepRecursions: 10
-  dslParams:
-    domainVar: DOMAIN_URL
-    domainUrl: https://example.com
+  dslParameters:
+    DOMAIN_URL: "https://example.com"
+    PORT: 8080
   CORS:
     allowedOrigins: ["https://test.buerokratt.ee", "https://admin.test.buerokratt.ee/", "https://tim.test.buerokratt.ee/"]
 

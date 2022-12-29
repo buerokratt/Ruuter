@@ -6,7 +6,7 @@ assign_values:
 get_message:
   call: http.get
   args:
-    url: DOMAIN_URL:8080/return-with-script
+    url: "[#DOMAIN_URL]:[#PORT]/return-with-script"
     query:
       some_val: ${stringValue}
       another_val: ${integerValue}

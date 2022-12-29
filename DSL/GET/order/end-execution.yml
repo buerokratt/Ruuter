@@ -14,4 +14,4 @@ second_step:
 this_step_is_not_executed:
   call: http.get
   args:
-    url: DOMAIN_URL/callB
+    url: "[#DOMAIN_URL]/callB"

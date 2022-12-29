@@ -1,6 +1,7 @@
 assign_step:
   assign:
-    variable: "result"
+    variable: "[#DOMAIN_URL]:[#PORT]"
+#    variable: "result"
 
 return_value:
   return: ${variable}
