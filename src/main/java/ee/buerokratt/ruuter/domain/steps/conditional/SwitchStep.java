@@ -20,13 +20,16 @@ public class SwitchStep extends DslStep {
     @JsonAlias({"switch"})
     private List<Condition> conditions;
 
+    @JsonAlias({"next"})
+    private String elseNextStepName;
+
     @Override
     protected void executeStepAction(DslInstance di) {
         ScriptingHelper scriptingHelper = di.getScriptingHelper();
         Optional<Condition> correctStatement = conditions.stream()
             .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders())))
             .findFirst();
-        correctStatement.ifPresent(condition -> this.setNextStepName(condition.getNextStepName()));
+        correctStatement.ifPresentOrElse(condition -> this.setNextStepName(condition.getNextStepName()), () -> this.setNextStepName(elseNextStepName));
     }
 
     @Override
