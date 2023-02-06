@@ -19,6 +19,8 @@ import static java.util.stream.Collectors.toMap;
 @ToString(callSuper = true)
 @NoArgsConstructor
 public class ReturnStep extends DslStep {
+    @JsonAlias({"wrapper"})
+    private boolean withWrapper = true;
     @JsonAlias({"return"})
     private String returnValue;
     private Map<String, Object> headers = new LinkedHashMap<>();
@@ -28,6 +30,7 @@ public class ReturnStep extends DslStep {
     protected void executeStepAction(DslInstance di) {
         di.setReturnHeaders(formatHeaders(di));
         di.setReturnStatus(status);
+        di.setReturnWithWrapper(withWrapper);
         di.setReturnValue(di.getScriptingHelper().evaluateScripts(returnValue, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders()));
     }
 

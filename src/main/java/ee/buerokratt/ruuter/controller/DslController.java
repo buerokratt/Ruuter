@@ -40,9 +40,13 @@ public class DslController {
         }
         DslInstance di = dslService.execute(dsl, request.getMethod(), requestBody, requestQuery, requestHeaders, request.getRemoteAddr());
 
+        Object returnObj;
+        if (di.isReturnWithWrapper()) returnObj = new RuuterResponse(di.getReturnValue());
+        else returnObj = di.getReturnValue();
+
         return status(di.getReturnStatus() == null ? getReturnStatus(di.getReturnValue()) : HttpStatus.valueOf(di.getReturnStatus()))
             .headers(httpHeaders -> di.getReturnHeaders().forEach(httpHeaders::add))
-            .body(di.getReturnValue());
+            .body(returnObj);
     }
 
     private HttpStatus getReturnStatus(Object response) {
