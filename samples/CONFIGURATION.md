@@ -70,6 +70,28 @@ finalResponse:
     dslWithoutResponseHttpStatusCode: 300
 ```
 
+### DSL parameters
+
+To make configuring DSL files easier it's possible to use custom parameters for frequently repeated values, for example domain url and server port.
+
+In DSL `yaml` files the lines which use custom parameter must be inside quotes.
+Example: `url: "[#DOMAIN_URL]:[#PORT]/steps/return/return-with-script"`
+
+As shown above, entire line where custom parameters are used is surrounded with quotes.
+If it's not surrounded in quotes, the program will fail to run.
+
+Another example of how it works:
+`url: "[#DOMAIN_URL]:[#PORT]/steps/return/return-with-script"` -> `url: "https://example.com:8080/steps/return/return-with-script"`
+
+Parameters are defined in `constants.ini` file as `PARAM_NAME=VALUE`.
+There is no limit to how many parameters you can define.
+
+```
+[DSL]
+DOMAIN_URL=https://example.com
+PORT=8080
+```
+
 ### CORS
 
 CORS CrossOrigin - whitelists domains which are permitted to access this application.

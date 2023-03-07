@@ -18,9 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -36,11 +37,14 @@ public class DslMappingHelper {
         this.mapper = mapper;
     }
 
-
     public Map<String, DslStep> getDslSteps(Path path) {
         try {
             if (FileUtils.isYmlFile(path)) {
                 Map<String, JsonNode> nodeMap = mapper.readValue(path.toFile(), new TypeReference<>() {});
+                for (String key : nodeMap.keySet()) {
+                    JsonNode node = nodeMap.get(key);
+                    nodeMap.replace(key, node, mapper.readTree(this.replaceDslParametersWithValues(node.toString())));
+                }
                 return convertNodeMapToStepMap(nodeMap);
             } else {
                 throw new IllegalArgumentException(DSL_NOT_YML_FILE_ERROR_MESSAGE);
@@ -82,5 +86,32 @@ public class DslMappingHelper {
             return mapper.treeToValue(jsonNode, SwitchStep.class);
         }
         throw new IllegalArgumentException(INVALID_STEP_ERROR_MESSAGE);
+    }
+
+    /**
+     * Replace DSL file parameters with values.
+     * Since DSL parameters look like this "[#PARAMETER]",
+     * then it's not as simple as calling String.replaceAll().
+     *
+     * @param input String to modify
+     * @return Updated string
+     */
+    private String replaceDslParametersWithValues(String input) {
+        try {
+            Map<String, String> params = FileUtils.parseIniFile(new File("/app/constants.ini")).get("DSL");
+            String output = input;
+            for (String key : params.keySet()) {
+                String param = "[#"+key+"]";
+                while (output.contains(param)) {
+                    int start = output.indexOf(param);
+                    int end = start + param.length();
+                    output = output.substring(0, start) + params.get(key) + output.substring(end);
+                }
+            }
+            return output;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
