@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.AssignStep;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
@@ -16,10 +15,11 @@ import ee.buerokratt.ruuter.helper.exception.InvalidDslException;
 import ee.buerokratt.ruuter.helper.exception.InvalidDslStepException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -28,8 +28,6 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 @Service
 public class DslMappingHelper {
-    @Autowired
-    private ApplicationProperties properties;
     private final ObjectMapper mapper;
 
     public static final String DSL_NOT_YML_FILE_ERROR_MESSAGE = "DSL is not yml file.";
@@ -99,16 +97,21 @@ public class DslMappingHelper {
      * @return Updated string
      */
     private String replaceDslParametersWithValues(String input) {
-        Map<String, String> params = properties.getDslParameters();
-        String output = input;
-        for (String key : params.keySet()) {
-            String param = "[#"+key+"]";
-            while (output.contains(param)) {
-                int start = output.indexOf(param);
-                int end = start + param.length();
-                output = output.substring(0, start) + params.get(key) + output.substring(end);
+        try {
+            Map<String, String> params = FileUtils.parseIniFile(new File("/app/constants.ini")).get("DSL");
+            String output = input;
+            for (String key : params.keySet()) {
+                String param = "[#"+key+"]";
+                while (output.contains(param)) {
+                    int start = output.indexOf(param);
+                    int end = start + param.length();
+                    output = output.substring(0, start) + params.get(key) + output.substring(end);
+                }
             }
+            return output;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        return output;
     }
 }

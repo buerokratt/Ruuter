@@ -83,14 +83,13 @@ If it's not surrounded in quotes, the program will fail to run.
 Another example of how it works:
 `url: "[#DOMAIN_URL]:[#PORT]/steps/return/return-with-script"` -> `url: "https://example.com:8080/steps/return/return-with-script"`
 
-Parameters are defined in `application.yml` file as `PARAM_NAME: VALUE`.
+Parameters are defined in `constants.ini` file as `PARAM_NAME=VALUE`.
 There is no limit to how many parameters you can define.
 
 ```
-application:
-    dslParameters:
-        DOMAIN_URL: https://example.com
-        PORT: 8080
+[DSL]
+DOMAIN_URL=https://example.com
+PORT=8080
 ```
 
 ### CORS

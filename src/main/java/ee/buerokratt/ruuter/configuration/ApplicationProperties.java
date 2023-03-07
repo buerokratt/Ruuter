@@ -23,7 +23,6 @@ public class ApplicationProperties {
     private IncomingRequests incomingRequests = new IncomingRequests();
     private FinalResponse finalResponse = new FinalResponse();
     private Integer maxStepRecursions;
-    private Map<String, String> dslParameters = new HashMap<>();
     private CORS cors;
 
     @Setter
