@@ -34,9 +34,6 @@ public class ScriptingHelper {
         if (toEval == null || !containsScript(toEval.toString())) {
             return toEval;
         }
-        if (toEval instanceof Map) {
-            return evaluateScripts(toEval, context, requestBody, requestQuery, requestHeaders);
-        }
 
         Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestQuery, requestHeaders);
         Bindings bindings = createBindingsWithContext(evalContext);

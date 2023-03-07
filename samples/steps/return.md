@@ -16,6 +16,7 @@ return_step:
 * `status` - if defined, sets the status of the final response, as the assigned status.
 * `headers`
     * *..desired header values* - assigns the headers to the response of the processed DSL. Scripts can be used.
+* `wrapper` - specify if return value should be inside `RuuterResponse` wrapper or sent as plain value. Default: `true`
 
 ***Note - Assigning a return value does not end the processing of the DSL - additionally, an assigned return value/headers can be overwritten by another return
 step***
@@ -88,6 +89,16 @@ return_value:
   headers:
     Set-Cookie: ${setCookie}
     custom-header: ${customHeader}
+  return: "result"
+```
+
+### Response wrapper
+
+[`return-without-wrapper.yml`](../../DSL/GET/steps/return/return-without-wrapper.yml)
+
+```
+return_value:
+  wrapper: false
   return: "result"
 ```
 

@@ -42,6 +42,7 @@ public class DslInstance {
     private int currentLoopMaxRecursions = 1;
     private Map<String, String> returnHeaders = new HashMap<>();
     private Map<String, Integer> recursions;
+    private boolean returnWithWrapper;
 
     public void execute() {
         addGlobalIncomingHeadersToRequestHeaders();
@@ -115,6 +116,7 @@ public class DslInstance {
         setReturnValue(null);
         setReturnStatus(null);
         setReturnHeaders(new HashMap<>());
+        setReturnWithWrapper(true);
     }
 
     private void addGlobalIncomingHeadersToRequestHeaders() {

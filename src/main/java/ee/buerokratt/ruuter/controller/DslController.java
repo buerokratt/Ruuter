@@ -26,7 +26,7 @@ public class DslController {
     private final ApplicationProperties properties;
 
     @RequestMapping()
-    public ResponseEntity<RuuterResponse> queryDsl(@RequestBody(required = false) Map<String, Object> requestBody,
+    public ResponseEntity<Object> queryDsl(@RequestBody(required = false) Map<String, Object> requestBody,
                                                              @RequestParam(required = false) Map<String, Object> requestQuery,
                                                              @RequestHeader(required = false) Map<String, String> requestHeaders,
                                                              HttpServletRequest request) {
@@ -40,9 +40,13 @@ public class DslController {
         }
         DslInstance di = dslService.execute(dsl, request.getMethod(), requestBody, requestQuery, requestHeaders, request.getRemoteAddr());
 
+        Object returnObj;
+        if (di.isReturnWithWrapper()) returnObj = new RuuterResponse(di.getReturnValue());
+        else returnObj = di.getReturnValue();
+
         return status(di.getReturnStatus() == null ? getReturnStatus(di.getReturnValue()) : HttpStatus.valueOf(di.getReturnStatus()))
             .headers(httpHeaders -> di.getReturnHeaders().forEach(httpHeaders::add))
-            .body(new RuuterResponse(di.getReturnValue()));
+            .body(returnObj);
     }
 
     private HttpStatus getReturnStatus(Object response) {

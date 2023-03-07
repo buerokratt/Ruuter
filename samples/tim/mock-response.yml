@@ -1,0 +1,20 @@
+step_1:
+  call: reflect.mock
+  args:
+    response:
+      sub: ""
+      firstName: "MARY ÄNN"
+      idCode: "EE60001019906"
+      displayName: "MARY ÄNN"
+      iss: "test.buerokratt.ee"
+      exp: 1670250948
+      login: "EE60001019906"
+      iat: 1670243748
+      jti: "e14a5084-3b30-4a55-8720-c2ee22f43c2c"
+      authorities: [
+        "ROLE_ADMINISTRATOR"
+      ]
+  result: reflected_request
+
+step_2:
+  return: ${reflected_request.response}
