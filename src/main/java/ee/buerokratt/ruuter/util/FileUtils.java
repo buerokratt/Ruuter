@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,14 @@ public class FileUtils {
     public static boolean isYmlFile(Path path) {
         String pathString = path.toString();
         return !isDirectory(path) && (pathString.endsWith(SUFFIX_YML) || pathString.endsWith(SUFFIX_YAML));
+    }
+
+    public static boolean isAllowedFiletype(Path path, List<String> allowedFiletypes) {
+        String pathString = path.toString();
+        if (isDirectory(path)) return true;
+        for (String filetype : allowedFiletypes)
+            if (pathString.endsWith(filetype)) return true;
+        return false;
     }
 
     public static String getFileNameWithoutSuffix(Path path) {
