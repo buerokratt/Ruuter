@@ -103,6 +103,17 @@ application:
         allowedOrigins: [https://test.buerokratt.ee, https://admin.test.buerokratt.ee/, https://tim.test.buerokratt.ee/]
 ```
 
+### Reloading DSLs
+
+It's possible to reload DSLs from the [`DSL directory`](../DSL), which is defined in `application.yml -> application -> config-path`
+This feature can be enabled/disabled in [application.yml](../src/main/resources/application.yml).
+
+```
+application:
+    DSL:
+        allowDslReloading: {true / false}
+```
+
 ### Default service
 
 Default service is a service file that will be executed when the request status code is not within the allowlist of HTTP response codes.
