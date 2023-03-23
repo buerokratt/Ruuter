@@ -66,6 +66,11 @@ public class DslInstance {
                 setCurrentLoopMaxRecursions(maxRecursions);
             }
         }
+        if (stepToExecute.isReloadDsl()) {
+            // Only allow reloading if it's enabled in configuration.
+            if (properties.getDsl().isAllowDslReloading()) dslService.reloadDsls();
+            else LoggingUtils.logError(log, "Reload DSLs was called, but is not enabled in configuration!", requestOrigin, "");
+        }
         executeNextStep(stepToExecute, stepNames);
     }
 

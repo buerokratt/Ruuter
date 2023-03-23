@@ -34,7 +34,7 @@ public class DslService {
     private final HttpHelper httpHelper;
     private final Tracer tracer;
 
-    private final Map<String, Map<String, Map<String, DslStep>>> dsls;
+    private Map<String, Map<String, Map<String, DslStep>>> dsls;
 
     public static final String UNSUPPORTED_FILETYPE_ERROR_MESSAGE = "Unsupported filetype";
 
@@ -47,6 +47,10 @@ public class DslService {
         this.mappingHelper = mappingHelper;
         this.httpHelper = httpHelper;
         this.externalForwardingHelper = externalForwardingHelper;
+    }
+
+    public void reloadDsls() {
+        this.dsls = getDsls(properties.getConfigPath());
     }
 
     public Map<String, Map<String, Map<String, DslStep>>> getDsls(String configPath) {

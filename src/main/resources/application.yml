@@ -27,6 +27,7 @@ application:
     allowedOrigins: ["https://test.buerokratt.ee", "https://admin.test.buerokratt.ee/", "https://tim.test.buerokratt.ee/"]
   DSL:
     allowedFiletypes: [".yml", ".yaml", ".tmp"]
+    allowDslReloading: true
 
 spring:
   application:
