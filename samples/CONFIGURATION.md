@@ -103,6 +103,20 @@ application:
         allowedOrigins: [https://test.buerokratt.ee, https://admin.test.buerokratt.ee/, https://tim.test.buerokratt.ee/]
 ```
 
+### Allowed DSL filetypes
+
+Ruuter limits what filetypes are allowed in [`DSL`](../DSL) directory.
+Allowed filetypes are defined in [application.yml](../src/main/resources/application.yml).
+
+```
+application:
+    DSL:
+        allowedFiletypes: [".yml", ".yaml", ".tmp"]
+```
+
+DSLs with `.tmp` filetype are inactive and not processed.
+If [`DSL`](../DSL) directory contains any filetypes that are not defined above, then Ruuter will not start.
+
 ### Reloading DSLs
 
 It's possible to reload DSLs from the [`DSL directory`](../DSL), which is defined in `application.yml -> application -> config-path`
@@ -112,6 +126,13 @@ This feature can be enabled/disabled in [application.yml](../src/main/resources/
 application:
     DSL:
         allowDslReloading: {true / false}
+```
+
+DSL reloading can be called from any DSL step. Example:
+
+```
+my_step:
+    reloadDsl: true
 ```
 
 ### Default service
