@@ -34,7 +34,9 @@ public class DslService {
     private final HttpHelper httpHelper;
     private final Tracer tracer;
 
-    private final Map<String, Map<String, Map<String, DslStep>>> dsls;
+    private Map<String, Map<String, Map<String, DslStep>>> dsls;
+
+    public static final String UNSUPPORTED_FILETYPE_ERROR_MESSAGE = "Unsupported filetype";
 
     public DslService(ApplicationProperties properties, DslMappingHelper dslMappingHelper, ScriptingHelper scriptingHelper, Tracer tracer, MappingHelper mappingHelper, HttpHelper httpHelper, ExternalForwardingHelper externalForwardingHelper) {
         this.dslMappingHelper = dslMappingHelper;
@@ -47,9 +49,17 @@ public class DslService {
         this.externalForwardingHelper = externalForwardingHelper;
     }
 
+    public void reloadDsls() {
+        this.dsls = getDsls(properties.getConfigPath());
+    }
+
     public Map<String, Map<String, Map<String, DslStep>>> getDsls(String configPath) {
         return Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
-            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))) {
+            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString())).filter(path -> {
+                if (!FileUtils.isAllowedFiletype(path, properties.getDsl().getAllowedFiletypes()))
+                    throw new IllegalArgumentException(UNSUPPORTED_FILETYPE_ERROR_MESSAGE+" "+path.toString().substring(path.toString().lastIndexOf('.'))+" ("+path+")");
+                return true;
+            }).filter(FileUtils::isYmlFile)) {
                 return paths
                     .filter(Files::isRegularFile)
                     .collect(toMap(FileUtils::getFileNameWithPathWithoutSuffix, dslMappingHelper::getDslSteps));
