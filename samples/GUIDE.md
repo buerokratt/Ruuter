@@ -118,6 +118,7 @@ Content-Type: application/json
 * [sleep](./general/sleep.md)
 * [scripting](./general/scripting.md)
 * [Passing parameters to DSL](./general/params.md)
+* [Reloading DSLs](./general/reload-dsls.md)
 
 ### Step types
 
