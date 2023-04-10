@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk as build
+FROM sapmachine:17 as build
 WORKDIR /workspace/app
 
 COPY gradlew .
@@ -11,7 +11,7 @@ RUN chmod 754 ./gradlew
 RUN ./gradlew -Pprod clean bootJar
 RUN mkdir -p build/libs && (cd build/libs; jar -xf *.jar)
 
-FROM openjdk:17-jdk-alpine
+FROM sapmachine:17
 VOLUME /build/tmp
 
 ARG DEPENDENCY=/workspace/app/build/libs
@@ -21,7 +21,7 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
 ENV application.config-path=/DSL
 
-RUN adduser -D ruuter
+RUN adduser ruuter
 RUN mkdir logs
 RUN mkdir DSL
 RUN chown ruuter:ruuter /logs
