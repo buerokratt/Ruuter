@@ -73,6 +73,7 @@ public class ApplicationProperties {
     @Getter
     @Setter
     public static class CORS {
+        private boolean allowCredentials;
         private List<String> allowedOrigins;
     }
 

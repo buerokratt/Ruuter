@@ -18,9 +18,11 @@ public class CORSConfiguration {
             public void addCorsMappings(CorsRegistry registry) {
                 String[] allowedOrigins = properties.getCors().getAllowedOrigins().toArray(new String[0]);
                 String[] allowedMethods = properties.getIncomingRequests().getAllowedMethodTypes().toArray(new String[0]);
+                boolean allowCredentials = properties.getCors().isAllowCredentials();
                 registry.addMapping("/**")
                     .allowedOrigins(allowedOrigins)
-                    .allowedMethods(allowedMethods);
+                    .allowedMethods(allowedMethods)
+                    .allowCredentials(allowCredentials);
             }
         };
     }
