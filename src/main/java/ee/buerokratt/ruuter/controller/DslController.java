@@ -5,13 +5,13 @@ import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.domain.RuuterResponse;
 import ee.buerokratt.ruuter.service.DslService;
 import ee.buerokratt.ruuter.util.LoggingUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 import static ee.buerokratt.ruuter.util.LoggingUtils.INCOMING_REQUEST;

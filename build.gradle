@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.0'
+    id 'org.springframework.boot' version '3.0.5'
     id 'io.spring.dependency-management' version '1.1.0'
     id 'java'
 }
@@ -18,11 +18,11 @@ repositories {
 }
 
 dependencies {
+    implementation 'io.micrometer:micrometer-tracing'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth:3.1.5'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     implementation 'org.graalvm.js:js:22.3.0'
     implementation 'org.graalvm.js:js-scriptengine:22.3.0'
@@ -33,6 +33,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'io.micrometer:micrometer-tracing-test'
     testImplementation 'org.mockito:mockito-core:4.9.0'
     testImplementation 'org.mockito:mockito-inline:4.9.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:4.9.0'

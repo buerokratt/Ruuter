@@ -8,7 +8,7 @@ import ee.buerokratt.ruuter.helper.exception.LoadDslsException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.Tracer;
+import io.micrometer.tracing.Tracer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -88,7 +88,7 @@ public class DslService {
     private boolean allowedToExecuteDsl(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         if (externalForwardingHelper.shouldForwardRequest()) {
             ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestQuery, requestHeaders);
-            return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
+            return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCode().value());
         }
         return true;
     }

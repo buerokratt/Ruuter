@@ -1,12 +1,12 @@
 package ee.buerokratt.ruuter;
 
 import ee.buerokratt.ruuter.domain.DslInstance;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.Tracer;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;

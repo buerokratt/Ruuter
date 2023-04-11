@@ -10,7 +10,7 @@ import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.Tracer;
+import io.micrometer.tracing.Tracer;
 
 import java.util.HashMap;
 import java.util.List;
