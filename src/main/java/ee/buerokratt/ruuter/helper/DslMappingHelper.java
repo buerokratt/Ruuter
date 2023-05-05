@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.AssignStep;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.steps.ReturnStep;
@@ -28,6 +29,7 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 @Service
 public class DslMappingHelper {
+    public ApplicationProperties properties;
     private final ObjectMapper mapper;
 
     public static final String DSL_NOT_YML_FILE_ERROR_MESSAGE = "DSL is not yml file.";
@@ -39,7 +41,7 @@ public class DslMappingHelper {
 
     public Map<String, DslStep> getDslSteps(Path path) {
         try {
-            if (FileUtils.isYmlFile(path)) {
+            if (FileUtils.isFiletype(path, properties.getDsl().getProcessedFiletypes())) {
                 Map<String, JsonNode> nodeMap = mapper.readValue(path.toFile(), new TypeReference<>() {});
                 for (String key : nodeMap.keySet()) {
                     JsonNode node = nodeMap.get(key);
