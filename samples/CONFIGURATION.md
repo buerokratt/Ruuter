@@ -56,6 +56,8 @@ application:
                 httpStatusCode: [ 200..202, 204 ]
 ```
 
+***Note!** `method`, `endpoint` and `proceedPredicate.httpStatusCode` must be defined for forwarding to work.*
+
 ### Final Response status code
 
 Final response status code can be defined in application.yml. If defined, all final responses by Ruuter will respond with this status code no matter what.
