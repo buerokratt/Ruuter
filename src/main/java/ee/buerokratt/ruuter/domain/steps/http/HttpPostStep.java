@@ -25,12 +25,11 @@ public class HttpPostStep extends HttpStep {
         Map<String, Object> evaluatedHeaders = di.getScriptingHelper().evaluateScripts(args.getHeaders(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, String> mappedHeaders = di.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
 
-        switch (args.getContentType()) {
-            case "plaintext":
-                return di.getHttpHelper().doPostPlaintext(args.getUrl(), evaluatedBody, evaluatedQuery, mappedHeaders, args.getPlaintext());
-            default:
-                return di.getHttpHelper().doPost(args.getUrl(), evaluatedBody, evaluatedQuery, mappedHeaders);
-        }
+        if ("plaintext".equals(args.getContentType()))
+            return di.getHttpHelper().doPostPlaintext(args.getUrl(), evaluatedBody, evaluatedQuery, mappedHeaders, args.getPlaintext());
+        else
+            return di.getHttpHelper().doPost(args.getUrl(), evaluatedBody, evaluatedQuery, mappedHeaders);
+
     }
 
     @Override
