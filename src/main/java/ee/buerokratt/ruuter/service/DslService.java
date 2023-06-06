@@ -70,11 +70,14 @@ public class DslService {
     }
 
     public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
+        return execute(dsl, requestType, requestBody, requestQuery, requestHeaders, requestOrigin, this.getClass().getName());
+    }
+    public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
         DslInstance di = new DslInstance(dsl, dsls.get(requestType.toUpperCase()).get(dsl), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
         if (di.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
-            if (allowedToExecuteDsl(requestBody, requestQuery, requestHeaders)) {
+            if (allowedToExecuteDsl(requestBody, requestQuery, requestHeaders, contentType)) {
                 di.execute();
             }
             LoggingUtils.logInfo(log, "Request processed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
@@ -85,9 +88,9 @@ public class DslService {
         return di;
     }
 
-    private boolean allowedToExecuteDsl(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
+    private boolean allowedToExecuteDsl(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType) {
         if (externalForwardingHelper.shouldForwardRequest()) {
-            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestQuery, requestHeaders);
+            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestQuery, requestHeaders, contentType);
             return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
         }
         return true;

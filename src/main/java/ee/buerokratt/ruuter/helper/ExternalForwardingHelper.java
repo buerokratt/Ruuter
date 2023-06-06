@@ -29,6 +29,9 @@ public class ExternalForwardingHelper {
     }
 
     public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
+        return forwardRequest(requestBody, requestQuery,requestHeaders, this.getClass().getName());
+    }
+    public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType) {
         String forwardingUrl = properties.getIncomingRequests().getExternalForwarding().getEndpoint();
         String methodType = properties.getIncomingRequests().getExternalForwarding().getMethod().toUpperCase(Locale.ROOT);
         Map<String, Object> query = shouldAddQuery(requestQuery) ? requestQuery : new HashMap<>();
@@ -36,7 +39,7 @@ public class ExternalForwardingHelper {
         Map<String, String> headers = shouldAddHeaders(requestHeaders) ? requestHeaders : new HashMap<>();
 
         if (methodType.equals(HttpMethod.POST.name())) {
-            return httpHelper.doPost(forwardingUrl, body, query, headers);
+            return httpHelper.doPost(forwardingUrl, body, query, headers, contentType);
         }
         if (methodType.equals(HttpMethod.GET.name())) {
             return httpHelper.doGet(forwardingUrl, query, headers);
