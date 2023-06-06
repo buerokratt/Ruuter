@@ -11,7 +11,7 @@ RUN chmod 754 ./gradlew
 RUN ./gradlew -Pprod clean bootJar
 RUN mkdir -p build/libs && (cd build/libs; jar -xf *.jar)
 
-FROM openjdk:17-jdk
+FROM openjdk:17-jdk-alpine
 VOLUME /build/tmp
 
 ARG DEPENDENCY=/workspace/app/build/libs
@@ -21,7 +21,7 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
 ENV application.config-path=/DSL
 
-RUN adduser ruuter
+RUN adduser -D ruuter
 RUN mkdir logs
 RUN mkdir DSL
 RUN chown ruuter:ruuter /logs
