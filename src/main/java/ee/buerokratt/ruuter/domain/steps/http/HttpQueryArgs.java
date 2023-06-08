@@ -15,6 +15,8 @@ public class HttpQueryArgs {
     private Map<String, Object> query = new HashMap<>();
     private Map<String, Object> headers = new HashMap<>();
     private Map<String, Object> body = new HashMap<>();
+    private String plaintext;
+    private String contentType;
     private String originalUrl = "";
 
     public void addHeaders(Map<String, Object> newHeaders) {

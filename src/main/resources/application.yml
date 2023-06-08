@@ -19,9 +19,6 @@ application:
   finalResponse:
       dslWithResponseHttpStatusCode: 200
       dslWithoutResponseHttpStatusCode: 300
-  httpPost:
-    headers:
-      Content-Type: "application/json"
   maxStepRecursions: 10
   CORS:
     allowedOrigins: ["https://test.buerokratt.ee", "https://admin.test.buerokratt.ee/", "https://tim.test.buerokratt.ee/"]
