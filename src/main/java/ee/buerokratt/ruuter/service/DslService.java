@@ -9,6 +9,7 @@ import ee.buerokratt.ruuter.util.FileUtils;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
@@ -36,6 +38,8 @@ public class DslService {
 
     private Map<String, Map<String, Map<String, DslStep>>> dsls;
 
+    private Map<String, Map<String, Map<String, DslStep>>> guards;
+
     public static final String UNSUPPORTED_FILETYPE_ERROR_MESSAGE = "Unsupported filetype";
 
     public DslService(ApplicationProperties properties, DslMappingHelper dslMappingHelper, ScriptingHelper scriptingHelper, Tracer tracer, MappingHelper mappingHelper, HttpHelper httpHelper, ExternalForwardingHelper externalForwardingHelper) {
@@ -43,6 +47,7 @@ public class DslService {
         this.properties = properties;
         this.scriptingHelper = scriptingHelper;
         this.dsls = getDsls(properties.getConfigPath());
+        this.guards = getGuards(properties.getConfigPath());
         this.tracer = tracer;
         this.mappingHelper = mappingHelper;
         this.httpHelper = httpHelper;
@@ -51,13 +56,16 @@ public class DslService {
 
     public void reloadDsls() {
         this.dsls = getDsls(properties.getConfigPath());
+        this.guards = getGuards(properties.getConfigPath());
     }
 
     public Map<String, Map<String, Map<String, DslStep>>> getDsls(String configPath) {
-        return Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
-            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString())).filter(path -> {
+        Map<String, Map<String, Map<String, DslStep>>> _dsls = Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
+            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
+                .filter(path -> !FileUtils.isGuard(path))
+                .filter(path -> {
                 if (!FileUtils.isAllowedFiletype(path, properties.getDsl().getAllowedFiletypes()))
-                    throw new IllegalArgumentException(UNSUPPORTED_FILETYPE_ERROR_MESSAGE+" "+path.toString().substring(path.toString().lastIndexOf('.'))+" ("+path+")");
+                    throw new IllegalArgumentException(UNSUPPORTED_FILETYPE_ERROR_MESSAGE + " " + path.toString().substring(path.toString().lastIndexOf('.')) + " (" + path + ")");
                 return true;
             }).filter(FileUtils::isYmlFile)) {
                 return paths
@@ -67,6 +75,25 @@ public class DslService {
                 throw new LoadDslsException(e);
             }
         }));
+        return _dsls;
+    }
+
+    public Map<String, Map<String, Map<String, DslStep>>> getGuards(String configPath) {
+        Map<String, Map<String, Map<String, DslStep>>> _dsls = Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
+            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
+                .filter(path -> FileUtils.isGuard(path))) {
+                return paths
+                    .filter(Files::isRegularFile)
+                    .collect(toMap(FileUtils::getGuardWithPath, dslMappingHelper::getDslSteps));
+            } catch (Exception e) {
+                throw new LoadDslsException(e);
+            }
+        }));
+        log.debug("guards: " + _dsls.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(",", "{", "}"))
+        );
+        return _dsls;
     }
 
     public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
@@ -74,6 +101,17 @@ public class DslService {
 
         if (di.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
+
+            DslInstance guard = new DslInstance(dsl, getGuard(requestType.toUpperCase(), dsl), requestBody, requestBody, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+            if (guard != null && guard.getSteps() != null) {
+                LoggingUtils.logInfo(log, "Executing guard for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
+                guard.execute();
+                if (guard.getReturnStatus() != HttpStatus.OK.value()) {
+                    LoggingUtils.logError(log, "Guard failed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
+                    return guard;
+                }
+            }
+
             if (allowedToExecuteDsl(requestBody, requestQuery, requestHeaders)) {
                 di.execute();
             }
@@ -91,5 +129,12 @@ public class DslService {
             return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
         }
         return true;
+    }
+
+    private Map<String, DslStep> getGuard(String method, String dslPath) {
+        if (dslPath.length()<=1 || dslPath.lastIndexOf('/') < 0)
+            return null;
+        String path = dslPath.substring(0, dslPath.lastIndexOf('/'));
+        return guards.get(method).containsKey(path) ? guards.get(method).get(path) : getGuard(method, path);
     }
 }
