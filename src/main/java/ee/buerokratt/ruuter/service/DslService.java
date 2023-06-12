@@ -61,7 +61,9 @@ public class DslService {
 
     public Map<String, Map<String, Map<String, DslStep>>> getDsls(String configPath) {
         Map<String, Map<String, Map<String, DslStep>>> _dsls = Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
-            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString())).filter(path -> {
+            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
+                .filter(path -> !FileUtils.isGuard(path))
+                .filter(path -> {
                 if (!FileUtils.isAllowedFiletype(path, properties.getDsl().getAllowedFiletypes()))
                     throw new IllegalArgumentException(UNSUPPORTED_FILETYPE_ERROR_MESSAGE + " " + path.toString().substring(path.toString().lastIndexOf('.')) + " (" + path + ")");
                 return true;
@@ -79,7 +81,7 @@ public class DslService {
     public Map<String, Map<String, Map<String, DslStep>>> getGuards(String configPath) {
         Map<String, Map<String, Map<String, DslStep>>> _dsls = Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
             try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
-                .filter(path -> path.endsWith(".guard.yml"))) {
+                .filter(path -> FileUtils.isGuard(path))) {
                 return paths
                     .filter(Files::isRegularFile)
                     .collect(toMap(FileUtils::getGuardWithPath, dslMappingHelper::getDslSteps));
@@ -87,7 +89,7 @@ public class DslService {
                 throw new LoadDslsException(e);
             }
         }));
-        log.info("guards: " + _dsls.entrySet().stream()
+        log.debug("guards: " + _dsls.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining(",", "{", "}"))
         );
@@ -130,7 +132,7 @@ public class DslService {
     }
 
     private Map<String, DslStep> getGuard(String method, String dslPath) {
-        if (dslPath.length()<=1)
+        if (dslPath.length()<=1 || dslPath.lastIndexOf('/') < 0)
             return null;
         String path = dslPath.substring(0, dslPath.lastIndexOf('/'));
         return guards.get(method).containsKey(path) ? guards.get(method).get(path) : getGuard(method, path);

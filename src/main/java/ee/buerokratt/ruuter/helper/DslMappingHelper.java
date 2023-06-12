@@ -39,7 +39,7 @@ public class DslMappingHelper {
 
     public Map<String, DslStep> getDslSteps(Path path) {
         try {
-            if (FileUtils.isYmlFile(path)) {
+            if (FileUtils.isYmlFile(path) || FileUtils.isGuard(path)) {
                 Map<String, JsonNode> nodeMap = mapper.readValue(path.toFile(), new TypeReference<>() {});
                 for (String key : nodeMap.keySet()) {
                     JsonNode node = nodeMap.get(key);

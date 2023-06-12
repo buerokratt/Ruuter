@@ -65,4 +65,8 @@ public class FileUtils {
         return ini.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
+    public static boolean isGuard(Path path) {
+        return path.endsWith(".guard");
+    }
 }
