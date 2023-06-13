@@ -128,4 +128,8 @@ public class DslInstance {
         Map<String, Object> evaluatedHeaders = scriptingHelper.evaluateScripts(properties.getIncomingRequests().getHeaders(), context, requestBody, requestQuery, requestHeaders);
         requestHeaders.putAll(mappingHelper.convertMapObjectValuesToString(evaluatedHeaders));
     }
+
+    public boolean isInternal() {
+        return name.startsWith("internal");
+    }
 }

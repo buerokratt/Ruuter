@@ -155,3 +155,17 @@ defaultServiceInCaseOfException:
 
 There is an example for POST requests. To add default headers to other requests in application.yml, define it in application.yml, also in
 ApplicationProperties class the same way as HttpPost is defined and use addHeaders method from HttpQueryArgs to add these default headers to the request.
+
+
+### Internal requests
+
+Some DSL services can be exposed to to internal requests as REST endpoints.
+These can be accessed only from IPs that are specified in `allowedFiletypes` configuration block:
+* `allowedIPs` - list of whitelisted IPs 
+* `allowedURLs` - list of whitelisted referral URLs
+
+```
+  internalRequests:
+    allowedIPs: ["127.0.0.1", "192.168.0.1", "172.21.0.1"]
+    allowedURLs: ["http://localhost/internalTest"]
+```

@@ -89,10 +89,6 @@ public class DslService {
                 throw new LoadDslsException(e);
             }
         }));
-        log.debug("guards: " + _dsls.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining(",", "{", "}"))
-        );
         return _dsls;
     }
 
@@ -101,6 +97,11 @@ public class DslService {
 
         if (di.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
+
+            if ( !allowedToExecuteDSLFrom(di, requestOrigin, requestHeaders.get("referer"))) {
+                LoggingUtils.logError(log, "Internal DSL not allowed: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
+                return di;
+            };
 
             DslInstance guard = new DslInstance(dsl, getGuard(requestType.toUpperCase(), dsl), requestBody, requestBody, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
             if (guard != null && guard.getSteps() != null) {
@@ -129,6 +130,14 @@ public class DslService {
             return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
         }
         return true;
+    }
+
+    private boolean allowedToExecuteDSLFrom(DslInstance dsl, String origin, String referer) {
+        if (!dsl.isInternal())
+            return true;
+        boolean ipAllowed = properties.getInternalRequests().getAllowedIPs().contains(origin);
+        boolean urlAllowed = properties.getInternalRequests().getAllowedURLs().contains(referer);
+        return ipAllowed && urlAllowed;
     }
 
     private Map<String, DslStep> getGuard(String method, String dslPath) {

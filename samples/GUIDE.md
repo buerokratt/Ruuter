@@ -108,6 +108,13 @@ Content-Type: application/json
 }
 ```
 
+### Internal services
+
+Requests put into first level subdirectory named `internal` will be 
+used for internal requests only. Those DSLs can only be accessed from 
+IPs and referrer URLs specified in configuration.
+
+
 ## Writing DSL files
 
 ### General functionalities
