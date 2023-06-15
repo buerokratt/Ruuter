@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import java.util.*;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,19 +38,36 @@ public class ScriptingHelper {
         Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestQuery, requestHeaders);
         Bindings bindings = createBindingsWithContext(evalContext);
 
-        List<String> nonScriptSlices = Arrays.stream(toEval.toString().split(SCRIPT_REGEX)).toList();
-        List<Object> evaluatedScripts = Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(toEval.toString()).results()
-            .map(matchResult -> matchResult.group(0))
-            .map(scriptToExecute -> setupObjectsInScript(removeScriptWrapper(scriptToExecute), bindings, evalContext))
-            .map(evaluableScript -> filterEmptyOptional(bindings, evaluableScript))
-            .collect(toList());
+        Object ret = replaceVariables(toEval, bindings, evalContext);
+        return ret;
+    }
 
-        if (nonScriptSlices.isEmpty()) {
-            return evaluatedScripts.size() == 1 ? evaluatedScripts.get(0) : evaluatedScripts.stream().reduce("", (o, o2) -> o + o2.toString());
+    private Object replaceVariables(Object toEval, Bindings bindings, Map<String, Object> evalContext ) {
+        if (toEval instanceof String) {
+            String eval = (String) toEval;
+
+            // Full variable match, assigned value can be any
+            if (eval.matches(SCRIPT_REGEX)) {
+                setupObjectsInScript(eval, bindings, evalContext);
+                return filterEmptyOptional(bindings, eval.substring(2, eval.length() - 1));
+            }
+
+            // Partial variable match, assigned value can only be String
+            List<MatchResult> founded = Pattern.compile(SCRIPT_REGEX).matcher(eval).results().collect(toList());
+            for (MatchResult f : founded) {
+                String found = f.group();
+                setupObjectsInScript(found.substring(2, found.length() - 1), bindings, evalContext);
+                eval = eval.replace(found, filterEmptyOptional(bindings, found.substring(2, found.length() - 1)).toString());
+            };
+
+            return eval;
         }
-        return nonScriptSlices.stream()
-            .map(nonScriptSlice -> evaluatedScripts.isEmpty() ? nonScriptSlice : nonScriptSlice + evaluatedScripts.remove(0))
-            .reduce("", (s, s2) -> s + s2);
+        if (toEval instanceof List)
+            return ((List)toEval).stream().map( obj -> replaceVariables(obj, bindings, evalContext)).collect(toList());
+        if (toEval instanceof Map)
+            return ((HashMap<String, Object>)toEval).entrySet().stream()
+                .collect(toMap(Map.Entry::getKey,entry -> replaceVariables(entry.getValue(), bindings,evalContext)));
+        return null;
     }
 
     private Object filterEmptyOptional(Bindings bindings, String evaluableScript) {
