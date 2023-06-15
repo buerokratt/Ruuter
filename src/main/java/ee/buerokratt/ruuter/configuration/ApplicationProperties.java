@@ -25,6 +25,7 @@ public class ApplicationProperties {
     private Integer maxStepRecursions;
     private CORS cors;
     private DSL dsl;
+    private InternalRequests internalRequests;
 
     @Setter
     @Getter
@@ -82,5 +83,12 @@ public class ApplicationProperties {
         private List<String> allowedFiletypes;
         private List<String> processedFiletypes;
         private boolean allowDslReloading;
+    }
+
+    @Getter
+    @Setter
+    public static class InternalRequests {
+        private List<String> allowedIPs;
+        private List<String> allowedURLs;
     }
 }
