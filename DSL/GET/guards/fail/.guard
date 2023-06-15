@@ -1,0 +1,3 @@
+guard_fail:
+  return: "not allowed"
+  status: 403

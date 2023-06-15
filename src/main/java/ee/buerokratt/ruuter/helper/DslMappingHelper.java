@@ -41,7 +41,8 @@ public class DslMappingHelper {
 
     public Map<String, DslStep> getDslSteps(Path path) {
         try {
-            if (FileUtils.isFiletype(path, properties.getDsl().getProcessedFiletypes())) {
+            if (FileUtils.isFiletype(path, properties.getDsl().getProcessedFiletypes())
+               || FileUtils.isGuard(path)) {
                 Map<String, JsonNode> nodeMap = mapper.readValue(path.toFile(), new TypeReference<>() {});
                 for (String key : nodeMap.keySet()) {
                     JsonNode node = nodeMap.get(key);
