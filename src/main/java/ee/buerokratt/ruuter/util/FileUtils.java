@@ -36,11 +36,10 @@ public class FileUtils {
         return !isDirectory(path) && (pathString.endsWith(SUFFIX_YML) || pathString.endsWith(SUFFIX_YAML));
     }
 
-    public static boolean isAllowedFiletype(Path path, List<String> allowedFiletypes) {
-        String pathString = path.toString();
+    public static boolean isFiletype(Path path, List<String> filetypes) {
         if (isDirectory(path)) return true;
-        for (String filetype : allowedFiletypes)
-            if (pathString.endsWith(filetype)) return true;
+        for (String filetype : filetypes)
+            if (path.toString().endsWith(filetype)) return true;
         return false;
     }
 

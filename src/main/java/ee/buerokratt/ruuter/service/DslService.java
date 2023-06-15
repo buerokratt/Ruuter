@@ -45,6 +45,7 @@ public class DslService {
     public DslService(ApplicationProperties properties, DslMappingHelper dslMappingHelper, ScriptingHelper scriptingHelper, Tracer tracer, MappingHelper mappingHelper, HttpHelper httpHelper, ExternalForwardingHelper externalForwardingHelper) {
         this.dslMappingHelper = dslMappingHelper;
         this.properties = properties;
+        this.dslMappingHelper.properties = properties;
         this.scriptingHelper = scriptingHelper;
         this.dsls = getDsls(properties.getConfigPath());
         this.guards = getGuards(properties.getConfigPath());
@@ -60,14 +61,15 @@ public class DslService {
     }
 
     public Map<String, Map<String, Map<String, DslStep>>> getDsls(String configPath) {
-        Map<String, Map<String, Map<String, DslStep>>> _dsls = Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
+        Map<String, Map<String, Map<String, DslStep>>> _dsls = 
+               Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
             try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
                 .filter(path -> !FileUtils.isGuard(path))
                 .filter(path -> {
-                if (!FileUtils.isAllowedFiletype(path, properties.getDsl().getAllowedFiletypes()))
+                if (!FileUtils.isFiletype(path, properties.getDsl().getAllowedFiletypes()))
                     throw new IllegalArgumentException(UNSUPPORTED_FILETYPE_ERROR_MESSAGE + " " + path.toString().substring(path.toString().lastIndexOf('.')) + " (" + path + ")");
                 return true;
-            }).filter(FileUtils::isYmlFile)) {
+            }).filter(path -> FileUtils.isFiletype(path, properties.getDsl().getProcessedFiletypes()))) {
                 return paths
                     .filter(Files::isRegularFile)
                     .collect(toMap(FileUtils::getFileNameWithPathWithoutSuffix, dslMappingHelper::getDslSteps));

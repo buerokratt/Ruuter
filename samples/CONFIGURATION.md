@@ -117,6 +117,17 @@ application:
 DSLs with `.tmp` filetype are inactive and not processed.
 If [`DSL`](../DSL) directory contains any filetypes that are not defined above, then Ruuter will not start.
 
+### Processed DSL filetypes
+
+Ruuter only processes DSL files, which are defined in [application.yml](../src/main/resources/application.yml).
+Everything not included will be considered inactive and will not be processed.
+
+```
+application:
+    DSL:
+        processedFiletypes: [".yml", ".yaml"]
+```
+
 ### Reloading DSLs
 
 It's possible to reload DSLs from the [`DSL directory`](../DSL), which is defined in `application.yml -> application -> config-path`

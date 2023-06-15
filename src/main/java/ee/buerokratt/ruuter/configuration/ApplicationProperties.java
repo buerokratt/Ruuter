@@ -80,6 +80,7 @@ public class ApplicationProperties {
     @Setter
     public static class DSL {
         private List<String> allowedFiletypes;
+        private List<String> processedFiletypes;
         private boolean allowDslReloading;
     }
 }
