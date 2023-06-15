@@ -159,7 +159,7 @@ ApplicationProperties class the same way as HttpPost is defined and use addHeade
 
 ### Internal requests
 
-Some DSL services can be exposed to to internal requests as REST endpoints.
+Some DSL services can be exposed to internal requests as REST endpoints.
 These can be accessed only from IPs that are specified in `allowedFiletypes` configuration block:
 * `allowedIPs` - list of whitelisted IPs 
 * `allowedURLs` - list of whitelisted referral URLs
