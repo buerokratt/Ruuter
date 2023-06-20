@@ -55,6 +55,7 @@ public class ApplicationProperties {
                 private Boolean get;
                 private Boolean post;
                 private Boolean headers;
+                private Boolean origin;
             }
 
             @Getter
