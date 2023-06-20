@@ -35,6 +35,10 @@ public class ScriptingHelper {
             return toEval;
         }
 
+        // Simple evaluation
+        if (toEval.toString().matches(SCRIPT_REGEX)) {
+            return evaluateSimple(toEval, context, requestBody, requestQuery, requestHeaders);
+        }
         Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestQuery, requestHeaders);
         Bindings bindings = createBindingsWithContext(evalContext);
 
@@ -43,31 +47,31 @@ public class ScriptingHelper {
     }
 
     private Object replaceVariables(Object toEval, Bindings bindings, Map<String, Object> evalContext ) {
-        if (toEval instanceof String) {
-            String eval = (String) toEval;
-
-            // Full variable match, assigned value can be any
-            if (eval.matches(SCRIPT_REGEX)) {
-                setupObjectsInScript(eval, bindings, evalContext);
-                return filterEmptyOptional(bindings, eval.substring(2, eval.length() - 1));
-            }
-
-            // Partial variable match, assigned value can only be String
-            List<MatchResult> founded = Pattern.compile(SCRIPT_REGEX).matcher(eval).results().collect(toList());
-            for (MatchResult f : founded) {
-                String found = f.group();
-                setupObjectsInScript(found.substring(2, found.length() - 1), bindings, evalContext);
-                eval = eval.replace(found, filterEmptyOptional(bindings, found.substring(2, found.length() - 1)).toString());
-            };
-
-            return eval;
-        }
         if (toEval instanceof List)
             return ((List)toEval).stream().map( obj -> replaceVariables(obj, bindings, evalContext)).collect(toList());
         if (toEval instanceof Map)
             return ((HashMap<String, Object>)toEval).entrySet().stream()
                 .collect(toMap(Map.Entry::getKey,entry -> replaceVariables(entry.getValue(), bindings,evalContext)));
-        return null;
+
+        String eval = (String) toEval;
+
+        // Full variable match, assigned value can be any
+        if (eval.matches(SCRIPT_REGEX)) {
+            setupObjectsInScript(eval, bindings, evalContext);
+            Object returnable = filterEmptyOptional(bindings, removeScriptWrapper(eval));
+            return returnable;
+        }
+
+        // Partial variable match, assigned value can only be String
+        List<MatchResult> founded = Pattern.compile(SCRIPT_REGEX).matcher(eval).results().collect(toList());
+        for (MatchResult f : founded) {
+            String found = f.group();
+            setupObjectsInScript(removeScriptWrapper(found), bindings, evalContext);
+            Object replacedValue = filterEmptyOptional(bindings, removeScriptWrapper(found));
+            eval = eval.replace(found, replacedValue.toString());
+        };
+
+        return eval;
     }
 
     private Object filterEmptyOptional(Bindings bindings, String evaluableScript) {
@@ -137,4 +141,19 @@ public class ScriptingHelper {
     private String removeScriptWrapper(String s) {
         return s.substring(2, s.length() - 1);
     }
+
+    public Object evaluateSimple(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
+
+        Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestQuery, requestHeaders);
+        Bindings bindings = createBindingsWithContext(evalContext);
+
+        List<Object> evaluatedScripts = Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(toEval.toString()).results()
+            .map(matchResult -> matchResult.group(0))
+            .map(scriptToExecute -> setupObjectsInScript(removeScriptWrapper(scriptToExecute), bindings, evalContext))
+            .map(evaluableScript -> filterEmptyOptional(bindings, evaluableScript))
+            .collect(toList());
+
+        return evaluatedScripts.size() == 1 ? evaluatedScripts.get(0) : evaluatedScripts.stream().reduce("", (o, o2) -> o + o2.toString());
+    }
+
 }
