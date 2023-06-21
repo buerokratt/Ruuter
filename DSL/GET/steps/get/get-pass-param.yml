@@ -2,7 +2,6 @@ get_message:
   call: http.get
   args:
     url: "http://localhost:8080/scripting/passing-get-parameters?queryVal=queryVariable"
-#    url: "http://rdn.ee:9000/scripting/passing-get-parameters?queryVal=queryVariable"
     query:
       varFromDSL: "variableFromDSL"
   result: response_for_get_request
