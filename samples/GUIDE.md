@@ -136,3 +136,13 @@ IPs and referrer URLs specified in configuration.
 * [http-post](steps/http-post.md)
 * [conditional-jump](steps/conditional-jump.md)
 * [template](steps/template.md)
+
+
+### Using javascript in DSLs
+
+Javascript function calls can be used in DSL parameters, for example 
+```
+    minValue: ${ list.sort( (a,b) => a - b ) }
+```
+If using anonymous function calls, only lambda syntax should be used, 
+as `{` and `}` are reserved as DSL parameter identifiers.
