@@ -81,7 +81,7 @@ class ExternalForwardingHelperTest {
         }};
 
         when(spyProperties.getIncomingRequests()).thenReturn(incomingRequests);
-        helper.forwardRequest(requestBody, requestQuery, requestHeaders);
+        helper.forwardRequest("originaldsl", requestBody, requestQuery, requestHeaders);
 
         verify(spyHttpHelper, times(1)).doPost(externalForwarding.getEndpoint(), requestBody, requestQuery, new HashMap<>());
     }
@@ -105,7 +105,7 @@ class ExternalForwardingHelperTest {
         }};
 
         when(spyProperties.getIncomingRequests()).thenReturn(incomingRequests);
-        helper.forwardRequest(new HashMap<>(), requestQuery, requestHeaders);
+        helper.forwardRequest("originaldsl",new HashMap<>(), requestQuery, requestHeaders);
 
         verify(spyHttpHelper, times(1)).doGet(externalForwarding.getEndpoint(), requestQuery, new HashMap<>());
     }
@@ -121,7 +121,7 @@ class ExternalForwardingHelperTest {
 
         when(spyProperties.getIncomingRequests()).thenReturn(incomingRequests);
 
-        assertThrows(IllegalArgumentException.class, () -> helper.forwardRequest(new HashMap<>(), new HashMap<>(), new HashMap<>()));
+        assertThrows(IllegalArgumentException.class, () -> helper.forwardRequest("originaldsl",new HashMap<>(), new HashMap<>(), new HashMap<>()));
     }
 
     @Test

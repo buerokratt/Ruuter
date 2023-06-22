@@ -1,0 +1,11 @@
+post_step:
+  call: http.post
+  args:
+   url: "[#DOMAIN_URL]:[#PORT]/scripting/passing-post-parameters"
+   contentType: plaintext
+   plaintext: 
+      "byrokratt"
+  result: the_message
+
+return_value:
+  return: ${the_message.response}

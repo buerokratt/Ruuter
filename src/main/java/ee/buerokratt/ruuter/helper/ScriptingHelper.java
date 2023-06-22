@@ -143,6 +143,7 @@ public class ScriptingHelper {
     private List<Object> getEvaluatedScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         Map<String, Object> evalContext = setupEvalContext(context, requestBody, requestQuery, requestHeaders);
         Bindings bindings = createBindingsWithContext(evalContext);
+
         List<Object> evaluatedScripts = Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(toEval.toString()).results()
             .map(matchResult -> matchResult.group(0))
             .map(scriptToExecute -> setupObjectsInScript(removeScriptWrapper(scriptToExecute), bindings, evalContext))

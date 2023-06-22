@@ -7,4 +7,4 @@ step_1:
   result: reflected_request
 
 step_2:
-  return: ${reflected_request.response}
+  return: ${reflected_request}
