@@ -11,8 +11,10 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -77,6 +79,7 @@ public class HttpHelper {
                 .retrieve()
                 .toEntity(Object.class)
                 .block();
+
         } catch (WebClientResponseException e) {
             return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
         }
