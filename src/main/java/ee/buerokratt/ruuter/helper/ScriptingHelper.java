@@ -1,6 +1,7 @@
 package ee.buerokratt.ruuter.helper;
 
 import ee.buerokratt.ruuter.helper.exception.ScriptEvaluationException;
+import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -106,9 +107,17 @@ public class ScriptingHelper {
         if (possibleObject.contains("\"")) {
             return possibleObject;
         }
+
         String objectName = possibleObject.substring(0, possibleObject.indexOf('.'));
-        bindings.put(objectName, mappingHelper.convertObjectToString(evalContext.get(objectName)));
-        return "JSON.parse(" + possibleObject.replaceFirst("\\.", ").");
+        if (evalContext.get(objectName) != null) {
+            String value = mappingHelper.convertObjectToString(evalContext.get(objectName));
+            bindings.put(objectName, value);
+        }
+
+        if (bindings.keySet().contains(objectName)) {
+            return "JSON.parse(" + possibleObject.replaceFirst("\\.", ").");
+        }
+        return possibleObject;
     }
 
     private Object evaluate(Bindings bindings, String evaluableString) {
