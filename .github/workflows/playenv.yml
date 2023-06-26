@@ -3,28 +3,28 @@ name: Deploy Docker Compose
 on:
   push:
     branches:
-      - dev
+ #     - dev
       - main
 
 jobs:
-  deploy-dev:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev'  # Only run for the 'dev' branch
+#  deploy-dev:
+ #   runs-on: ubuntu-latest
+ #   if: github.ref == 'refs/heads/dev'  # Only run for the 'dev' branch
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v2
 
-      - name: Install Docker
-        uses: docker/setup-docker@v1
+#      - name: Install Docker
+#        uses: docker/setup-docker@v1
 
-      - name: Push repository to DEV server
-        run: |
-          rsync -az --delete $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/dev/ruuter
+ #     - name: Push repository to DEV server
+ #       run: |
+ #         rsync -az  "ssh -i $HOME/.ssh/id_rsa" $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/dev/ruuter
 
-      - name: Run Docker Compose on DEV server
-        run: |
-          sh ubuntu@171.22.247.156 'cd /opt/etapp2/dev/ruuter && docker-compose up -d'
+  #    - name: Run Docker Compose on DEV server
+  #      run: |
+  #        sh ubuntu@171.22.247.156 'cd /opt/etapp2/dev/ruuter && docker-compose up -d'
   deploy-main:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'  # Only run for the 'main' branch
@@ -38,7 +38,7 @@ jobs:
 
       - name: Push repository to MAIN server
         run: |
-          rsync -az --delete $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/main/ruuter
+          rsync -az --delete "ssh -i $HOME/.ssh/id_rsa" $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/main/ruuter
 
       - name: Run Docker Compose on MAIN server
         run: |
