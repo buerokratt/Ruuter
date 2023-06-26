@@ -29,4 +29,6 @@ RUN chown -R ruuter:ruuter /app
 RUN chown -R ruuter:ruuter /DSL
 USER ruuter
 
+EXPOSE 8080 8995
+
 ENTRYPOINT ["java","-cp","app:app/lib/*","ee.buerokratt.ruuter.RuuterApplication"]
