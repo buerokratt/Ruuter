@@ -19,12 +19,12 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 171.22.247.156 >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.MAIN_SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: Push repository to MAIN server
-        run: rsync -az --exclude='.git/' -e "ssh -i $HOME/.ssh/id_rsa" $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/main/ruuter
+        run: rsync -az --exclude='.git/' -e "ssh -i $HOME/.ssh/id_rsa" $GITHUB_WORKSPACE/ ubuntu@${{ secrets.MAIN_SERVER_IP }}:/opt/etapp2/main/ruuter
 
       - name: Run Docker Compose on MAIN server
         run: |
-          ssh -i $HOME/.ssh/id_rsa ubuntu@171.22.247.156 'cd /opt/etapp2/main/ruuter && docker-compose up -d'
+          ssh -i $HOME/.ssh/id_rsa ubuntu@${{ secrets.MAIN_SERVER_IP }} 'cd /opt/etapp2/main/ruuter && docker-compose down && docker-compose up -d'
 
