@@ -22,7 +22,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth:3.1.5'
+    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth:3.1.8'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     implementation 'org.graalvm.js:js:22.3.0'
     implementation 'org.graalvm.js:js-scriptengine:23.0.0'
