@@ -1,0 +1,52 @@
+name: Deploy Docker Compose
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'  # Only run for the 'dev' branch
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Docker
+        uses: docker/setup-docker@v1
+
+      - name: Log into Docker registry
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push repository to DEV server
+        run: |
+          rsync -az --delete $GITHUB_WORKSPACE/ username@dev-server-ip:/path/to/dev/destination
+
+      - name: Run Docker Compose on DEV server
+        run: |
+          ssh username@dev-server-ip 'cd /path/to/dev/destination && docker-compose up -d'
+
+  deploy-main:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'  # Only run for the 'main' branch
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Docker
+        uses: docker/setup-docker@v1
+
+      - name: Log into Docker registry
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push repository to MAIN server
+        run: |
+          rsync -az --delete $GITHUB_WORKSPACE/ username@main-server-ip:/path/to/main/destination
+
+      - name: Run Docker Compose on MAIN server
+        run: |
+          ssh username@main-server-ip 'cd /path/to/main/destination && docker-compose up -d'
