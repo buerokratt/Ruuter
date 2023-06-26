@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - dev
+      - test
 
 jobs:
   deploy-main:
@@ -29,9 +29,9 @@ jobs:
         run: |
           ssh -i $HOME/.ssh/id_rsa ubuntu@${{ secrets.MAIN_SERVER_IP }} 'cd /opt/etapp2/main/ruuter && docker-compose down && docker-compose up -d'
           
-  deploy-dev:
+  deploy-test:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev'  # Only run for the 'dev' branch
+    if: github.ref == 'refs/heads/test'  # Only run for the 'dev' branch
 
     steps:
       - name: Checkout repository
