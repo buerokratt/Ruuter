@@ -35,10 +35,16 @@ jobs:
 
 #      - name: Install Docker
 #        uses: docker/setup-docker@v1
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 171.22.247.156 >> ~/.ssh/known_hosts
 
       - name: Push repository to MAIN server
         run: |
-          rsync -az --delete "ssh -i $HOME/.ssh/id_rsa" $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/main/ruuter
+          rsync -az "ssh -i $HOME/.ssh/id_rsa" $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/main/ruuter
 
       - name: Run Docker Compose on MAIN server
         run: |
