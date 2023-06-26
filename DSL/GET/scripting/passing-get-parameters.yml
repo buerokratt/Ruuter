@@ -1,2 +1,2 @@
 first_step:
-  return: ${incoming.params.passedVariable}
+  return: ${incoming.params.varFromDSL} AND ${incoming.params.queryVal}

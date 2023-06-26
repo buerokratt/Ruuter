@@ -7,6 +7,8 @@ post_step:
   call: http.post
   args:
     url: https://www.example-url.com
+    contentType: plaintext
+    plaintext: "value"
     body:
       test: "param"
   result: responseVariable
@@ -28,6 +30,10 @@ post_step:
     * `headers`
         * *..desired header values* - Scripts can be used for headers values
     * `result` - name of the variable to store the response of the query in, for use in other steps
+    * `contentType` - alias of the MIME contenttype to use, currently allowed "plaintext" which maps 
+        to 'text/plain' for plaintext or 'application/x-www-form-urlencoded' for maps.
+        If left empty, 'application/json' will be used.
+    * `plaintext` - used instead of `body` if a singular plaintext value is needed to be sent 
 
 ***Note: POST step responses are stored the same way as [GET step responses](./http-get.md#How-responses-are-stored-with-the-result-field)***
 
@@ -45,6 +51,24 @@ post_step:
     body:
       project: "byk"
       website: "krat.ee"
+  result: the_message
+
+return_value:
+  return: ${the_message.response}
+```
+
+### POST step with payload sent as plaintext value
+
+[`post-with-plaintext-value.yml`](../../DSL/POST/steps/post/post-with-plaintext-value.yml)
+
+```
+post_step:
+  call: http.post
+  args:
+    url: http://localhost:8080/scripting/passing-post-parameters
+    contentType: plaintext
+    plaintext: 
+        "byrokratt"
   result: the_message
 
 return_value:
