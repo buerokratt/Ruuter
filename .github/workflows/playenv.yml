@@ -18,17 +18,13 @@ jobs:
       - name: Install Docker
         uses: docker/setup-docker@v1
 
-      - name: Log into Docker registry
-        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-
       - name: Push repository to DEV server
         run: |
-          rsync -az --delete $GITHUB_WORKSPACE/ username@dev-server-ip:/path/to/dev/destination
+          rsync -az --delete $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/dev/ruuter
 
       - name: Run Docker Compose on DEV server
         run: |
-          ssh username@dev-server-ip 'cd /path/to/dev/destination && docker-compose up -d'
-
+          sh ubuntu@171.22.247.156 'cd /opt/etapp2/dev/ruuter && docker-compose up -d'
   deploy-main:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'  # Only run for the 'main' branch
@@ -40,13 +36,10 @@ jobs:
       - name: Install Docker
         uses: docker/setup-docker@v1
 
-      - name: Log into Docker registry
-        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-
       - name: Push repository to MAIN server
         run: |
-          rsync -az --delete $GITHUB_WORKSPACE/ username@main-server-ip:/path/to/main/destination
+          rsync -az --delete $GITHUB_WORKSPACE/ ubuntu@171.22.247.156:/opt/etapp2/main/ruuter
 
       - name: Run Docker Compose on MAIN server
         run: |
-          ssh username@main-server-ip 'cd /path/to/main/destination && docker-compose up -d'
+          ssh ubuntu@171.22.247.156 'cd /opt/etapp2/main/ruuter && docker-compose up -d'
