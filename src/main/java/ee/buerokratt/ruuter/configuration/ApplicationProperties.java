@@ -24,6 +24,8 @@ public class ApplicationProperties {
     private FinalResponse finalResponse = new FinalResponse();
     private Integer maxStepRecursions;
     private CORS cors;
+    private DSL dsl;
+    private InternalRequests internalRequests;
 
     @Setter
     @Getter
@@ -53,6 +55,7 @@ public class ApplicationProperties {
                 private Boolean get;
                 private Boolean post;
                 private Boolean headers;
+                private Boolean origin;
             }
 
             @Getter
@@ -73,5 +76,20 @@ public class ApplicationProperties {
     @Setter
     public static class CORS {
         private List<String> allowedOrigins;
+    }
+
+    @Getter
+    @Setter
+    public static class DSL {
+        private List<String> allowedFiletypes;
+        private List<String> processedFiletypes;
+        private boolean allowDslReloading;
+    }
+
+    @Getter
+    @Setter
+    public static class InternalRequests {
+        private List<String> allowedIPs;
+        private List<String> allowedURLs;
     }
 }

@@ -1,0 +1,10 @@
+step_1:
+  call: reflect.mock
+  args:
+    response:
+      project: "Bürokratt"
+      website: "www.kratid.ee"
+  result: reflected_request
+
+step_2:
+  return: ${reflected_request}

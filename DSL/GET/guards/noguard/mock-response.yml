@@ -1,12 +1,10 @@
 step_1:
   call: reflect.mock
   args:
-    request:
-      some: "request"
     response:
       project: "Bürokratt"
       website: "www.kratid.ee"
   result: reflected_request
 
 step_2:
-  return: ${reflected_request.response}
+  return: ${reflected_request}

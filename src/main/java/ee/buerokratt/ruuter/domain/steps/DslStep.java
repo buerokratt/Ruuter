@@ -23,6 +23,8 @@ public abstract class DslStep {
     private Boolean skip;
     private Long sleep;
     private Integer maxRecursions;
+    @JsonAlias({"reloadDsls"})
+    private boolean reloadDsl = false;
 
     public final void execute(DslInstance di) {
         Span newSpan = di.getTracer().nextSpan().name(name);

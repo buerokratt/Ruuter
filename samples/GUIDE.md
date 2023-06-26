@@ -108,6 +108,13 @@ Content-Type: application/json
 }
 ```
 
+### Internal services
+
+Requests put into first level subdirectory named `internal` will be 
+used for internal requests only. Those DSLs can only be accessed from 
+IPs and referrer URLs specified in configuration.
+
+
 ## Writing DSL files
 
 ### General functionalities
@@ -118,6 +125,7 @@ Content-Type: application/json
 * [sleep](./general/sleep.md)
 * [scripting](./general/scripting.md)
 * [Passing parameters to DSL](./general/params.md)
+* [Reloading DSLs](./general/reload-dsls.md)
 
 ### Step types
 
@@ -128,3 +136,13 @@ Content-Type: application/json
 * [http-post](steps/http-post.md)
 * [conditional-jump](steps/conditional-jump.md)
 * [template](steps/template.md)
+
+
+### Using javascript in DSLs
+
+Javascript function calls can be used in DSL parameters, for example 
+```
+    minValue: ${ list.sort( (a,b) => a - b ) }
+```
+If using anonymous function calls, only lambda syntax should be used, 
+as `{` and `}` are reserved as DSL parameter identifiers.

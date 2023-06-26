@@ -39,6 +39,7 @@ public abstract class HttpStep extends DslStep {
 
     @Override
     protected void executeStepAction(DslInstance di) {
+        args.checkUrl(di);
         ResponseEntity<Object> response = getRequestResponse(di);
         di.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
 

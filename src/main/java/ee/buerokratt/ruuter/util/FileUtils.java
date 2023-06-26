@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,13 @@ public class FileUtils {
         return !isDirectory(path) && (pathString.endsWith(SUFFIX_YML) || pathString.endsWith(SUFFIX_YAML));
     }
 
+    public static boolean isFiletype(Path path, List<String> filetypes) {
+        if (isDirectory(path)) return true;
+        for (String filetype : filetypes)
+            if (path.toString().endsWith(filetype)) return true;
+        return false;
+    }
+
     public static String getFileNameWithoutSuffix(Path path) {
         String nameWithSuffix = path.getFileName().toString();
         return nameWithSuffix.substring(0, nameWithSuffix.lastIndexOf('.'));
@@ -46,9 +54,18 @@ public class FileUtils {
         return fullPath;
     }
 
+    public static String getGuardWithPath(Path path) {
+        String fullPath = getFileNameWithPathWithoutSuffix(path);
+        return fullPath.substring(0, fullPath.lastIndexOf("/"));
+    }
+
     public static Map<String, Map<String, String>> parseIniFile(File fileToParse) throws IOException {
         Ini ini = new Ini(fileToParse);
         return ini.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public static boolean isGuard(Path path) {
+        return path.endsWith(".guard");
     }
 }

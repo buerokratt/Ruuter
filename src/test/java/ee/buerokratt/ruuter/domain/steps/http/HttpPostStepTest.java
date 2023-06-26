@@ -120,4 +120,20 @@ class HttpPostStepTest extends StepTestBase {
 
         assertThrows(IllegalArgumentException.class, () -> postStep.execute(di));
     }
+
+    @Test
+    void execute_shouldFollowPlaintextWhenPlaintextContentType(WireMockRuntimeInfo wireMockRuntimeInfo){
+        postArgs.setContentType("plaintext");
+        postArgs.setPlaintext("plaintextTest");
+        when(httpHelper.doPostPlaintext(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>(), postArgs.getPlaintext())).thenReturn(httpResponse);
+        when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
+        when(httpPost.getHeaders()).thenReturn(new HashMap<>());
+        when(properties.getHttpPost()).thenReturn(httpPost);
+        when(properties.getLogging()).thenReturn(logging);
+        when(logging.getDisplayRequestContent()).thenReturn(true);
+        postStep.execute(di);
+
+        assertEquals(HttpStatus.OK, ((HttpStepResult) testContext.get("the_response")).getResponse().getStatusCode());
+
+    }
 }

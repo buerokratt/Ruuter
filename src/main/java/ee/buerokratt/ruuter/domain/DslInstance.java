@@ -66,6 +66,11 @@ public class DslInstance {
                 setCurrentLoopMaxRecursions(maxRecursions);
             }
         }
+        if (stepToExecute.isReloadDsl()) {
+            // Only allow reloading if it's enabled in configuration.
+            if (properties.getDsl().isAllowDslReloading()) dslService.reloadDsls();
+            else LoggingUtils.logError(log, "Reload DSLs was called, but is not enabled in configuration!", requestOrigin, "");
+        }
         executeNextStep(stepToExecute, stepNames);
     }
 
@@ -122,5 +127,9 @@ public class DslInstance {
     private void addGlobalIncomingHeadersToRequestHeaders() {
         Map<String, Object> evaluatedHeaders = scriptingHelper.evaluateScripts(properties.getIncomingRequests().getHeaders(), context, requestBody, requestQuery, requestHeaders);
         requestHeaders.putAll(mappingHelper.convertMapObjectValuesToString(evaluatedHeaders));
+    }
+
+    public boolean isInternal() {
+        return name.startsWith("internal");
     }
 }

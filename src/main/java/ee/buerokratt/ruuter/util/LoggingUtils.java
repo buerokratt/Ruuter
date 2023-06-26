@@ -4,6 +4,9 @@ import ee.buerokratt.ruuter.domain.steps.DslStep;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class LoggingUtils {
     public static final String INCOMING_REQUEST = "incoming.request";
     public static final String STEP_TYPE = "stepType";
@@ -56,5 +59,11 @@ public class LoggingUtils {
         MDC.put(REQUEST_CONTENT, requestContent);
         MDC.put(RESPONSE_CONTENT, responseContent);
         MDC.put(RESPONSE_CODE, responseCode);
+    }
+
+    public static String mapDeepToString(Map<String, Object> map) {
+        return map.entrySet().stream()
+            .map(e ->"{ " + e.getKey() + " => " + (e.getValue() instanceof Map ? mapDeepToString((Map)e.getValue()) : e.getValue().toString()) + " }")
+            .collect(Collectors.joining(","));
     }
 }
