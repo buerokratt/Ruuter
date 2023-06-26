@@ -30,6 +30,9 @@ application:
     allowedIPs: ["127.0.0.1", "192.168.0.1", "172.21.0.1"]
     allowedURLs: ["http://localhost/internalTest"]
 
+server:
+   port: 8995
+
 spring:
   application:
     name: ruuter
