@@ -7,7 +7,7 @@ services:
     volumes:
       - ./DSL:/DSL
     ports:
-      - 8999:8999
+      - 8995:8995
     networks:
       - ruuter
 
