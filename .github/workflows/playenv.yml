@@ -45,11 +45,11 @@ jobs:
           ssh-keyscan -H ${{ secrets.MAIN_SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: Push repository to DEV server
-        run: rsync -az --exclude='.git/' -e "ssh -i $HOME/.ssh/id_rsa" $GITHUB_WORKSPACE/ ubuntu@${{ secrets.MAIN_SERVER_IP }}:/opt/etapp2/dev/ruuter
+        run: rsync -az --exclude='.git/' -e "ssh -i $HOME/.ssh/id_rsa" $GITHUB_WORKSPACE/ ubuntu@${{ secrets.MAIN_SERVER_IP }}:/opt/etapp2/test/ruuter
 
       - name: Run Docker Compose on MAIN server
         run: |
-          ssh -i $HOME/.ssh/id_rsa ubuntu@${{ secrets.MAIN_SERVER_IP }} 'cd /opt/etapp2/dev/ruuter && docker-compose down && docker-compose up -d'
+          ssh -i $HOME/.ssh/id_rsa ubuntu@${{ secrets.MAIN_SERVER_IP }} 'cd /opt/etapp2/test/ruuter && docker-compose down && docker-compose up -d'
 
 
 
