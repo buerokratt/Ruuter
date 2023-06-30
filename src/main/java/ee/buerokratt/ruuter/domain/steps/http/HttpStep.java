@@ -88,18 +88,28 @@ public abstract class HttpStep extends DslStep {
     private boolean displayResponseContent(ApplicationProperties properties) {
         if (logging != null && Boolean.TRUE.equals(logging.getDisplayResponseContent())) {
             return true;
-        } else if (logging == null || logging.getDisplayResponseContent() == null) {
-            return Boolean.TRUE.equals(properties.getLogging().getDisplayResponseContent());
         }
+
+        if (properties.getLogging() != null &&
+            (logging == null || logging.getDisplayResponseContent() == null) &&
+            Boolean.TRUE.equals(properties.getLogging().getDisplayResponseContent())) {
+            return true;
+        }
+
         return false;
     }
 
     private boolean displayRequestContent(ApplicationProperties properties) {
         if (logging != null && Boolean.TRUE.equals(logging.getDisplayRequestContent())) {
             return true;
-        } else if (logging == null || logging.getDisplayRequestContent() == null) {
-            return Boolean.TRUE.equals(properties.getLogging().getDisplayRequestContent());
         }
+
+        if (properties.getLogging() != null &&
+            (logging == null || logging.getDisplayRequestContent() == null) &&
+            Boolean.TRUE.equals(properties.getLogging().getDisplayRequestContent())) {
+            return true;
+        }
+
         return false;
     }
 
