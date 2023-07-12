@@ -141,4 +141,26 @@ return_value:
   return: ${the_message.request}
 ```
 
+### HTTP Error handling
+
+It is possible to specify the DSL step to follow when GET request gets a
+non-OK response. For that the `error` field can be used
+```
+get_message:
+  call: http.get
+  args:
+    url: http://localhost:8080/guards/fail/mock-response #step that always gives 403
+    query:
+      var: "value"
+  result: the_message
+  error: error_step
+
+return_value:
+  return: ${the_message.request}
+  
+error_step:
+  return: "Request failed"
+  status: 500  
+```
+
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

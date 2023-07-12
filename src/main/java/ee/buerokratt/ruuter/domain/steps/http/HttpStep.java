@@ -37,6 +37,9 @@ public abstract class HttpStep extends DslStep {
     protected DefaultHttpDsl localHttpExceptionDsl;
     protected Logging logging;
 
+    @JsonAlias("error")
+    protected String onErrorStep;
+
     @Override
     protected void executeStepAction(DslInstance di) {
         args.checkUrl(di);
@@ -44,7 +47,11 @@ public abstract class HttpStep extends DslStep {
         di.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
 
         if (!isAllowedHttpStatusCode(di, response.getStatusCodeValue())) {
-            throw new IllegalArgumentException();
+            if (getOnErrorStep() != null) {
+                setNextStepName(getOnErrorStep());
+            }
+            else
+                throw new IllegalArgumentException();
         }
     }
 
