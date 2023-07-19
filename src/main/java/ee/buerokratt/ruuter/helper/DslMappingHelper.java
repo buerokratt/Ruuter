@@ -15,14 +15,19 @@ import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import ee.buerokratt.ruuter.helper.exception.InvalidDslException;
 import ee.buerokratt.ruuter.helper.exception.InvalidDslStepException;
 import ee.buerokratt.ruuter.util.FileUtils;
+import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -34,6 +39,8 @@ public class DslMappingHelper {
 
     public static final String DSL_NOT_YML_FILE_ERROR_MESSAGE = "DSL is not yml file.";
     public static final String INVALID_STEP_ERROR_MESSAGE = "Invalid step type.";
+
+    private Properties dslParameters;
 
     public DslMappingHelper(@Qualifier("ymlMapper") ObjectMapper mapper) {
         this.mapper = mapper;
@@ -93,28 +100,44 @@ public class DslMappingHelper {
 
     /**
      * Replace DSL file parameters with values.
-     * Since DSL parameters look like this "[#PARAMETER]",
-     * then it's not as simple as calling String.replaceAll().
+     * DSL parameters are formatted like "[#PARAMETER]"
+     * and will be replaced in bulk by regular expression.
      *
      * @param input String to modify
      * @return Updated string
      */
     private String replaceDslParametersWithValues(String input) {
-        try {
-            Map<String, String> params = FileUtils.parseIniFile(new File("/app/constants.ini")).get("DSL");
-            String output = input;
-            for (String key : params.keySet()) {
-                String param = "[#"+key+"]";
-                while (output.contains(param)) {
-                    int start = output.indexOf(param);
-                    int end = start + param.length();
-                    output = output.substring(0, start) + params.get(key) + output.substring(end);
-                }
-            }
-            return output;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        if (dslParameters == null || dslParameters.isEmpty()) {
+            initDSLParameters();
         }
+
+        Matcher parameterMatcher = Pattern.compile("\\[#.*?\\]").matcher(input);
+
+        if (!parameterMatcher.find())
+            return input;
+
+        String replaced = parameterMatcher
+            .replaceAll(match ->
+                dslParameters.containsKey(unwrapParameter(match.group(0))) ?
+                    dslParameters.getProperty(unwrapParameter(match.group(0))) :
+                    match.group(0)
+                );
+
+        System.out.println("replaced input: " + replaced);
+        return replaced;
+    }
+
+    public void initDSLParameters() {
+        try {
+            dslParameters = new Properties();
+            dslParameters.load(new FileInputStream("/app/constants.ini"));
+        } catch (IOException e) {
+            log.warn("constants.ini not found or not accessible");
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String unwrapParameter(String parameter) {
+        return parameter.substring(2, parameter.length()-1);
     }
 }
