@@ -1,6 +1,6 @@
 plugins {
     id 'org.springframework.boot' version '2.7.0'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id 'io.spring.dependency-management' version '1.1.2'
     id 'java'
 }
 
@@ -24,8 +24,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.cloud:spring-cloud-starter-sleuth:3.1.9'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-    implementation 'org.graalvm.js:js:23.0.0'
-    implementation 'org.graalvm.js:js-scriptengine:23.0.0'
+    implementation 'org.graalvm.js:js:23.0.1'
+    implementation 'org.graalvm.js:js-scriptengine:23.0.1'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.ini4j:ini4j:0.5.4'
     compileOnly 'org.projectlombok:lombok'
