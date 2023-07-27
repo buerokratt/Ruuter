@@ -38,9 +38,6 @@ If the following values are defined, then every incoming request is forwarded to
 * `paramsToPass.get` - whether to forward query params from incoming request
 * `paramsToPass.post` - whether to forward body from incoming request
 * `paramsToPass.headers` - whether to forward headers from incoming request
-* `paramsToPass.origin` - whether to forward original Ruuter endpoint
-  * original endpoint and host is stored in query parameters `originalEndpoint` 
-  and `originalHost` respectively
 * `proceedPredicate.httpStatusCode` - defines the accepted http status codes for proceeding with DSL processing. If the external forwarding request
   receives a response not included in the list, then the request is not processed.
     * values can be defined as single status codes: `200`, `201`, `202`...
@@ -55,7 +52,6 @@ application:
                 GET: true
                 POST: false
                 headers: true
-                origin: true
             proceedPredicate:
                 httpStatusCode: [ 200..202, 204 ]
 ```

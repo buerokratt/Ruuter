@@ -118,7 +118,7 @@ public class DslService {
                 }
             }
 
-            if (allowedToExecuteDsl(dsl, requestBody, requestQuery, requestHeaders, contentType)) {
+            if (allowedToExecuteDsl(requestBody, requestQuery, requestHeaders, contentType)) {
                 di.execute();
             }
             LoggingUtils.logInfo(log, "Request processed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
@@ -129,9 +129,9 @@ public class DslService {
         return di;
     }
 
-    private boolean allowedToExecuteDsl(String dsl, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType) {
+    private boolean allowedToExecuteDsl(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType) {
         if (externalForwardingHelper.shouldForwardRequest()) {
-            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(dsl, requestBody, requestQuery, requestHeaders, contentType);
+            ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(requestBody, requestQuery, requestHeaders, contentType);
             return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
         }
         return true;

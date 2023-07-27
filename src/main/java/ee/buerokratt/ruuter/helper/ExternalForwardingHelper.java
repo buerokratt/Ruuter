@@ -7,10 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -32,34 +28,31 @@ public class ExternalForwardingHelper {
             properties.getIncomingRequests().getExternalForwarding().getProceedPredicate().getHttpStatusCode() != null;
     }
 
-    public ResponseEntity<Object> forwardRequest(String dsl, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
-        return forwardRequest(dsl, requestBody, requestQuery,requestHeaders, this.getClass().getName());
+    public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
+        return forwardRequest(requestBody, requestQuery,requestHeaders, this.getClass().getName());
     }
 
-    public ResponseEntity<Object> forwardRequest(String dsl, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType) {
+    public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType) {
+        StringBuilder forwardingUrl = new StringBuilder(properties.getIncomingRequests().getExternalForwarding().getEndpoint());
         String methodType = properties.getIncomingRequests().getExternalForwarding().getMethod().toUpperCase(Locale.ROOT);
         Map<String, Object> query = shouldAddQuery(requestQuery) ? requestQuery : new HashMap<>();
         Map<String, Object> body = shouldAddBody(requestBody) ? requestBody : new HashMap<>();
         Map<String, String> headers = shouldAddHeaders(requestHeaders) ? requestHeaders : new HashMap<>();
-
-        if (shouldAddOrigin()) {
-            requestQuery.put("originalEndpoint", dsl);
-            if (requestHeaders.containsKey("host"))
-                requestQuery.put("originalHost", requestHeaders.get("host"));
+        if (!query.isEmpty()) {
+            forwardingUrl.append("?");
+            int i = 0;
+            for (String key : query.keySet()) {
+                forwardingUrl.append(key).append("=").append(query.get(key));
+                i++;
+                if (i != query.keySet().size()) forwardingUrl.append("&");
+            }
         }
-
-        MultiValueMap<String, String> multibody = new LinkedMultiValueMap<>();
-        requestQuery.forEach((s, o) -> multibody.add(s, (String) o));
-
-        String forwardingUrl = UriComponentsBuilder.fromUriString(properties.getIncomingRequests().getExternalForwarding().getEndpoint())
-            .queryParams(multibody)
-            .toUriString();
 
         if (methodType.equals(HttpMethod.POST.name())) {
-            return httpHelper.doPost(forwardingUrl, body, query, headers, contentType);
+            return httpHelper.doPost(forwardingUrl.toString(), body, query, headers, contentType);
         }
         if (methodType.equals(HttpMethod.GET.name())) {
-            return httpHelper.doGet(forwardingUrl, query, headers);
+            return httpHelper.doGet(forwardingUrl.toString(), query, headers);
         }
         throw new InvalidHttpMethodTypeException(methodType);
     }
@@ -83,9 +76,4 @@ public class ExternalForwardingHelper {
     private boolean shouldAddHeaders(Map<String, String> requestHeaders) {
         return requestHeaders != null && Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getHeaders());
     }
-
-    private boolean shouldAddOrigin() {
-        return Boolean.TRUE.equals(properties.getIncomingRequests().getExternalForwarding().getParamsToPass().getOrigin());
-    }
-
 }
