@@ -29,30 +29,17 @@ public class ExternalForwardingHelper {
     }
 
     public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
-        return forwardRequest(requestBody, requestQuery,requestHeaders, this.getClass().getName());
-    }
-
-    public ResponseEntity<Object> forwardRequest(Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType) {
-        StringBuilder forwardingUrl = new StringBuilder(properties.getIncomingRequests().getExternalForwarding().getEndpoint());
+        String forwardingUrl = properties.getIncomingRequests().getExternalForwarding().getEndpoint();
         String methodType = properties.getIncomingRequests().getExternalForwarding().getMethod().toUpperCase(Locale.ROOT);
         Map<String, Object> query = shouldAddQuery(requestQuery) ? requestQuery : new HashMap<>();
         Map<String, Object> body = shouldAddBody(requestBody) ? requestBody : new HashMap<>();
         Map<String, String> headers = shouldAddHeaders(requestHeaders) ? requestHeaders : new HashMap<>();
-        if (!query.isEmpty()) {
-            forwardingUrl.append("?");
-            int i = 0;
-            for (String key : query.keySet()) {
-                forwardingUrl.append(key).append("=").append(query.get(key));
-                i++;
-                if (i != query.keySet().size()) forwardingUrl.append("&");
-            }
-        }
 
         if (methodType.equals(HttpMethod.POST.name())) {
-            return httpHelper.doPost(forwardingUrl.toString(), body, query, headers, contentType);
+            return httpHelper.doPost(forwardingUrl, body, query, headers);
         }
         if (methodType.equals(HttpMethod.GET.name())) {
-            return httpHelper.doGet(forwardingUrl.toString(), query, headers);
+            return httpHelper.doGet(forwardingUrl, query, headers);
         }
         throw new InvalidHttpMethodTypeException(methodType);
     }
