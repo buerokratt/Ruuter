@@ -75,4 +75,26 @@ return_value:
   return: ${the_message.response}
 ```
 
+### HTTP Error handling
+
+It is possible to specify the DSL step to follow when POST request gets a
+non-OK response. For that the `error` field can be used
+```
+post_step:
+  call: http.post
+  args:
+    url: http://localhost:8080/nonexistant
+    contentType: plaintext
+    plaintext: 
+        "byrokratt"
+  result: the_message
+
+return_value:
+  return: ${the_message.request}
+  
+error_step:
+  return: "Request failed"
+  status: 500  
+```
+
 [Back to Guide](../GUIDE.md#Writing-DSL-files)
