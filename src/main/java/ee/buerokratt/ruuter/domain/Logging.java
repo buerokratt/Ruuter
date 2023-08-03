@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.domain;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Logging {
+    @JsonAlias("request")
     private Boolean displayRequestContent;
+
+    @JsonAlias("response")
     private Boolean displayResponseContent;
 }
