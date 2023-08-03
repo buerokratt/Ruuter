@@ -15,14 +15,11 @@ import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import ee.buerokratt.ruuter.helper.exception.InvalidDslException;
 import ee.buerokratt.ruuter.helper.exception.InvalidDslStepException;
 import ee.buerokratt.ruuter.util.FileUtils;
-import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
@@ -123,7 +120,6 @@ public class DslMappingHelper {
                     match.group(0)
                 );
 
-        System.out.println("replaced input: " + replaced);
         return replaced;
     }
 
