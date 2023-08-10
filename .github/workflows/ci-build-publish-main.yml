@@ -17,13 +17,14 @@ jobs:
     - name: Set image tag
       run: |
         LOWER_CASE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
+        DOCKER_TAG_CUSTOM=beta-2.0.$(date +'%y%m%d%H%M%S')
         echo "DOCKER_TAG_CUSTOM=ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:${CURRENT_DATE}" >> $GITHUB_ENV
     - name: Docker Build
-      run: docker image build --tag $DOCKER_TAG_SHA .
+      run: docker image build --tag $DOCKER_TAG_CUSTOM .
 
 
     - name: Log in to GitHub container registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
     - name: Push Docker image to ghcr
-      run: docker push $DOCKER_TAG_SHA
+      run: docker push $DOCKER_TAG_CUSTOM
