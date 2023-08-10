@@ -23,7 +23,7 @@ jobs:
 
 
     - name: Log in to GitHub container registry
-      run: echo "${{ secrets.RUUTER_SSH_PRIVATE_KEY }}" | docker login ghcr.io -u $ --password-stdin
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
     - name: Push Docker image to ghcr
       run: docker push $DOCKER_TAG_SHA
