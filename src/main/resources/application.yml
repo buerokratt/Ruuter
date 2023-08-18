@@ -22,6 +22,7 @@ application:
   maxStepRecursions: 10
   CORS:
     allowedOrigins: ["https://test.buerokratt.ee", "https://admin.test.buerokratt.ee/", "https://tim.test.buerokratt.ee/"]
+    allowCredentials: true
   DSL:
     allowedFiletypes: [".yml", ".yaml", ".tmp"]
     processedFiletypes: [".yml", ".yaml"]
