@@ -3,12 +3,16 @@ name: Build and publish Ruuter
 on:
   push:
     branches: [ dev ]
-  #  paths:
-  #    - '.env'
+    paths:
+      - '.env'
 
 jobs:
   PackageDeploy:
     runs-on: ubuntu-22.04
+
+    env:
+      DOCKER_REPO_OWNER: ${{ buerokratt }}
+      DOCKER_REPO_NAME: ${{ Ruuter }}
 
     steps:
       - uses: actions/checkout@v2
@@ -28,11 +32,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker buildx build --tag docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX .
+          docker buildx build --tag docker.pkg.github.com/${DOCKER_REPO_OWNER}/${DOCKER_REPO_NAME}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX .
 
       - name: Log in to GitHub container registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
       - name: Push Docker image to ghcr
         run: |
-          docker push docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX
+          docker push docker.pkg.github.com/${DOCKER_REPO_OWNER}/${DOCKER_REPO_NAME}ruuter:$RELEASE-$VERSION.$BUILD.$FIX
