@@ -3,32 +3,21 @@ name: Build and publish Ruuter
 on:
   push:
     branches: [ dev ]
-#    paths:
-#     - '.env'
+  #  paths:
+  #    - '.env'
 
 jobs:
   PackageDeploy:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
-    - name: Docker Setup BuildX
-      uses: docker/setup-buildx-action@v2
-    - name: log untrusted output
-      run: |
+      - name: Docker Setup BuildX
+        uses: docker/setup-buildx-action@v2
 
-        # disable command workflow processing
-        echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
-
-        # log untrusted output
-        echo "untrusted output"
-
-        # enable workflow command processing
-        echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
-
-    - name: Load environment variables and set them
-      run: |
+      - name: Load environment variables and set them
+        run: |
           if [ -f .env ]; then
             export $(cat .env | grep -v '^#' | xargs)
           fi
@@ -37,16 +26,13 @@ jobs:
           echo "BUILD=$BUILD" >> $GITHUB_ENV
           echo "FIX=$FIX" >> $GITHUB_ENV
 
-          
-    - name: Build Docker image
-      run: |
-          docker image build --tag ruuter:$RELEASE-$VERSION.$BUILD.$FIX .
-          echo "::set-env name=IMAGE_TAG::ruuter:$RELEASE-$VERSION.$BUILD.$FIX"
-          
+      - name: Build Docker image
+        run: |
+          docker buildx build --tag docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX .
 
-    - name: Log in to GitHub container registry
-      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+      - name: Log in to GitHub container registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
-    - name: Push Docker image to ghcr
-      run: |
-         docker push docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX
+      - name: Push Docker image to ghcr
+        run: |
+          docker push docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX
