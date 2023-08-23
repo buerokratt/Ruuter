@@ -16,17 +16,16 @@ jobs:
     - name: Docker Setup BuildX
       uses: docker/setup-buildx-action@v2
 
-    - name: Configure Docker Buildx
-      run: docker buildx create --use
-
-    - name: Load environment variables
-      run: source .env
-    - name: Extract values from .env
+    - name: Load environment variables and set them
       run: |
-          RELEASE=$(grep RELEASE .env | cut -d '=' -f2)
-          VERSION=$(grep VERSION .env | cut -d '=' -f2)
-          BUILD=$(grep BUILD .env | cut -d '=' -f2)
-          FIX=$(grep FIX .env | cut -d '=' -f2)
+          if [ -f .env ]; then
+            export $(cat .env | grep -v '^#' | xargs)
+          fi
+          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "BUILD=$BUILD" >> $GITHUB_ENV
+          echo "FIX=$FIX" >> $GITHUB_ENV
+          
     - name: Build Docker image
       run: |
           docker buildx build --tag docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX .
