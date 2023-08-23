@@ -37,4 +37,5 @@ jobs:
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
     - name: Push Docker image to ghcr
+      run: |
          docker push docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:${{ needs.build.outputs.IMAGE_TAG }}
