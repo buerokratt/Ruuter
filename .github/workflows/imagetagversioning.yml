@@ -16,23 +16,25 @@ jobs:
     - name: Docker Setup BuildX
       uses: docker/setup-buildx-action@v2
 
+    - name: Configure Docker Buildx
+      run: docker buildx create --use
+
     - name: Load environment variables
+      run: source .env
+    - name: Extract values from .env
       run: |
-        if [ -f .env ]; then
-        export $(cat .env | grep -v '^#' | xargs)
-        fi
-
-    - name: Set image tag
+          RELEASE=$(grep RELEASE .env | cut -d '=' -f2)
+          VERSION=$(grep VERSION .env | cut -d '=' -f2)
+          BUILD=$(grep BUILD .env | cut -d '=' -f2)
+          FIX=$(grep FIX .env | cut -d '=' -f2)
+    - name: Build Docker image
       run: |
-         LOWER_CASE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
-         echo DOCKER_TAG_CUSTOM="ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:"${RELEASE}-${VERSION}.${BUILD}.${FIX}"  >> $GITHUB_ENV 
-      shell: bash
+          docker buildx build --tag docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX .
+          echo "::set-env name=IMAGE_TAG::ruuter:$RELEASE-$VERSION.$BUILD.$FIX"
 
-    - name: Docker Build
-      run: docker image build --tag $DOCKER_TAG_CUSTOM .
 
     - name: Log in to GitHub container registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
     - name: Push Docker image to ghcr
-      run: docker push $DOCKER_TAG_CUSTOM
+         docker push docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:${{ needs.build.outputs.IMAGE_TAG }}
