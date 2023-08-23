@@ -30,7 +30,7 @@ jobs:
     - name: Build Docker image
       run: |
           docker image build --tag ruuter:$RELEASE-$VERSION.$BUILD.$FIX .
-          echo "::set-env name=IMAGE_TAG::ruuter:$RELEASE-$VERSION.$BUILD.$FIX"
+          
 
     - name: Log in to GitHub container registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
