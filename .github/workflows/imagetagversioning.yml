@@ -10,10 +10,6 @@ jobs:
   PackageDeploy:
     runs-on: ubuntu-22.04
 
-    env:
-      DOCKER_REPO_OWNER: ${{ github.repository_owner }}
-      DOCKER_REPO_NAME: ${{ github.repository_name }}
-
     steps:
       - uses: actions/checkout@v2
 
@@ -29,14 +25,18 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "BUILD=$BUILD" >> $GITHUB_ENV
           echo "FIX=$FIX" >> $GITHUB_ENV
+      - name: Set repo
+        run: |
+          LOWER_CASE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
+          echo "REPO=ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
-          docker buildx build --tag ghcr.io/${DOCKER_REPO_OWNER}/${DOCKER_REPO_NAME}:$RELEASE-$VERSION.$BUILD.$FIX .
+          docker buildx build --tag ghcr.io/${REPO}/${ruuter}:$RELEASE-$VERSION.$BUILD.$FIX .
 
       - name: Log in to GitHub container registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
       - name: Push Docker image to ghcr
         run: |
-          docker push ghcr.io/${DOCKER_REPO_OWNER}/${DOCKER_REPO_NAME}:$RELEASE-$VERSION.$BUILD.$FIX
+          docker push ghcr.io/${REPO}/${ruuter}:$RELEASE-$VERSION.$BUILD.$FIX
