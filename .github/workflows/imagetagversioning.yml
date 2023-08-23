@@ -12,7 +12,7 @@ jobs:
 
     env:
       DOCKER_REPO_OWNER: ${{ buerokratt }}
-      DOCKER_REPO_NAME: ${{ Ruuter }}
+      DOCKER_REPO_NAME: ${{ ruuter }}
 
     steps:
       - uses: actions/checkout@v2
