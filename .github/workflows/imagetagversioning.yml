@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      DOCKER_REPO_OWNER: ${{ buerokratt }}
-      DOCKER_REPO_NAME: ${{ ruuter }}
+      DOCKER_REPO_OWNER: ${{ github.repository_owner }}
+      DOCKER_REPO_NAME: ${{ github.repository_name }}
 
     steps:
       - uses: actions/checkout@v2
