@@ -27,8 +27,7 @@ jobs:
          LOWER_CASE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
          TAG_VERSION="${RELEASE}-${VERSION}.${BUILD}.${FIX}"
          CLEAN_TAG_VERSION=$(echo "$TAG_VERSION" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]' | tr -d '[:punct:]')
-         DOCKER_TAG_CUSTOM="ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:${CLEAN_TAG_VERSION}"
-         echo "DOCKER_TAG_CUSTOM=${DOCKER_TAG_CUSTOM}" >> $GITHUB_ENV   
+         echo DOCKER_TAG_CUSTOM="ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:${CLEAN_TAG_VERSION}"  >> $GITHUB_ENV 
       shell: bash
 
     - name: Log in to GitHub container registry
