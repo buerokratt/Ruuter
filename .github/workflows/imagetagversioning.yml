@@ -25,6 +25,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "BUILD=$BUILD" >> $GITHUB_ENV
           echo "FIX=$FIX" >> $GITHUB_ENV
+
           
     - name: Build Docker image
       run: |
