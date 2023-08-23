@@ -25,8 +25,7 @@ jobs:
     - name: Set image tag
       run: |
          LOWER_CASE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
-         TAG_VERSION="${RELEASE}-${VERSION}.${BUILD}.${FIX}"
-         echo DOCKER_TAG_CUSTOM="ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:${TAG_VERSION}"  >> $GITHUB_ENV 
+         echo DOCKER_TAG_CUSTOM="ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:"${RELEASE}-${VERSION}.${BUILD}.${FIX}"  >> $GITHUB_ENV 
       shell: bash
 
     - name: Docker Build
