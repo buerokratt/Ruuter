@@ -3,8 +3,8 @@ name: Build and publish Ruuter
 on:
   push:
     branches: [ dev ]
-    paths:
-     - '.env'
+#    paths:
+#     - '.env'
 
 jobs:
   PackageDeploy:
@@ -37,4 +37,4 @@ jobs:
 
     - name: Push Docker image to ghcr
       run: |
-         docker push docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:RELEASE-$VERSION.$BUILD.$FIX
+         docker push docker.pkg.github.com/${{ github.repository_owner }}/${{ github.repository_name }}/ruuter:$RELEASE-$VERSION.$BUILD.$FIX
