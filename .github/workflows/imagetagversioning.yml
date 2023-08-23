@@ -39,4 +39,4 @@ jobs:
 
       - name: Push Docker image to ghcr
         run: |
-          docker push docker.pkg.github.com/${DOCKER_REPO_OWNER}/${DOCKER_REPO_NAME}ruuter:$RELEASE-$VERSION.$BUILD.$FIX
+          docker push ghcr.io/${DOCKER_REPO_OWNER}/${DOCKER_REPO_NAME}ruuter:$RELEASE-$VERSION.$BUILD.$FIX
