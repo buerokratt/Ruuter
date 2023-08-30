@@ -2,30 +2,86 @@ name: Build and publish Ruuter
 
 on:
   push:
-    branches: [ main ]
-    paths-ignore:
-     - '**.md'
+    branches: [ dev ]
+    paths:
+      - '.env'
 
 jobs:
   PackageDeploy:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
-    - name: Docker Setup BuildX
-      uses: docker/setup-buildx-action@v2
+      - name: Docker Setup BuildX
+        uses: docker/setup-buildx-action@v2
 
-    - name: Set image tag
-      run: |
-        LOWER_CASE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
-        echo "DOCKER_TAG_CUSTOM=ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:${m-beta-2.0.$(date +'%y%m%d%H%M%S')}" >> $GITHUB_ENV
-    - name: Docker Build
-      run: docker image build --tag $DOCKER_TAG_CUSTOM .
+      - name: Load environment variables and set them
+        run: |
+          if [ -f .env ]; then
+            export $(cat .env | grep -v '^#' | xargs)
+          fi
+          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "BUILD=$BUILD" >> $GITHUB_ENV
+          echo "FIX=$FIX" >> $GITHUB_ENV
+      - name: Set repo
+        run: |
+           LOWER_CASE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
+           echo "DOCKER_TAG_CUSTOM=ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:$RELEASE-$VERSION.$BUILD.$FIX" >> $GITHUB_ENV
+           echo "$GITHUB_ENV"
+      - name: Docker Build
+        run: docker image build --tag $DOCKER_TAG_CUSTOM .
 
+      - name: Log in to GitHub container registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
-    - name: Log in to GitHub container registry
-      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+      - name: Push Docker image to ghcr
+        run: docker push $DOCKER_TAG_CUSTOM
+        
+      - name: Check if changelog.md exists
+        id: check_file
+        run: |
+          if [ -f changelog.md ]; then
+            echo "::set-output name=file_exists::true"
+          else
+            echo "::set-output name=file_exists::false"
+          fi
+          
+      - name: Generate changelog.md
+        run: |
+          if [ "${{ steps.check_file.outputs.file_exists }}" = "false" ]; then
+            
+            echo "## Changelog" >> changelog.md
+            echo "" >> image_update.md
+            echo "The Docker image has been successfully built and pushed." >> changelog.md
+            echo "" >> image_update.md
+            echo "You can pull the updated image using the following command:" >> changelog.md
+            echo "" >> changelog.md
+           # echo "```" >> changelog.md
+            echo "<code>docker pull $DOCKER_TAG_CUSTOM</code>" >> changelog.md
+           # echo "```" >> changelog.md
+            echo "" >> changelog.md
+            echo "Enjoy the Ruuter!" >> changelog.md
+          else
+            > changelog.md
+            echo "## Docker Image Update" >> changelog.md
+            echo "" >> image_update.md
+            echo "The Docker image has been successfully built and pushed." >> changelog.md
+            echo "" >> changelog.md
+            echo "You can pull the updated image using the following command:" >> changelog.md
+            echo "" >> changelog.md
+           # echo "```" >> changelog.md
+            echo "<code>docker pull $DOCKER_TAG_CUSTOM</code>" >> changelog.md
+           # echo "```" >> changelog.md
+            echo "" >> changelog.md
+            echo "Enjoy the Ruuter!" >> changelog.md
+          fi
 
-    - name: Push Docker image to ghcr
-      run: docker push $DOCKER_TAG_CUSTOM
+      - name: Commit and push updated changelog.md
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add image_update.md
+          git commit -m "Update image_update.md with Docker image info"
+          git push
