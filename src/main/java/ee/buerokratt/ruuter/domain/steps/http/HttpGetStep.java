@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -17,10 +18,11 @@ public class HttpGetStep extends HttpStep {
 
     @Override
     public ResponseEntity<Object> getRequestResponse(DslInstance di) {
+        String evaluatedURL = di.getScriptingHelper().evaluateScripts(args.getUrl(),di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders()).toString();
         Map<String, Object> evaluatedQuery = di.getScriptingHelper().evaluateScripts(args.getQuery(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, Object> evaluatedHeaders = di.getScriptingHelper().evaluateScripts(args.getHeaders(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, String> mappedHeaders = di.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
-        return di.getHttpHelper().doGet(args.getUrl(), evaluatedQuery, mappedHeaders);
+        return di.getHttpHelper().doMethod(HttpMethod.GET, evaluatedURL, evaluatedQuery, null, mappedHeaders, null, null);
     }
 
     @Override

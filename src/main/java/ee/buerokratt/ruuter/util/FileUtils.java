@@ -56,7 +56,8 @@ public class FileUtils {
 
     public static String getGuardWithPath(Path path) {
         String fullPath = getFileNameWithPathWithoutSuffix(path);
-        return fullPath.substring(0, fullPath.lastIndexOf("/"));
+        String guard = fullPath.contains("/") ? fullPath.substring(0, fullPath.lastIndexOf("/")) : fullPath;
+        return guard;
     }
 
     public static Map<String, Map<String, String>> parseIniFile(File fileToParse) throws IOException {

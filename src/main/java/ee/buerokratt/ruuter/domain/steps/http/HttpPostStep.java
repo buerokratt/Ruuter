@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -20,20 +21,24 @@ public class HttpPostStep extends HttpStep {
         Map<String, Object> defaultHeaders = di.getProperties().getHttpPost().getHeaders();
         if (defaultHeaders != null && !defaultHeaders.isEmpty())
             args.addHeaders(di.getProperties().getHttpPost().getHeaders());
+        String evaluatedURL = di.getScriptingHelper().evaluateScripts(args.getUrl(),di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders()).toString();
         Map<String, Object> evaluatedBody = di.getScriptingHelper().evaluateScripts(args.getBody(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, Object> evaluatedQuery = di.getScriptingHelper().evaluateScripts(args.getQuery(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, Object> evaluatedHeaders = di.getScriptingHelper().evaluateScripts(args.getHeaders(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, String> mappedHeaders = di.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
 
-        if ("plaintext".equals(args.getContentType()))
-            return di.getHttpHelper().doPostPlaintext(args.getUrl(), evaluatedBody, evaluatedQuery, mappedHeaders, args.getPlaintext());
-        else
-            return di.getHttpHelper().doPost(args.getUrl(), evaluatedBody, evaluatedQuery, mappedHeaders);
-
+        return di.getHttpHelper().doMethod(getMethod(), evaluatedURL,
+            evaluatedQuery, evaluatedBody, mappedHeaders,
+            "plaintext".equals(args.getContentType()) ? "plaintext" : null,
+            "plaintext".equals(args.getContentType()) ? args.getPlaintext() : null);
     }
 
     @Override
     public String getType() {
         return "http.post";
+    }
+
+    public HttpMethod getMethod() {
+        return HttpMethod.POST;
     }
 }
