@@ -27,6 +27,8 @@ import org.springframework.http.ResponseEntity;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = HttpGetStep.class, name = "http.get"),
     @JsonSubTypes.Type(value = HttpPostStep.class, name = "http.post"),
+    @JsonSubTypes.Type(value = HttpPutStep.class, name = "http.put"),
+    @JsonSubTypes.Type(value = HttpDeleteStep.class, name = "http.delete"),
 })
 @NoArgsConstructor
 public abstract class HttpStep extends DslStep {

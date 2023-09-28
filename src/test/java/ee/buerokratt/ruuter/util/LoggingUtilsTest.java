@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -96,7 +97,7 @@ class LoggingUtilsTest extends StepTestBase {
         mappingHelper = new MappingHelper(new ObjectMapper());
 
         when(di.getMappingHelper()).thenReturn(mappingHelper);
-        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
+        when(httpHelper.doMethod(HttpMethod.GET,getArgs.getUrl(), getArgs.getQuery(),null, new HashMap<>(), null, null)).thenReturn(httpResponse);
         when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
         when(properties.getLogging()).thenReturn(globalLogging);
 
