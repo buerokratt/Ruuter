@@ -2,7 +2,7 @@ name: Build and publish Ruuter
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
     paths:
       - '.env'
 
