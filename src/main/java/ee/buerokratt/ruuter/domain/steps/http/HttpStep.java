@@ -9,13 +9,20 @@ import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.Logging;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.util.LoggingUtils;
+import io.netty.channel.ConnectTimeoutException;
+import io.netty.handler.timeout.ReadTimeoutException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import java.net.http.HttpTimeoutException;
 
 @Slf4j
 @Data
@@ -45,15 +52,28 @@ public abstract class HttpStep extends DslStep {
     @Override
     protected void executeStepAction(DslInstance di) {
         args.checkUrl(di);
-        ResponseEntity<Object> response = getRequestResponse(di);
+        ResponseEntity<Object> response;
+        try {
+             response = getRequestResponse(di);
+        } catch (WebClientRequestException | WebClientResponseException wcre) {
+            di.setErrorMessage("Webclient error: "+wcre.getMessage());
+            if (wcre.getRootCause() instanceof ConnectTimeoutException)
+                di.setErrorStatus(HttpStatus.REQUEST_TIMEOUT);
+            else
+                di.setErrorStatus(HttpStatus.BAD_REQUEST);
+            throw wcre;
+        }
         di.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
 
         if (!isAllowedHttpStatusCode(di, response.getStatusCodeValue())) {
             if (getOnErrorStep() != null) {
                 setNextStepName(getOnErrorStep());
             }
-            else
+            else {
+                di.setErrorStatus(response.getStatusCode());
+                di.setErrorMessage("HTTP returned with non-OK");
                 throw new IllegalArgumentException();
+            }
         }
     }
 
