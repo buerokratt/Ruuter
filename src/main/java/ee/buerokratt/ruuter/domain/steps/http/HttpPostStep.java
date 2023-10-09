@@ -29,7 +29,7 @@ public class HttpPostStep extends HttpStep {
 
         return di.getHttpHelper().doMethod(getMethod(), evaluatedURL,
             evaluatedQuery, evaluatedBody, mappedHeaders,
-            "plaintext".equals(args.getContentType()) ? "plaintext" : null,
+            args.getContentType(),
             "plaintext".equals(args.getContentType()) ? args.getPlaintext() : null);
     }
 
