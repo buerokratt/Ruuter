@@ -61,7 +61,7 @@ public class LoggingUtils {
         MDC.put(RESPONSE_CODE, responseCode);
     }
 
-    public static String mapDeepToString(Map<String, Object> map) {
+    public static <T> String mapDeepToString(Map<String, T> map) {
         return map == null ? "" : map.entrySet().stream()
             .map(e ->"{ " + e.getKey() + " => " + (e.getValue() instanceof Map ? mapDeepToString((Map)e.getValue()) : e.getValue().toString()) + " }")
             .collect(Collectors.joining(","));

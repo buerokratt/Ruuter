@@ -32,9 +32,11 @@ post_step:
     * `result` - name of the variable to store the response of the query in, for use in other steps
     * `contentType` - specifies the contenttype to use, currently allowed values:
       * `"plaintext"` - uses field `plaintext` and mediaType 'text/plain'
-      * `"formdata"` - maps `body` to 'application/x-www-form-urlencoded'
-      * `"file"` - maps fields in `body` to files (field name = filename, field content = file content) and sends 
-as 'multipart/form-data'
+      * `"formdata"` 
+        - if any field names start with `file:`, that field is sent as a file with 
+filename field name without `file:` part and mediatype "multipart/form-data";   
+        - otherwise maps `body` as url-encoded form and mediatype 'application/x-www-form-urlencoded' 
+          as 
       * If left empty, `body` is posted as JSON and 'application/json' is used as mediatype.
     * `plaintext` - used instead of `body` if a singular plaintext value is needed to be sent 
 
@@ -72,6 +74,24 @@ post_step:
     contentType: plaintext
     plaintext: 
         "byrokratt"
+  result: the_message
+
+return_value:
+  return: ${the_message.response}
+```
+
+### POST step with formdata and file
+```
+post_step:
+  call: http.post
+  args:
+    url: http://localhost:8080/scripting/passing-post-parameters
+    contentType: formdata
+    body:
+      description: "Requested file"
+      file:requested.txt: > 
+            This is the required content
+            formatted as YAML multiline string   
   result: the_message
 
 return_value:

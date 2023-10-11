@@ -35,8 +35,7 @@ public class DslController {
     private final DslService dslService;
     private final ApplicationProperties properties;
 
-
-    @RequestMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Object> queryDsl(@RequestBody(required = false) MultipartFile[] file,
                                            @RequestParam(required = false) Map<String, Object> requestQuery,
                                            @RequestHeader(required = false) Map<String, String> requestHeaders,
@@ -45,7 +44,7 @@ public class DslController {
             f -> f.getOriginalFilename(),
             f -> {
                 try {
-                    return new String(f.getBytes(), StandardCharsets.UTF_8)e;
+                    return new String(f.getBytes(), StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -53,13 +52,14 @@ public class DslController {
         return queryDsl(body, requestQuery, requestHeaders, request);
     }
 
-    @RequestMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseEntity<Object> queryDsl(@RequestBody(required = false) MultiValueMap<String, Object> requestBody,
                                            @RequestParam(required = false) Map<String, Object> requestQuery,
                                            @RequestHeader(required = false) Map<String, String> requestHeaders,
                                            HttpServletRequest request) {
         return queryDsl(requestBody.toSingleValueMap(), requestQuery,requestHeaders, request);
     }
+
     @RequestMapping(consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Object> queryDsl(@RequestBody(required = false) Map<String, Object> requestBody,
                                                              @RequestParam(required = false) Map<String, Object> requestQuery,
