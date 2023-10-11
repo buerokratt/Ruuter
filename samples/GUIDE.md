@@ -60,6 +60,15 @@ So if a GET query is made to the DSL `messages`, Ruuter will try to execute `mes
 * If there is a `messages.yml` DSL in another "main directory", for example the `POST` directory, but not in the `GET` directory, then that DSL will not be
   executed.
 
+### Request body
+
+Ruuter supports request body as formdata or JSON format. 
+If formdata is used, duplicate keys are ignored so the functionality is 
+kept the same as for JSON, which does not allow duplicate keys.
+
+For multipart (file) requests, all file data should be in field `file` which can be duplicate; 
+content of these files will be accessible through the array `body.file[]`.  
+
 ### DSL query responses
 
 A DSL query always returns a fixed response in the form of:
