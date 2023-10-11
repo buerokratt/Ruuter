@@ -30,9 +30,12 @@ post_step:
     * `headers`
         * *..desired header values* - Scripts can be used for headers values
     * `result` - name of the variable to store the response of the query in, for use in other steps
-    * `contentType` - alias of the MIME contenttype to use, currently allowed "plaintext" which maps 
-        to 'text/plain' for plaintext or 'application/x-www-form-urlencoded' for maps.
-        If left empty, 'application/json' will be used.
+    * `contentType` - specifies the contenttype to use, currently allowed values:
+      * `"plaintext"` - uses field `plaintext` and mediaType 'text/plain'
+      * `"formdata"` - maps `body` to 'application/x-www-form-urlencoded'
+      * `"file"` - maps fields in `body` to files (field name = filename, field content = file content) and sends 
+as 'multipart/form-data'
+      * If left empty, `body` is posted as JSON and 'application/json' is used as mediatype.
     * `plaintext` - used instead of `body` if a singular plaintext value is needed to be sent 
 
 ***Note: POST step responses are stored the same way as [GET step responses](./http-get.md#How-responses-are-stored-with-the-result-field)***
