@@ -1,9 +1,11 @@
 package ee.buerokratt.ruuter.helper;
 
+import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -72,17 +74,27 @@ public class HttpHelper {
                 "plaintext".equals(contentType) && plaintextValue != null) {
                 bodyValue = BodyInserters.fromValue(plaintextValue);;
                 mediaType = MediaType.TEXT_PLAIN_VALUE;
-            } else if (method == POST &&
-                    "formdata".equals(contentType)) {
+            } else if ("formdata".equals(contentType) &&
+                    body.keySet().stream().noneMatch(k -> k.startsWith("file:"))) {
+                mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
                 MultiValueMap<String, String> bp = new LinkedMultiValueMap<>(
                     body.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> Arrays.asList(e.getValue().toString()))));
                 bodyValue = BodyInserters.fromFormData(bp);
-                mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
-            } else if (method == POST && "file".equals(contentType)) {
+            } else if ("formdata".equals(contentType)) {
                 mediaType = MediaType.MULTIPART_FORM_DATA_VALUE;
                 MultipartBodyBuilder builder = new MultipartBodyBuilder();
-                body.entrySet().forEach(e -> builder.part(e.getKey(), e.getValue()));
-                bodyValue = BodyInserters.fromMultipartData(builder.build());
+                for (Map.Entry<String, Object> e : body.entrySet()) {
+                    if (e.getKey().startsWith("file:")) {
+                        byte[] bytes = ((String) e.getValue()).getBytes();
+                        String filename= e.getKey().replace("file:", "");
+                        builder.part(e.getKey(), new ByteArrayResource(bytes)).filename(filename);
+                    }
+                    else {
+                        builder.part(e.getKey(), e.getValue());
+                    }
+                }
+                MultiValueMap<String, HttpEntity<?>> bodyparts = builder.build();System.out.println("FILE" + LoggingUtils.mapDeepToString(bodyparts.toSingleValueMap()));
+                bodyValue = BodyInserters.fromMultipartData(bodyparts);
             } else if (body == null) {
                 bodyValue = BodyInserters.empty();
                 mediaType = MediaType.APPLICATION_JSON_VALUE;
