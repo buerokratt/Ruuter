@@ -33,8 +33,9 @@ post_step:
     * `contentType` - specifies the contenttype to use, currently allowed values:
       * `"plaintext"` - uses field `plaintext` and mediaType 'text/plain'
       * `"formdata"` 
-        - if any field names start with `file:`, that field is sent as a file with 
-filename field name without `file:` part and mediatype "multipart/form-data";   
+        - if a key start with `file:`, that field content is sent as a file on a 
+field named as the second part of the key and original filename as third part of 
+the key, for example `file:projectdata:Project.csv`, and mediatype "multipart/form-data";   
         - otherwise maps `body` as url-encoded form and mediatype 'application/x-www-form-urlencoded' 
           as 
       * If left empty, `body` is posted as JSON and 'application/json' is used as mediatype.
@@ -89,7 +90,7 @@ post_step:
     contentType: formdata
     body:
       description: "Requested file"
-      file:requested.txt: > 
+      file:fieldname:requested.txt: > 
             This is the required content
             formatted as YAML multiline string   
   result: the_message
