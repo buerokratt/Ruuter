@@ -86,8 +86,9 @@ public class HttpHelper {
                 for (Map.Entry<String, Object> e : body.entrySet()) {
                     if (e.getKey().startsWith("file:")) {
                         byte[] bytes = ((String) e.getValue()).getBytes();
-                        String filename= e.getKey().replace("file:", "");
-                        builder.part(e.getKey(), new ByteArrayResource(bytes)).filename(filename);
+                        String fieldname = e.getKey().split(":")[1];
+                        String filename = e.getKey().split(":")[2];
+                        builder.part(fieldname, new ByteArrayResource(bytes)).filename(filename);
                     }
                     else {
                         builder.part(e.getKey(), e.getValue());
