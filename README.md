@@ -13,6 +13,28 @@ See guide [here](./samples/GUIDE.md)
 ## Configuration
 See configuration [here](./samples/CONFIGURATION.md)
 
+## TLS/SSL  
+
+The `application.yml` must be configured as following:  
+```
+server:
+  port: 8088,8443 ##Configure to reflect the environment
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: 123456 ##Configure to reflect the environment
+    key-store-type: PKCS12 
+    key-alias: ruuter 
+    key-password: 123456 ##Configure to reflect the environment
+    enabled: true
+```
+
+To generate the key, use folowing command:  
+```
+keytool -genkeypair -alias ruuter -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 3650
+```
+Make sure, the password in `application.yml` will match the password you are asked during the key generating  
+Make sure, that the generated `keystore.p12` is in `src/main/resources/` before you build the image.  
+
 ## Docker
 
 To run the application using Docker, run:
