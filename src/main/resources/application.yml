@@ -37,3 +37,14 @@ spring:
 logging:
   level:
     root: INFO
+
+server:
+  port: 8088,8443
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: 123456
+    key-store-type: PKCS12
+    key-alias: ruuter
+    key-password: 123456
+    enabled: true
+
