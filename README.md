@@ -1,8 +1,8 @@
-> PS! Ruuter of this repo is currently in a state of "functionally working, but **not ready for use in production**"!
+> https://github.com/buerokratt/Ruuter/releases/tag/2.0.1-beta is the latest `pentested` version of Ruuter
 >
-> Although we are building new functionalities of Bürokratt based on Ruuter 2.0, we aren't using them in production until penetration tests have been run on Ruuter. This is planned for Q1 in 2023.
+> The latest state of Ruuter can be found from https://github.com/buerokratt/Ruuter/tree/dev
 >
-> There are currently (some serious) security issues that we are aware of.
+> The next major pentest is planned for `Q1 2024`, but there haven't been many major changes since the last pentest.
 
 # Ruuter
 - Java 17, Gradle
