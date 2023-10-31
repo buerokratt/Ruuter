@@ -17,6 +17,8 @@ import ee.buerokratt.ruuter.helper.exception.InvalidDslStepException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -38,6 +40,9 @@ public class DslMappingHelper {
     public static final String INVALID_STEP_ERROR_MESSAGE = "Invalid step type.";
 
     private Properties dslParameters;
+
+    @Value("classpath:/constants.ini")
+    private Resource defaultDslParams;
 
     public DslMappingHelper(@Qualifier("ymlMapper") ObjectMapper mapper) {
         this.mapper = mapper;
@@ -126,7 +131,9 @@ public class DslMappingHelper {
     public void initDSLParameters() {
         try {
             dslParameters = new Properties();
-            dslParameters.load(new FileInputStream("/app/constants.ini"));
+            if (defaultDslParams != null && defaultDslParams.exists()) {
+                dslParameters.load(defaultDslParams.getInputStream());
+            }
         } catch (IOException e) {
             log.warn("constants.ini not found or not accessible");
             throw new RuntimeException(e);

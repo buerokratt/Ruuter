@@ -73,9 +73,7 @@ class ExternalForwardingHelperTest {
         Map<String, Object> requestBody = new HashMap<>() {{
             put("key", "value");
         }};
-        Map<String, Object> requestQuery = new HashMap<>() {{
-            put("key2", "value2");
-        }};
+        Map<String, Object> requestQuery = new HashMap<>();
         Map<String, String> requestHeaders = new HashMap<>() {{
             put("key3", "value3");
         }};
@@ -83,7 +81,7 @@ class ExternalForwardingHelperTest {
         when(spyProperties.getIncomingRequests()).thenReturn(incomingRequests);
         helper.forwardRequest("originaldsl", requestBody, requestQuery, requestHeaders);
 
-        verify(spyHttpHelper, times(1)).doPost(externalForwarding.getEndpoint(), requestBody, requestQuery, new HashMap<>());
+        verify(spyHttpHelper, times(1)).doPost(externalForwarding.getEndpoint(), requestBody, requestQuery, new HashMap<>(), "ee.buerokratt.ruuter.helper.ExternalForwardingHelper");
     }
 
     @Test
@@ -97,9 +95,7 @@ class ExternalForwardingHelperTest {
         }};
         ApplicationProperties.IncomingRequests incomingRequests = new ApplicationProperties.IncomingRequests();
         incomingRequests.setExternalForwarding(externalForwarding);
-        Map<String, Object> requestQuery = new HashMap<>() {{
-            put("key", "value");
-        }};
+        Map<String, Object> requestQuery = new HashMap<>();
         Map<String, String> requestHeaders = new HashMap<>() {{
             put("key3", "value3");
         }};

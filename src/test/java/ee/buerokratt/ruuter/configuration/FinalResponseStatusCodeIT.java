@@ -33,8 +33,7 @@ class FinalResponseStatusCodeIT extends BaseIntegrationTest {
         client.get()
             .uri("/without-return")
             .exchange().expectStatus().isAccepted()
-            .expectBody()
-            .jsonPath("$.response")
-            .isEmpty();
+            .expectBody().isEmpty();
+
     }
 }

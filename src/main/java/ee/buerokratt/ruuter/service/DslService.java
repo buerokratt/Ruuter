@@ -72,12 +72,17 @@ public class DslService {
             }).filter(path -> FileUtils.isFiletype(path, properties.getDsl().getProcessedFiletypes()))) {
                 return paths
                     .filter(Files::isRegularFile)
-                    .collect(toMap(FileUtils::getFileNameWithPathWithoutSuffix, dslMappingHelper::getDslSteps));
+                    .collect(toMap(this::getDslStepKey, dslMappingHelper::getDslSteps));
             } catch (Exception e) {
                 throw new LoadDslsException(e);
             }
         }));
         return _dsls;
+    }
+
+    private String getDslStepKey(Path path) {
+        String fileNameWithPathWithoutSuffix = FileUtils.getFileNameWithPathWithoutSuffix(path);
+        return fileNameWithPathWithoutSuffix.substring(fileNameWithPathWithoutSuffix.lastIndexOf('/') + 1);
     }
 
     public Map<String, Map<String, Map<String, DslStep>>> getGuards(String configPath) {

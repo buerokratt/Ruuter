@@ -3,14 +3,18 @@ package ee.buerokratt.ruuter.helper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @WireMockTest
 class DslMappingHelperTest {
@@ -23,6 +27,12 @@ class DslMappingHelperTest {
     protected void initializeObjects() {
         ObjectMapper mapper = new YAMLMapper();
         helper = new DslMappingHelper(mapper);
+        ApplicationProperties applicationProperties = spy(new ApplicationProperties());
+        ApplicationProperties.DSL defaultDSL = new ApplicationProperties.DSL();
+        defaultDSL.setProcessedFiletypes(List.of(".yml", ".yaml"));
+        defaultDSL.setAllowedFiletypes(List.of(".yml", ".yaml", ".tmp"));
+        when(applicationProperties.getDsl()).thenReturn(defaultDSL);
+        helper.properties = applicationProperties;
     }
 
     @Test
