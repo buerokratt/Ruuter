@@ -11,8 +11,10 @@ RUN chmod 754 ./gradlew
 RUN ./gradlew -Pprod clean bootJar
 RUN mkdir -p build/libs && (cd build/libs; jar -xf *.jar)
 
-FROM openjdk:17-jdk
+FROM openjdk:17-jdk-alpine
 VOLUME /build/tmp
+
+RUN apk add less
 
 ARG DEPENDENCY=/workspace/app/build/libs
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
