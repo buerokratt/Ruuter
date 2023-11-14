@@ -15,6 +15,7 @@ FROM openjdk:17-jdk-alpine
 VOLUME /build/tmp
 
 RUN apk add less
+RUN apk add curl
 
 ARG DEPENDENCY=/workspace/app/build/libs
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
