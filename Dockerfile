@@ -23,7 +23,7 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
 ENV application.config-path=/DSL
 
-RUN adduser  ruuter
+RUN adduser -D  ruuter
 RUN mkdir logs
 RUN mkdir DSL
 RUN chown ruuter:ruuter /logs
