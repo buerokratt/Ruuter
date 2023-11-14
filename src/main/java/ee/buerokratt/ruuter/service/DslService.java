@@ -69,7 +69,6 @@ public class DslService {
         Map<String, Map<String, Map<String, DslStep>>> _dsls =
              Arrays.stream(Objects.requireNonNull(new File(projectPath).listFiles(File::isDirectory)))
                    .collect(toMap(File::getName, this::extractDSL));
-        System.out.println("Loaded DSLs: " + mapDeepToString(_dsls));
         return _dsls;
     }
     private Map<String, Map<String, DslStep>> extractDSL(File directory) {
@@ -92,7 +91,6 @@ public class DslService {
         Map<String, Map<String, Map<String, Map<String, DslStep>>>> _dsls =
             Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory)))
                 .collect(toMap(File::getName, f -> getGuardsForProject(configPath+"/" + f.getName()+"/")));
-        System.out.println("Loaded Guards: " + mapDeepToString(_dsls));
         return _dsls;
     }
 
@@ -118,13 +116,8 @@ public class DslService {
         return execute(dsl, requestType, requestBody, requestQuery, requestHeaders, requestOrigin, this.getClass().getName());
     }
     public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
-        System.out.println("Loading DSL: "+ dsl);
         String project = dsl.substring(0, dsl.indexOf('/'));
         dsl = dsl.substring(dsl.indexOf('/')+1);
-        System.out.println("Loading DSL: "+ dsl + " from project: " + project);
-        System.out.println("DSLs in project: "+ dsls.get(project));
-        System.out.println("DSLs for method "+requestType.toUpperCase()+": "+ dsls.get(project).get(requestType.toUpperCase()));
-        System.out.println("DSL: "+dsls.get(project).get(requestType.toUpperCase()).get(dsl));
 
         DslInstance di = new DslInstance(dsl, dsls.get(project).get(requestType.toUpperCase()).get(dsl), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
