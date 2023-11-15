@@ -120,12 +120,12 @@ public class DslService {
 
     public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
         String project = dsl.substring(0, dsl.indexOf('/'));
+        dsl = dsl.substring(dsl.indexOf('/')+1);
         return execute(project, dsl, requestType, requestBody, requestQuery,requestHeaders, requestOrigin, contentType);
     }
     public DslInstance execute(String project, String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
 
         System.out.println("Loading DSL: "+ dsl);
-        dsl = dsl.substring(dsl.indexOf('/')+1);
         log.debug("Loading DSL: "+ dsl + " from project: " + project);
         log.debug("DSL: "+dsls.get(project).get(requestType.toUpperCase()).get(dsl));
 
