@@ -126,10 +126,15 @@ public class DslService {
     public DslInstance execute(String project, String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
 
         System.out.println("Loading DSL: "+ dsl);
-        log.debug("Loading DSL: "+ dsl + " from project: " + project);
-        log.debug("DSL: "+dsls.get(project).get(requestType.toUpperCase()).get(dsl));
+        log.info("Loading DSL: "+ dsl + " from project: " + project);
+        Map<String, DslStep> dslSteps = dsls.containsKey(project) ?
+            dsls.get(project)
+            .get(requestType.toUpperCase())
+            .get(dsl) :
+            null;
+        log.debug("DSL: "+ dslSteps);
 
-        DslInstance di = new DslInstance(dsl, dsls.get(project).get(requestType.toUpperCase()).get(dsl), requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+        DslInstance di = new DslInstance(dsl, dslSteps, requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
 
         if (di.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
