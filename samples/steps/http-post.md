@@ -109,6 +109,7 @@ post_step:
   args:
     url: http://localhost:8080/nonexistant
     contentType: plaintext
+    error: error_step
     plaintext: 
         "byrokratt"
   result: the_message
