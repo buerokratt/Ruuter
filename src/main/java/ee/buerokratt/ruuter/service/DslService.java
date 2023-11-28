@@ -112,6 +112,12 @@ public class DslService {
             if (guard != null && guard.getSteps() != null) {
                 LoggingUtils.logInfo(log, "Executing guard for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
                 guard.execute();
+
+                // In case the guard does not specifically return a status code or throw an exception, it
+                // should be considered as HTTP OK.
+                if (guard.getReturnStatus() != null)
+                    guard.setReturnStatus(HttpStatus.OK.value());
+
                 if (guard.getReturnStatus() != HttpStatus.OK.value()) {
                     LoggingUtils.logError(log, "Guard failed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
                     return guard;
