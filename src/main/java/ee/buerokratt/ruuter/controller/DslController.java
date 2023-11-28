@@ -4,6 +4,7 @@ import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.domain.RuuterResponse;
 import ee.buerokratt.ruuter.service.DslService;
+import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +17,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -73,11 +76,22 @@ public class DslController {
             LoggingUtils.logError(log, errorMsg, request.getRemoteAddr(), INCOMING_REQUEST);
             return status(HttpStatus.METHOD_NOT_ALLOWED).body(new RuuterResponse());
         }
+
         DslInstance di = dslService.execute(dsl, request.getMethod(), requestBody, requestQuery, requestHeaders, request.getRemoteAddr());
 
         Object returnObj;
         if (di.isReturnWithWrapper()) returnObj = new RuuterResponse(di.getReturnValue());
         else returnObj = di.getReturnValue();
+
+        if (di.getProperties().getLogging().getMeaningfulErrors() && di.getErrorMessage() != null) {
+            String errorMsg = "DSL %s caught error: %s";
+            LoggingUtils.logError(log, errorMsg.formatted(dsl, di.getErrorMessage()), request.getRemoteAddr(), INCOMING_REQUEST);
+
+            if (di.getReturnValue() == null) {
+                returnObj = new HashMap<>() {{ put("error", di.getErrorMessage()); }};
+             }
+            di.setReturnStatus(di.getErrorStatus().value());
+        }
 
         return status(di.getReturnStatus() == null ? getReturnStatus(di.getReturnValue()) : HttpStatus.valueOf(di.getReturnStatus()))
             .headers(httpHeaders -> di.getReturnHeaders().forEach(httpHeaders::add))

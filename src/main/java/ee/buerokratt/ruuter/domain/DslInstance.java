@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,9 @@ public class DslInstance {
     private Map<String, String> returnHeaders = new HashMap<>();
     private Map<String, Integer> recursions;
     private boolean returnWithWrapper;
+
+    private String errorMessage;
+    private HttpStatus errorStatus;
 
     public void execute() {
         addGlobalIncomingHeadersToRequestHeaders();

@@ -186,3 +186,14 @@ These can be accessed only from IPs that are specified in `allowedIPs` configura
     allowedIPs: ["127.0.0.1", "192.168.0.1", "172.21.0.1"]
     allowedURLs: ["http://localhost/internalTest"]
 ```
+
+
+### Meaningful errors
+
+To help debugging different problems in Ruuter and other components some extra
+logging can be turned on.
+* `(application,)logging.meaningfulErrors` - boolean
+
+If this value is set to `true`, a specified error message written to
+error log and also sent as a response to request with relevant error code.
+
