@@ -1,12 +1,13 @@
 package ee.buerokratt.ruuter.helper;
 
+import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.*;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -14,17 +15,19 @@ import org.springframework.util.MultiValueMap;
 
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
-
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
+
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpMethod.POST;
 
 @Service
 @RequiredArgsConstructor
@@ -34,72 +37,83 @@ public class HttpHelper {
         return doPost(url, body, query, headers, this.getClass().getName());
     }
     public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-
-        WebClient client = WebClient.builder()
-            .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
-            .baseUrl(url)
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .defaultUriVariables(query)
-            .build();
-
-        try {
-            return client.post()
-                .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
-                .bodyValue(body)
-                .retrieve()
-                .toEntity(Object.class)
-                .block();
-        } catch (WebClientResponseException e) {
-            return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
-        }
+        return doMethod(POST, url, query, body,headers, contentType, null);
     }
 
     public ResponseEntity<Object> doPostPlaintext(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String plaintext) {
-        WebClient client = WebClient.builder()
-            .clientConnector(new ReactorClientHttpConnector(getHttpClient()))
-            .baseUrl(url)
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
-            .defaultUriVariables(query)
-            .build();
-
-        BodyInserter sendable;
-        if (body.isEmpty()) {
-            sendable = BodyInserters.fromPublisher(Mono.just(plaintext), String.class);
-        }
-        else {
-            MultiValueMap<String, String> multibody = new LinkedMultiValueMap<>();
-            body.forEach((s, o) -> multibody.add(s, (String) o));
-            sendable = BodyInserters.fromFormData(multibody);
-        }
-
-        try {
-            return client.post()
-                .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
-                .body(sendable)
-                .retrieve()
-                .toEntity(Object.class)
-                .block();
-
-        } catch (WebClientResponseException e) {
-            return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
-        }
+        return doMethod(POST, url, body, query, headers, "plaintext", plaintext);
     }
 
-
     public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers) {
+        return doMethod(HttpMethod.GET, url, query, null, headers, null, null);
+    }
+
+    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
+        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null);
+    }
+
+    public ResponseEntity<Object> doDelete(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
+        return doMethod(HttpMethod.DELETE, url, query, body,headers, contentType, null);
+    }
+
+    public ResponseEntity<Object> doMethod(HttpMethod method,
+                                           String url,
+                                           Map<String, Object> query,
+                                           Map<String, Object> body,
+                                           Map<String, String> headers,
+                                           String contentType,
+                                           String plaintextValue) {
         try {
             MultiValueMap<String, String> qp = new LinkedMultiValueMap<>(
                 query.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e-> Arrays.asList(e.getValue().toString()))));
+
+            BodyInserter bodyValue;
+            String mediaType;
+
+            if (method == POST &&
+                "plaintext".equals(contentType) && plaintextValue != null) {
+                bodyValue = BodyInserters.fromValue(plaintextValue);;
+                mediaType = MediaType.TEXT_PLAIN_VALUE;
+            } else if ("formdata".equals(contentType) &&
+                    body.keySet().stream().noneMatch(k -> k.startsWith("file:"))) {
+                mediaType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+                MultiValueMap<String, String> bp = new LinkedMultiValueMap<>(
+                    body.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> Arrays.asList(e.getValue().toString()))));
+                bodyValue = BodyInserters.fromFormData(bp);
+            } else if ("formdata".equals(contentType)) {
+                mediaType = MediaType.MULTIPART_FORM_DATA_VALUE;
+                MultipartBodyBuilder builder = new MultipartBodyBuilder();
+                for (Map.Entry<String, Object> e : body.entrySet()) {
+                    if (e.getKey().startsWith("file:")) {
+                        byte[] bytes = ((String) e.getValue()).getBytes();
+                        String fieldname = e.getKey().split(":")[1];
+                        String filename = e.getKey().split(":")[2];
+                        builder.part(fieldname, new ByteArrayResource(bytes)).filename(filename);
+                    }
+                    else {
+                        builder.part(e.getKey(), e.getValue());
+                    }
+                }
+                MultiValueMap<String, HttpEntity<?>> bodyparts = builder.build();System.out.println("FILE" + LoggingUtils.mapDeepToString(bodyparts.toSingleValueMap()));
+                bodyValue = BodyInserters.fromMultipartData(bodyparts);
+            } else if (body == null) {
+                bodyValue = BodyInserters.empty();
+                mediaType = MediaType.APPLICATION_JSON_VALUE;
+            } else {
+                bodyValue = BodyInserters.fromValue(body);
+                mediaType = MediaType.APPLICATION_JSON_VALUE;
+            }
+
             return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(getHttpClient())).build()
-                .get()
+                .method(method)
                 .uri(url, uriBuilder -> uriBuilder.queryParams(qp).build())
                 .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(bodyValue)
+                .header(HttpHeaders.CONTENT_TYPE, mediaType)
                 .retrieve()
                 .toEntity(Object.class)
                 .block();
-
         } catch (WebClientResponseException e) {
             return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
         }

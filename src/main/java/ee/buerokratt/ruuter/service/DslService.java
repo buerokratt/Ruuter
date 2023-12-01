@@ -112,6 +112,12 @@ public class DslService {
             if (guard != null && guard.getSteps() != null) {
                 LoggingUtils.logInfo(log, "Executing guard for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
                 guard.execute();
+
+                // In case the guard does not specifically return a status code or throw an exception, it
+                // should be considered as HTTP OK.
+                if (guard.getReturnStatus() != null)
+                    guard.setReturnStatus(HttpStatus.OK.value());
+
                 if (guard.getReturnStatus() != HttpStatus.OK.value()) {
                     LoggingUtils.logError(log, "Guard failed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
                     return guard;
@@ -146,9 +152,9 @@ public class DslService {
     }
 
     private Map<String, DslStep> getGuard(String method, String dslPath) {
-        if (dslPath.length()<=1 || dslPath.lastIndexOf('/') < 0)
+        if (dslPath.length()<=1)
             return null;
-        String path = dslPath.substring(0, dslPath.lastIndexOf('/'));
+        String path = dslPath.contains("/") ? dslPath.substring(0, dslPath.lastIndexOf('/')) : "";
         return guards.get(method).containsKey(path) ? guards.get(method).get(path) : getGuard(method, path);
     }
 }

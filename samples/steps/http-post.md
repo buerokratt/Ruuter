@@ -30,9 +30,15 @@ post_step:
     * `headers`
         * *..desired header values* - Scripts can be used for headers values
     * `result` - name of the variable to store the response of the query in, for use in other steps
-    * `contentType` - alias of the MIME contenttype to use, currently allowed "plaintext" which maps 
-        to 'text/plain' for plaintext or 'application/x-www-form-urlencoded' for maps.
-        If left empty, 'application/json' will be used.
+    * `contentType` - specifies the contenttype to use, currently allowed values:
+      * `"plaintext"` - uses field `plaintext` and mediaType 'text/plain'
+      * `"formdata"` 
+        - if a key start with `file:`, that field content is sent as a file on a 
+field named as the second part of the key and original filename as third part of 
+the key, for example `file:projectdata:Project.csv`, and mediatype "multipart/form-data";   
+        - otherwise maps `body` as url-encoded form and mediatype 'application/x-www-form-urlencoded' 
+          as 
+      * If left empty, `body` is posted as JSON and 'application/json' is used as mediatype.
     * `plaintext` - used instead of `body` if a singular plaintext value is needed to be sent 
 
 ***Note: POST step responses are stored the same way as [GET step responses](./http-get.md#How-responses-are-stored-with-the-result-field)***
@@ -73,6 +79,47 @@ post_step:
 
 return_value:
   return: ${the_message.response}
+```
+
+### POST step with formdata and file
+```
+post_step:
+  call: http.post
+  args:
+    url: http://localhost:8080/scripting/passing-post-parameters
+    contentType: formdata
+    body:
+      description: "Requested file"
+      file:fieldname:requested.txt: > 
+            This is the required content
+            formatted as YAML multiline string   
+  result: the_message
+
+return_value:
+  return: ${the_message.response}
+```
+
+### HTTP Error handling
+
+It is possible to specify the DSL step to follow when POST request gets a
+non-OK response. For that the `error` field can be used
+```
+post_step:
+  call: http.post
+  args:
+    url: http://localhost:8080/nonexistant
+    contentType: plaintext
+    error: error_step
+    plaintext: 
+        "byrokratt"
+  result: the_message
+
+return_value:
+  return: ${the_message.request}
+  
+error_step:
+  return: "Request failed"
+  status: 500  
 ```
 
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

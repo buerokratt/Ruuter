@@ -4,6 +4,7 @@ application:
   logging:
     displayRequestContent: false
     displayResponseContent: false
+    meaningfulErrors: true
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
     headers:
@@ -24,7 +25,7 @@ application:
     allowedOrigins: ["https://test.buerokratt.ee", "https://admin.test.buerokratt.ee/", "https://tim.test.buerokratt.ee/"]
     allowCredentials: true
   DSL:
-    allowedFiletypes: [".yml", ".yaml", ".tmp"]
+    allowedFiletypes: [".yml", ".yaml", ".tmp", ".DS_Store"]
     processedFiletypes: [".yml", ".yaml"]
     allowDslReloading: true
   internalRequests:
