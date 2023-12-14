@@ -6,6 +6,7 @@ COPY gradlew.bat .
 COPY gradle gradle
 COPY build.gradle .
 COPY src src
+COPY .env .env
 
 RUN chmod 754 ./gradlew
 RUN ./gradlew -Pprod clean bootJar
@@ -21,6 +22,9 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
 ENV application.config-path=/DSL
 
+COPY .env /app/.env
+RUN echo BUILDTIME=`date +%s` >> /app/.env
+
 RUN adduser  ruuter
 RUN mkdir logs
 RUN mkdir DSL
@@ -28,5 +32,6 @@ RUN chown ruuter:ruuter /logs
 RUN chown -R ruuter:ruuter /app
 RUN chown -R ruuter:ruuter /DSL
 USER ruuter
+
 
 ENTRYPOINT ["java","-cp","app:app/lib/*","ee.buerokratt.ruuter.RuuterApplication"]
