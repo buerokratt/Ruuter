@@ -50,7 +50,15 @@ public class ReturnStep extends DslStep {
     private Map.Entry<String, Object> addDefaultCookies(Map.Entry<String, Object> entry, DslInstance di) {
         if ("Set-Cookie".equals(entry.getKey())) {
             if (!((HashMap<String, Object>) entry.getValue()).containsKey("Path"))
-                ((HashMap<String, Object>) entry.getValue()).put("Path", "/" + di.getName());
+                ((HashMap<String, Object>) entry.getValue()).put("Path", "/" );
+
+            if (!((HashMap<String, Object>) entry.getValue()).containsKey("HttpOnly"))
+                ((HashMap<String, Object>) entry.getValue()).put("HttpOnly", true);
+
+            if (!((HashMap<String, Object>) entry.getValue()).containsKey("SetSecure"))
+                ((HashMap<String, Object>) entry.getValue()).put("Secure", true);
+
+
         }
         return entry;
     }
