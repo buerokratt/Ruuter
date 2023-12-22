@@ -22,7 +22,7 @@ public class CORSConfiguration {
                 String[] allowedMethods = properties.getIncomingRequests().getAllowedMethodTypes().toArray(new String[0]);
                 boolean allowCredentials = Optional.ofNullable(properties.getCors().getAllowCredentials()).orElse(false);
                 registry.addMapping("/**")
-                    .allowedOrigins(allowedOrigins)
+                    .allowedOriginPatterns(allowedOrigins)
                     .allowCredentials(allowCredentials)
                     .allowedMethods(allowedMethods);
             }
