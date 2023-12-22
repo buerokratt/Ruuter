@@ -47,17 +47,18 @@ public class ReturnStep extends DslStep {
             .collect(toMap(Entry::getKey, this::entryValueToHeaderString));
     }
 
+    private void addToCookie(LinkedHashMap<String, Object> cookie, String key, Object value) {
+        if (!cookie.containsKey(key))
+            cookie.put(key, value);
+    }
     private Map.Entry<String, Object> addDefaultCookies(Map.Entry<String, Object> entry, DslInstance di) {
         if ("Set-Cookie".equals(entry.getKey())) {
             LinkedHashMap<String, Object> cookie = new LinkedHashMap<>((HashMap<String, Object>) entry.getValue());
-            if (!cookie.containsKey("Path"))
-                cookie.put("Path", "/" );
 
-            if (!cookie.containsKey("HttpOnly"))
-                cookie.put("HttpOnly", true);
-
-            if (!cookie.containsKey("SetSecure"))
-                cookie.put("Secure", true);
+            addToCookie(cookie, "Path", "/");
+            addToCookie(cookie, "HttpOnly", true);
+            addToCookie(cookie, "Secure", true);
+            addToCookie(cookie, "Max-Age", 28800);
 
             entry.setValue(cookie);
         }
