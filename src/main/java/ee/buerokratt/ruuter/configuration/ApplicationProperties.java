@@ -26,6 +26,7 @@ public class ApplicationProperties {
     private CORS cors;
     private DSL dsl;
     private InternalRequests internalRequests;
+    private OpenSearchConfiguration openSearchConfiguration;
 
     @Setter
     @Getter
@@ -92,5 +93,12 @@ public class ApplicationProperties {
     public static class InternalRequests {
         private List<String> allowedIPs;
         private List<String> allowedURLs;
+    }
+
+    @Getter
+    @Setter
+    public static class OpenSearchConfiguration {
+        private String url;
+        private String index;
     }
 }
