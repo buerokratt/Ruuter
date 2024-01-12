@@ -197,3 +197,30 @@ logging can be turned on.
 If this value is set to `true`, a specified error message written to
 error log and also sent as a response to request with relevant error code.
 
+### External logging
+
+For further analysis, information about technical error can be stored to OpenSearch.
+This logging can be turned on by adding configuration block to the application.yml:
+```
+  openSearchConfiguration:
+    url: <opensearch server url>
+    index: <index name for Ruuter logs>
+```
+
+Whenever an exception is thrown while executing any DSL step, an RuuterEvent object 
+is written to Opensearch with fields:
+```
+    "timestamp": timestamp in milliseconds,
+    "level": error level, "RUNTIME" for runtime DSL errors, "STARTUP" for startup parsing errors,
+    "dslName": name of DSL where error occurred,
+    "dslMethod": HTTP request method that triggered that DSL,
+    "stepName": name of DSL step here error occurred,
+    "statusCode": DSL HTTP return code (if applicable),
+    "errorCode": DSL HTTP error code (if applicable),
+    "requestParams": map of request parameters,
+    "requestHeaders": map of request header parameters,
+    "requestBody": map of request body values,
+    "message": error message (if applicable),
+    "stackTrace": Java stack trace for thrown exception.
+```
+

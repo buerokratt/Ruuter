@@ -6,6 +6,8 @@ import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.DslService;
+import ee.buerokratt.ruuter.service.OpenSearchSender;
+import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 @Slf4j
 @Data
 @RequiredArgsConstructor
 public class DslInstance {
     private final String name;
+    private final String method;
     private final Map<String, DslStep> steps;
     private final Map<String, Object> requestBody;
     private final Map<String, Object> requestQuery;
@@ -48,28 +51,58 @@ public class DslInstance {
     private String errorMessage;
     private HttpStatus errorStatus;
 
+    private final OpenSearchSender openSearchSender;
+
     public void execute() {
         addGlobalIncomingHeadersToRequestHeaders();
         List<String> stepNames = steps.keySet().stream().toList();
         recursions = stepNames.stream().collect(Collectors.toMap(Function.identity(), a -> 0));
         try {
             executeStep(stepNames.get(0), stepNames);
+
         } catch (Exception e) {
             LoggingUtils.logError(log, "Error executing DSL: %s".formatted(name), requestOrigin, "", e);
             clearReturnValues();
         }
     }
 
+    private void logEvent(DslStep stepToExecute, String level, StackTraceElement[] stackTrace) {
+        openSearchSender.log(
+            new OpenSearchSender.RuuterEvent(
+                level,
+                getName(),
+                getMethod(),
+                stepToExecute.getName(),
+                getReturnStatus(),
+                (getErrorStatus() != null) ? Integer.valueOf(getErrorStatus().value()) : getReturnStatus(),
+                getRequestQuery(),
+                getRequestHeaders(),
+                getRequestBody(),
+                getErrorMessage(),
+                stackTrace
+            ));
+    }
     private void executeStep(String stepName, List<String> stepNames) {
         DslStep stepToExecute = steps.get(stepName);
         if (!Objects.equals(recursions.get(stepName), getStepMaxRecursions(stepToExecute))) {
-            stepToExecute.execute(this);
+            try {
+                stepToExecute.execute(this);
+            } catch (StepExecutionException e) {
+                logEvent(stepToExecute, "RUNTIME", e.getStackTrace());
+
+                if (getProperties().getStopInCaseOfException() != null && getProperties().getStopInCaseOfException()) {
+                    Thread.currentThread().interrupt();
+                    throw new StepExecutionException(name, e);
+                }
+            }
+
             recursions.computeIfPresent(stepName, (k, v) ->  v + 1);
             Integer maxRecursions = getStepMaxRecursions(stepToExecute);
             if (recursions.get(stepName) > 1 && maxRecursions != null && maxRecursions > currentLoopMaxRecursions) {
                 setCurrentLoopMaxRecursions(maxRecursions);
             }
         }
+
         if (stepToExecute.isReloadDsl()) {
             // Only allow reloading if it's enabled in configuration.
             if (properties.getDsl().isAllowDslReloading()) dslService.reloadDsls();

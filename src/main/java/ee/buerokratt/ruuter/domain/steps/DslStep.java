@@ -28,7 +28,7 @@ public abstract class DslStep {
     @JsonAlias({"reloadDsls"})
     private boolean reloadDsl = false;
 
-    public final void execute(DslInstance di) {
+    public final void execute(DslInstance di) throws StepExecutionException {
         Span newSpan = di.getTracer().nextSpan().name(name);
         long startTime = System.currentTimeMillis();
 
@@ -44,12 +44,12 @@ public abstract class DslStep {
             handleFailedResult(di);
             di.setErrorMessage("ScriptingException: " + see.getMessage());
             di.setErrorStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new StepExecutionException(name, see);
         } catch (Exception e) {
             handleFailedResult(di);
-            if (di.getProperties().getStopInCaseOfException() != null && di.getProperties().getStopInCaseOfException()) {
-                Thread.currentThread().interrupt();
-                throw new StepExecutionException(name, e);
-            }
+            di.setErrorMessage(e.getMessage());
+            di.setErrorStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new StepExecutionException(name, e);
         } finally {
             newSpan.end();
         }
