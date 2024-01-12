@@ -211,7 +211,7 @@ Whenever an exception is thrown while executing any DSL step, an RuuterEvent obj
 is written to Opensearch with fields:
 ```
     "timestamp": timestamp in milliseconds,
-    "level": error level, default value:"ERROR",
+    "level": error level, "RUNTIME" for runtime DSL errors, "STARTUP" for startup parsing errors,
     "dslName": name of DSL where error occurred,
     "dslMethod": HTTP request method that triggered that DSL,
     "stepName": name of DSL step here error occurred,

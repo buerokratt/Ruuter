@@ -88,7 +88,7 @@ public class DslInstance {
             try {
                 stepToExecute.execute(this);
             } catch (StepExecutionException e) {
-                logEvent(stepToExecute, "ERROR", e.getStackTrace());
+                logEvent(stepToExecute, "RUNTIME", e.getStackTrace());
 
                 if (getProperties().getStopInCaseOfException() != null && getProperties().getStopInCaseOfException()) {
                     Thread.currentThread().interrupt();

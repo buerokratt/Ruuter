@@ -14,6 +14,7 @@ import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
 import ee.buerokratt.ruuter.helper.exception.InvalidDslException;
 import ee.buerokratt.ruuter.helper.exception.InvalidDslStepException;
+import ee.buerokratt.ruuter.service.OpenSearchSender;
 import ee.buerokratt.ruuter.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,8 +40,27 @@ public class DslMappingHelper {
 
     private Properties dslParameters;
 
+    private OpenSearchSender openSearchSender;
+
     public DslMappingHelper(@Qualifier("ymlMapper") ObjectMapper mapper) {
         this.mapper = mapper;
+    }
+
+    private void logEvent(String dslName, String dslMethod, String level, StackTraceElement[] stackTrace) {
+        openSearchSender.log(
+            new OpenSearchSender.RuuterEvent(
+                level,
+                dslName,
+                dslMethod,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                stackTrace
+            ));
     }
 
     public Map<String, DslStep> getDslSteps(Path path) {
@@ -57,6 +77,11 @@ public class DslMappingHelper {
                 throw new IllegalArgumentException(DSL_NOT_YML_FILE_ERROR_MESSAGE);
             }
         } catch (Exception e) {
+            String pathname = path.toString();
+            logEvent(pathname.substring(1, pathname.indexOf('/', 1)),
+                pathname.substring(pathname.indexOf('/', 1)),
+                "STARTUP",
+                e.getStackTrace());
             throw new InvalidDslException(path.toString(), e.getMessage(), e);
         }
     }

@@ -66,7 +66,8 @@ public class DslService {
 
     public Map<String, Map<String, Map<String, DslStep>>> getDsls(String configPath) {
         Map<String, Map<String, Map<String, DslStep>>> _dsls =
-               Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
+               Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory)))
+                   .collect(toMap(File::getName, directory -> {
             try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
                 .filter(path -> !FileUtils.isGuard(path))
                 .filter(path -> {
