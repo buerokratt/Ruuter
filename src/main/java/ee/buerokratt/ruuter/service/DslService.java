@@ -33,6 +33,7 @@ public class DslService {
     private final MappingHelper mappingHelper;
     private final HttpHelper httpHelper;
     private final Tracer tracer;
+    private final OpenSearchSender openSearchSender;
 
     private Map<String, Map<String, Map<String, Map<String, DslStep>>>> dsls;
 
@@ -40,7 +41,9 @@ public class DslService {
 
     public static final String UNSUPPORTED_FILETYPE_ERROR_MESSAGE = "Unsupported filetype";
 
-    public DslService(ApplicationProperties properties, DslMappingHelper dslMappingHelper, ScriptingHelper scriptingHelper, Tracer tracer, MappingHelper mappingHelper, HttpHelper httpHelper, ExternalForwardingHelper externalForwardingHelper) {
+    public DslService(ApplicationProperties properties, DslMappingHelper dslMappingHelper, ScriptingHelper scriptingHelper,
+                      Tracer tracer, MappingHelper mappingHelper, HttpHelper httpHelper,
+                      ExternalForwardingHelper externalForwardingHelper, OpenSearchSender openSearchSender) {
         this.dslMappingHelper = dslMappingHelper;
         this.properties = properties;
         this.dslMappingHelper.properties = properties;
@@ -51,6 +54,7 @@ public class DslService {
         this.mappingHelper = mappingHelper;
         this.httpHelper = httpHelper;
         this.externalForwardingHelper = externalForwardingHelper;
+        this.openSearchSender = openSearchSender;
     }
 
     public void reloadDsls() {
@@ -125,7 +129,6 @@ public class DslService {
     }
     public DslInstance execute(String project, String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
 
-        System.out.println("Loading DSL: "+ dsl);
         log.info("Loading DSL: "+ dsl + " from project: " + project);
         Map<String, DslStep> dslSteps = dsls.containsKey(project) ?
             dsls.get(project)
@@ -134,7 +137,7 @@ public class DslService {
             null;
         log.debug("DSL: "+ dslSteps);
 
-        DslInstance di = new DslInstance(dsl, dslSteps, requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+        DslInstance di = new DslInstance(dsl, requestType.toUpperCase(), dslSteps, requestBody, requestQuery, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer, openSearchSender);
 
         if (di.getSteps() != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
@@ -144,10 +147,16 @@ public class DslService {
                 return di;
             };
 
-            DslInstance guard = new DslInstance(dsl, getGuard(project, requestType.toUpperCase(), dsl), requestBody, requestBody, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer);
+            DslInstance guard = new DslInstance(dsl, requestType.toUpperCase(), getGuard(project, requestType.toUpperCase(), dsl), requestBody, requestBody, requestHeaders, requestOrigin, this, properties, scriptingHelper, mappingHelper, httpHelper, tracer, openSearchSender);
             if (guard != null && guard.getSteps() != null) {
                 LoggingUtils.logInfo(log, "Executing guard for DSL: %s".formatted(dsl), requestOrigin, INCOMING_REQUEST);
                 guard.execute();
+
+                // In case the guard does not specifically return a status code or throw an exception, it
+                // should be considered as HTTP OK.
+                if (guard.getReturnStatus() != null)
+                    guard.setReturnStatus(HttpStatus.OK.value());
+
                 if (guard.getReturnStatus() != HttpStatus.OK.value()) {
                     LoggingUtils.logError(log, "Guard failed for DSL: %s".formatted(dsl), requestOrigin, INCOMING_RESPONSE);
                     return guard;

@@ -4,6 +4,7 @@ application:
   logging:
     displayRequestContent: false
     displayResponseContent: false
+    meaningfulErrors: true
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
     headers:
@@ -22,13 +23,17 @@ application:
   maxStepRecursions: 10
   CORS:
     allowedOrigins: ["https://test.buerokratt.ee", "https://admin.test.buerokratt.ee/", "https://tim.test.buerokratt.ee/"]
+    allowCredentials: true
   DSL:
-    allowedFiletypes: [".yml", ".yaml", ".tmp"]
+    allowedFiletypes: [".yml", ".yaml", ".tmp", ".DS_Store"]
     processedFiletypes: [".yml", ".yaml"]
     allowDslReloading: true
   internalRequests:
     allowedIPs: ["127.0.0.1", "192.168.0.1", "172.21.0.1"]
     allowedURLs: ["http://localhost/internalTest"]
+#  openSearchConfiguration:
+#    url: http://host.docker.internal:9200
+#    index: ruuterlog
 
 spring:
   application:

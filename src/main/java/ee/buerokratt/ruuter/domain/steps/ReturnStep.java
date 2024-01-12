@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -41,7 +42,27 @@ public class ReturnStep extends DslStep {
 
     private Map<String, String> formatHeaders(DslInstance di) {
         Map<String, Object> evaluatedMap = di.getScriptingHelper().evaluateScripts(headers, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
-        return evaluatedMap.entrySet().stream().collect(toMap(Entry::getKey, this::entryValueToHeaderString));
+        return evaluatedMap.entrySet().stream()
+            .map(e -> addDefaultCookies(e, di))
+            .collect(toMap(Entry::getKey, this::entryValueToHeaderString));
+    }
+
+    private void addToCookie(LinkedHashMap<String, Object> cookie, String key, Object value) {
+        if (!cookie.containsKey(key))
+            cookie.put(key, value);
+    }
+    private Map.Entry<String, Object> addDefaultCookies(Map.Entry<String, Object> entry, DslInstance di) {
+        if ("Set-Cookie".equals(entry.getKey())) {
+            LinkedHashMap<String, Object> cookie = new LinkedHashMap<>((HashMap<String, Object>) entry.getValue());
+
+            addToCookie(cookie, "Path", "/");
+            addToCookie(cookie, "HttpOnly", true);
+            addToCookie(cookie, "Secure", true);
+            addToCookie(cookie, "Max-Age", 28800);
+
+            entry.setValue(cookie);
+        }
+        return entry;
     }
 
     private String entryValueToHeaderString(Entry<String, Object> entry) {

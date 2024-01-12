@@ -56,16 +56,13 @@ public class FileUtils {
 
     public static String getFileNameWithPathWithoutSuffix(Path path) {
         String fullPath = path.toAbsolutePath().toString();
-        System.out.println("Filename with path/suffix: "+ fullPath);
 
         Pattern pattern = Pattern.compile(PATH_MATCHER);
         Matcher matcher = pattern.matcher(fullPath);
 
         matcher.find();
         fullPath = matcher.group(1).substring(1);
-        System.out.println("Matches with path/suffix: "+ fullPath);
 
-//        fullPath = fullPath.substring(fullPath.indexOf('/', fullPath.indexOf('/', fullPath.indexOf('/')+1)+1)+1, fullPath.lastIndexOf('.'));
         return fullPath;
     }
 

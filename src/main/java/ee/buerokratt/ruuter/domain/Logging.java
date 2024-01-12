@@ -14,4 +14,6 @@ public class Logging {
 
     @JsonAlias("response")
     private Boolean displayResponseContent;
+
+    private Boolean meaningfulErrors;
 }
