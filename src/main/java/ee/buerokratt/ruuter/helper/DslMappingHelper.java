@@ -5,10 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
-import ee.buerokratt.ruuter.domain.steps.AssignStep;
-import ee.buerokratt.ruuter.domain.steps.DslStep;
-import ee.buerokratt.ruuter.domain.steps.ReturnStep;
-import ee.buerokratt.ruuter.domain.steps.TemplateStep;
+import ee.buerokratt.ruuter.domain.steps.*;
 import ee.buerokratt.ruuter.domain.steps.http.HttpMockStep;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
@@ -117,6 +114,10 @@ public class DslMappingHelper {
         if (jsonNode.get("switch") != null) {
             return mapper.treeToValue(jsonNode, SwitchStep.class);
         }
+        if (jsonNode.get("log") != null) {
+            return mapper.treeToValue(jsonNode, LogStep.class);
+        }
+
         throw new IllegalArgumentException(INVALID_STEP_ERROR_MESSAGE);
     }
 
