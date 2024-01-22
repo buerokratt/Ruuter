@@ -87,6 +87,9 @@ public class DslInstance {
         if (!Objects.equals(recursions.get(stepName), getStepMaxRecursions(stepToExecute))) {
             try {
                 stepToExecute.execute(this);
+                if (getErrorStatus() != null && !getErrorStatus().equals(HttpStatus.OK)) {
+                    logEvent(stepToExecute, "RUNTIME", Thread.currentThread().getStackTrace());
+                }
             } catch (StepExecutionException e) {
                 logEvent(stepToExecute, "RUNTIME", e.getStackTrace());
 

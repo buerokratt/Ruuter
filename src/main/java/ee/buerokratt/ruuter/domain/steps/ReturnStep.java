@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,6 +34,10 @@ public class ReturnStep extends DslStep {
         di.setReturnStatus(status);
         di.setReturnWithWrapper(withWrapper);
         di.setReturnValue(di.getScriptingHelper().evaluateScripts(returnValue, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders()));
+        if (status != 200) {
+            di.setErrorStatus(HttpStatus.valueOf(status));
+            di.setErrorMessage(returnValue);
+        }
     }
 
     @Override
