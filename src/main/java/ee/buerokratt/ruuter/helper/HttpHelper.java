@@ -5,6 +5,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpMethod.POST;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HttpHelper {
@@ -115,6 +117,7 @@ public class HttpHelper {
                 .toEntity(Object.class)
                 .block();
         } catch (WebClientResponseException e) {
+            log.error("Failed HTTP request: ", e);
             return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
         }
     }
