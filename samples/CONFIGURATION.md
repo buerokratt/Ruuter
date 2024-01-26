@@ -224,3 +224,12 @@ is written to Opensearch with fields:
     "stackTrace": Java stack trace for thrown exception.
 ```
 
+### HTTP response size limit
+
+Allows setting the limit for size of HTTP queries. 
+
+Default value is 256 (kB).
+
+```
+    "httpResponseSizeLimit": response size limit in KB
+```

@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.helper;
 
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -16,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -35,27 +37,29 @@ import static org.springframework.http.HttpMethod.POST;
 @RequiredArgsConstructor
 public class HttpHelper {
 
+    final private ApplicationProperties properties;
+
     public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers) {
         return doPost(url, body, query, headers, this.getClass().getName());
     }
     public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(POST, url, query, body,headers, contentType, null);
+        return doMethod(POST, url, query, body,headers, contentType, null, null);
     }
 
     public ResponseEntity<Object> doPostPlaintext(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String plaintext) {
-        return doMethod(POST, url, body, query, headers, "plaintext", plaintext);
+        return doMethod(POST, url, body, query, headers, "plaintext", plaintext, null);
     }
 
     public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers) {
-        return doMethod(HttpMethod.GET, url, query, null, headers, null, null);
+        return doMethod(HttpMethod.GET, url, query, null, headers, null, null, null);
     }
 
     public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null);
+        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null, null);
     }
 
     public ResponseEntity<Object> doDelete(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(HttpMethod.DELETE, url, query, body,headers, contentType, null);
+        return doMethod(HttpMethod.DELETE, url, query, body,headers, contentType, null, null);
     }
 
     public ResponseEntity<Object> doMethod(HttpMethod method,
@@ -64,7 +68,8 @@ public class HttpHelper {
                                            Map<String, Object> body,
                                            Map<String, String> headers,
                                            String contentType,
-                                           String plaintextValue) {
+                                           String plaintextValue,
+                                           Integer limit) {
         try {
             MultiValueMap<String, String> qp = new LinkedMultiValueMap<>(
                 query.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e-> Arrays.asList(e.getValue().toString()))));
@@ -106,13 +111,18 @@ public class HttpHelper {
                 mediaType = MediaType.APPLICATION_JSON_VALUE;
             }
 
+            Integer finalLimit = limit == null ? properties.getHttpResponseSizeLimit() : limit;
             return WebClient.builder()
+                .exchangeStrategies(
+                    ExchangeStrategies.builder().codecs(
+                        configurer -> configurer.defaultCodecs().maxInMemorySize(finalLimit * 1024 )).build())
                 .clientConnector(new ReactorClientHttpConnector(getHttpClient())).build()
                 .method(method)
                 .uri(url, uriBuilder -> uriBuilder.queryParams(qp).build())
                 .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
                 .body(bodyValue)
                 .header(HttpHeaders.CONTENT_TYPE, mediaType)
+
                 .retrieve()
                 .toEntity(Object.class)
                 .block();

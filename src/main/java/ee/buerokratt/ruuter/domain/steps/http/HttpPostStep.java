@@ -30,7 +30,8 @@ public class HttpPostStep extends HttpStep {
         return di.getHttpHelper().doMethod(getMethod(), evaluatedURL,
             evaluatedQuery, evaluatedBody, mappedHeaders,
             args.getContentType(),
-            "plaintext".equals(args.getContentType()) ? args.getPlaintext() : null);
+            "plaintext".equals(args.getContentType()) ? args.getPlaintext() : null,
+            getLimit());
     }
 
     @Override
