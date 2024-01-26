@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.sleuth.Span;
 import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Slf4j
 @Data
