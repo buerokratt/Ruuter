@@ -2,11 +2,12 @@
 
 The GET step allows for making GET requests.
 
-```
+```yaml 
 get_step:
   call: http.get
   args:
     url: https://www.example-url.com
+  limit: 500
   result: responseVariable
 ```
 
@@ -24,6 +25,7 @@ get_step:
     * `headers`
         * *..desired header values* - Scripts can be used for headers values
 * `result` - name of the variable to store the response of the query in, for use in other steps
+* `limit` - limit the size of allowed response in kilobytes (default value is configured in application.yaml) 
 
 #### How responses are stored with the result field
 

@@ -56,10 +56,10 @@ public class ExternalForwardingHelper {
             .toUriString();
 
         if (methodType.equals(HttpMethod.POST.name())) {
-            return httpHelper.doMethod(HttpMethod.POST,forwardingUrl, query, body, headers, contentType, null);
+            return httpHelper.doMethod(HttpMethod.POST,forwardingUrl, query, body, headers, contentType, null, null);
         }
         if (methodType.equals(HttpMethod.GET.name())) {
-            return httpHelper.doMethod(HttpMethod.GET, forwardingUrl,  query,null, headers, null, null);
+            return httpHelper.doMethod(HttpMethod.GET, forwardingUrl,  query,null, headers, null, null, null);
         }
         throw new InvalidHttpMethodTypeException(methodType);
     }

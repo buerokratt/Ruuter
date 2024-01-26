@@ -28,6 +28,8 @@ public class ApplicationProperties {
     private InternalRequests internalRequests;
     private OpenSearchConfiguration openSearchConfiguration;
 
+    private Integer httpResponseSizeLimit;
+
     @Setter
     @Getter
     public static class FinalResponse {
