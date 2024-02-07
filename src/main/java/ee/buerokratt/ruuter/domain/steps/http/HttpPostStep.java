@@ -31,7 +31,7 @@ public class HttpPostStep extends HttpStep {
             evaluatedQuery, evaluatedBody, mappedHeaders,
             args.getContentType(),
             "plaintext".equals(args.getContentType()) ? args.getPlaintext() : null,
-            getLimit());
+            getLimit(), di);
     }
 
     @Override

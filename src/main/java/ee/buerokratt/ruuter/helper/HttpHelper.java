@@ -1,7 +1,7 @@
 package ee.buerokratt.ruuter.helper;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
-import ee.buerokratt.ruuter.util.LoggingUtils;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -25,7 +25,6 @@ import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -39,27 +38,29 @@ public class HttpHelper {
 
     final private ApplicationProperties properties;
 
-    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers) {
-        return doPost(url, body, query, headers, this.getClass().getName());
+    final private ScriptingHelper scriptingHelper;
+
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, DslInstance di) {
+        return doPost(url, body, query, headers, this.getClass().getName(), di);
     }
-    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(POST, url, query, body,headers, contentType, null, null);
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
+        return doMethod(POST, url, query, body,headers, contentType, null, null, di);
     }
 
-    public ResponseEntity<Object> doPostPlaintext(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String plaintext) {
-        return doMethod(POST, url, body, query, headers, "plaintext", plaintext, null);
+    public ResponseEntity<Object> doPostPlaintext(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String plaintext, DslInstance di) {
+        return doMethod(POST, url, body, query, headers, "plaintext", plaintext, null, di);
     }
 
-    public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers) {
-        return doMethod(HttpMethod.GET, url, query, null, headers, null, null, null);
+    public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers, DslInstance di) {
+        return doMethod(HttpMethod.GET, url, query, null, headers, null, null, null, di);
     }
 
-    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null, null);
+    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
+        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null, null, di);
     }
 
-    public ResponseEntity<Object> doDelete(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(HttpMethod.DELETE, url, query, body,headers, contentType, null, null);
+    public ResponseEntity<Object> doDelete(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
+        return doMethod(HttpMethod.DELETE, url, query, body, headers, contentType, null, null, di);
     }
 
     public ResponseEntity<Object> doMethod(HttpMethod method,
@@ -69,7 +70,8 @@ public class HttpHelper {
                                            Map<String, String> headers,
                                            String contentType,
                                            String plaintextValue,
-                                           Integer limit) {
+                                           Integer limit,
+                                           DslInstance instance) {
         try {
             MultiValueMap<String, String> qp = new LinkedMultiValueMap<>(
                 query.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e-> Arrays.asList(e.getValue().toString()))));
@@ -95,13 +97,16 @@ public class HttpHelper {
                         byte[] bytes = ((String) e.getValue()).getBytes();
                         String fieldname = e.getKey().split(":")[1];
                         String filename = e.getKey().split(":")[2];
+
+                        filename = scriptingHelper.evaluateScripts(filename, instance).toString();
+
                         builder.part(fieldname, new ByteArrayResource(bytes)).filename(filename);
                     }
                     else {
                         builder.part(e.getKey(), e.getValue());
                     }
                 }
-                MultiValueMap<String, HttpEntity<?>> bodyparts = builder.build();System.out.println("FILE" + LoggingUtils.mapDeepToString(bodyparts.toSingleValueMap()));
+                MultiValueMap<String, HttpEntity<?>> bodyparts = builder.build();
                 bodyValue = BodyInserters.fromMultipartData(bodyparts);
             } else if (body == null) {
                 bodyValue = BodyInserters.empty();
