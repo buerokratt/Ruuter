@@ -1,10 +1,12 @@
 package ee.buerokratt.ruuter.helper;
 
-import ee.buerokratt.ruuter.util.LoggingUtils;
+import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -15,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -22,38 +25,42 @@ import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpMethod.POST;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HttpHelper {
 
-    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers) {
-        return doPost(url, body, query, headers, this.getClass().getName());
+    final private ApplicationProperties properties;
+
+    final private ScriptingHelper scriptingHelper;
+
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, DslInstance di) {
+        return doPost(url, body, query, headers, this.getClass().getName(), di);
     }
-    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(POST, url, query, body,headers, contentType, null);
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
+        return doMethod(POST, url, query, body,headers, contentType, null, null, di);
     }
 
-    public ResponseEntity<Object> doPostPlaintext(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String plaintext) {
-        return doMethod(POST, url, body, query, headers, "plaintext", plaintext);
+    public ResponseEntity<Object> doPostPlaintext(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String plaintext, DslInstance di) {
+        return doMethod(POST, url, body, query, headers, "plaintext", plaintext, null, di);
     }
 
-    public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers) {
-        return doMethod(HttpMethod.GET, url, query, null, headers, null, null);
+    public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers, DslInstance di) {
+        return doMethod(HttpMethod.GET, url, query, null, headers, null, null, null, di);
     }
 
-    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null);
+    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
+        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null, null, di);
     }
 
-    public ResponseEntity<Object> doDelete(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType) {
-        return doMethod(HttpMethod.DELETE, url, query, body,headers, contentType, null);
+    public ResponseEntity<Object> doDelete(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
+        return doMethod(HttpMethod.DELETE, url, query, body, headers, contentType, null, null, di);
     }
 
     public ResponseEntity<Object> doMethod(HttpMethod method,
@@ -62,7 +69,9 @@ public class HttpHelper {
                                            Map<String, Object> body,
                                            Map<String, String> headers,
                                            String contentType,
-                                           String plaintextValue) {
+                                           String plaintextValue,
+                                           Integer limit,
+                                           DslInstance instance) {
         try {
             MultiValueMap<String, String> qp = new LinkedMultiValueMap<>(
                 query.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e-> Arrays.asList(e.getValue().toString()))));
@@ -88,13 +97,16 @@ public class HttpHelper {
                         byte[] bytes = ((String) e.getValue()).getBytes();
                         String fieldname = e.getKey().split(":")[1];
                         String filename = e.getKey().split(":")[2];
+
+                        filename = scriptingHelper.evaluateScripts(filename, instance).toString();
+
                         builder.part(fieldname, new ByteArrayResource(bytes)).filename(filename);
                     }
                     else {
                         builder.part(e.getKey(), e.getValue());
                     }
                 }
-                MultiValueMap<String, HttpEntity<?>> bodyparts = builder.build();System.out.println("FILE" + LoggingUtils.mapDeepToString(bodyparts.toSingleValueMap()));
+                MultiValueMap<String, HttpEntity<?>> bodyparts = builder.build();
                 bodyValue = BodyInserters.fromMultipartData(bodyparts);
             } else if (body == null) {
                 bodyValue = BodyInserters.empty();
@@ -104,17 +116,23 @@ public class HttpHelper {
                 mediaType = MediaType.APPLICATION_JSON_VALUE;
             }
 
+            Integer finalLimit = limit == null ? properties.getHttpResponseSizeLimit() : limit;
             return WebClient.builder()
+                .exchangeStrategies(
+                    ExchangeStrategies.builder().codecs(
+                        configurer -> configurer.defaultCodecs().maxInMemorySize(finalLimit * 1024 )).build())
                 .clientConnector(new ReactorClientHttpConnector(getHttpClient())).build()
                 .method(method)
                 .uri(url, uriBuilder -> uriBuilder.queryParams(qp).build())
                 .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
                 .body(bodyValue)
                 .header(HttpHeaders.CONTENT_TYPE, mediaType)
+
                 .retrieve()
                 .toEntity(Object.class)
                 .block();
         } catch (WebClientResponseException e) {
+            log.error("Failed HTTP request: ", e);
             return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());
         }
     }

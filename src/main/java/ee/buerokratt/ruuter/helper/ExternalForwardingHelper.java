@@ -1,6 +1,7 @@
 package ee.buerokratt.ruuter.helper;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
+import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.helper.exception.InvalidHttpMethodTypeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,11 +33,12 @@ public class ExternalForwardingHelper {
             properties.getIncomingRequests().getExternalForwarding().getProceedPredicate().getHttpStatusCode() != null;
     }
 
-    public ResponseEntity<Object> forwardRequest(String dsl, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
-        return forwardRequest(dsl, requestBody, requestQuery,requestHeaders, this.getClass().getName());
+    public ResponseEntity<Object> forwardRequest(String dsl, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, DslInstance di) {
+        return forwardRequest(dsl, requestBody, requestQuery,requestHeaders, this.getClass().getName(), di);
     }
 
-    public ResponseEntity<Object> forwardRequest(String dsl, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType) {
+    public ResponseEntity<Object> forwardRequest(String dsl, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType,
+                                                 DslInstance di) {
         String methodType = properties.getIncomingRequests().getExternalForwarding().getMethod().toUpperCase(Locale.ROOT);
         Map<String, Object> query = shouldAddQuery(requestQuery) ? requestQuery : new HashMap<>();
         Map<String, Object> body = shouldAddBody(requestBody) ? requestBody : new HashMap<>();
@@ -56,10 +58,10 @@ public class ExternalForwardingHelper {
             .toUriString();
 
         if (methodType.equals(HttpMethod.POST.name())) {
-            return httpHelper.doMethod(HttpMethod.POST,forwardingUrl, query, body, headers, contentType, null);
+            return httpHelper.doMethod(HttpMethod.POST,forwardingUrl, query, body, headers, contentType, null, null, di);
         }
         if (methodType.equals(HttpMethod.GET.name())) {
-            return httpHelper.doMethod(HttpMethod.GET, forwardingUrl,  query,null, headers, null, null);
+            return httpHelper.doMethod(HttpMethod.GET, forwardingUrl,  query,null, headers, null, null, null, di);
         }
         throw new InvalidHttpMethodTypeException(methodType);
     }

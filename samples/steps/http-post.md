@@ -2,7 +2,7 @@
 
 The POST step allows for making POST requests with the input information.
 
-```
+```yaml
 post_step:
   call: http.post
   args:
@@ -11,6 +11,7 @@ post_step:
     plaintext: "value"
     body:
       test: "param"
+  limit: 500
   result: responseVariable
 ```
 
@@ -33,15 +34,18 @@ post_step:
     * `contentType` - specifies the contenttype to use, currently allowed values:
       * `"plaintext"` - uses field `plaintext` and mediaType 'text/plain'
       * `"formdata"` 
-        - if a key start with `file:`, that field content is sent as a file on a 
+        - if a key starts with `file:`, that field content is sent as a file on a 
 field named as the second part of the key and original filename as third part of 
-the key, for example `file:projectdata:Project.csv`, and mediatype "multipart/form-data";   
+the key, for example `file:projectdata:Project.csv`, and mediatype "multipart/form-data";
+        filename can contain scripts, for example `file:projectfile:project-${new Date().toISOString()}.txt` 
+        creates file with current timestamp in ISO format in name;
         - otherwise maps `body` as url-encoded form and mediatype 'application/x-www-form-urlencoded' 
           as 
       * If left empty, `body` is posted as JSON and 'application/json' is used as mediatype.
     * `plaintext` - used instead of `body` if a singular plaintext value is needed to be sent 
+* `limit` - limit the size of allowed response in kilobytes (default value is configured in application.yaml)
 
-***Note: POST step responses are stored the same way as [GET step responses](./http-get.md#How-responses-are-stored-with-the-result-field)***
+* ***Note: POST step responses are stored the same way as [GET step responses](./http-get.md#How-responses-are-stored-with-the-result-field)***
 
 ## Examples
 

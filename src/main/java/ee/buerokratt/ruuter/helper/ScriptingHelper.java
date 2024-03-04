@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.helper;
 
+import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.helper.exception.ScriptEvaluationException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +26,17 @@ public class ScriptingHelper {
         return Pattern.compile(SCRIPT_REGEX, Pattern.MULTILINE).matcher(s).find();
     }
 
+    public Map<String, Object> evaluateScripts(Map<String, Object> map, DslInstance di) {
+        return evaluateScripts(map, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
+    }
+
     public Map<String, Object> evaluateScripts(Map<String, Object> map, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {
         return map == null || map.isEmpty() ? map : map.entrySet().stream()
             .collect(toMap(Map.Entry::getKey, objectEntry -> evaluateScripts(objectEntry.getValue(), context, requestBody, requestQuery, requestHeaders), (x, y) -> y, LinkedHashMap::new));
+    }
+
+    public Object evaluateScripts(Object toEval, DslInstance di) {
+        return evaluateScripts(toEval, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
     }
 
     public Object evaluateScripts(Object toEval, Map<String, Object> context, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders) {

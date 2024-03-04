@@ -44,7 +44,7 @@ public class DslMappingHelper {
     }
 
     private void logEvent(String dslName, String dslMethod, String level, StackTraceElement[] stackTrace) {
-        openSearchSender.log(
+/*        openSearchSender.log(
             new OpenSearchSender.RuuterEvent(
                 level,
                 dslName,
@@ -57,7 +57,7 @@ public class DslMappingHelper {
                 null,
                 null,
                 stackTrace
-            ));
+            ));*/
     }
 
     public Map<String, DslStep> getDslSteps(Path path) {
