@@ -27,6 +27,6 @@ public class DefaultHttpDsl {
         Map<String, Object> evaluatedQuery = di.getScriptingHelper().evaluateScripts(query, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, Object> evaluatedHeaders = di.getScriptingHelper().evaluateScripts(headers, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, String> mappedHeaders = di.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
-        di.getDslService().execute(dsl, requestType, evaluatedBody, evaluatedQuery, mappedHeaders, di.getRequestOrigin());
+        di.getDslService().execute("default", dsl, requestType, evaluatedBody, evaluatedQuery, mappedHeaders, di.getRequestOrigin(), "");
     }
 }

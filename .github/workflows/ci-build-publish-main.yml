@@ -2,7 +2,7 @@ name: Build and publish Ruuter
 
 on:
   push:
-    branches: [ dev ]
+    branches: [  237-update-ruuter-to-project-based-dsl-mapping ]
     paths:
       - '.env'
 

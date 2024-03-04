@@ -11,7 +11,7 @@ application:
       header: value
   httpCodesAllowList: [ 200, 201, 202 ]
   defaultDslInCaseOfException:
-    dsl: default-dsl
+    dsl: default/default-dsl
     requestType: "POST"
     body:
       someVal: "Hello World"

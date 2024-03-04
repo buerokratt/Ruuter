@@ -26,6 +26,7 @@ COPY .env /app/.env
 RUN echo BUILDTIME=`date +%s` >> /app/.env
 
 RUN adduser  ruuter
+
 RUN mkdir logs
 RUN mkdir DSL
 RUN chown ruuter:ruuter /logs
