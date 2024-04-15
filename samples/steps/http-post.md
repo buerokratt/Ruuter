@@ -103,6 +103,22 @@ return_value:
   return: ${the_message.response}
 ```
 
+### POST step with "dynamic body"
+It is possible to send a pre-defined json body with POST by storing it in
+`body.dynamicBody` value and setting `args.dynamicParameters` value to true:
+
+```yaml
+dynamicTest:
+  call: http.post
+  args:
+    url: http://host.docker.internal:9001/test_endpoint
+    dynamicParameters: true
+    body:
+      dynamicBody: ${incoming.body.input}
+```
+
+This is considered unsafe and should be used only in special cases.
+
 ### HTTP Error handling
 
 It is possible to specify the DSL step to follow when POST request gets a
@@ -125,5 +141,6 @@ error_step:
   return: "Request failed"
   status: 500  
 ```
+
 
 [Back to Guide](../GUIDE.md#Writing-DSL-files)
