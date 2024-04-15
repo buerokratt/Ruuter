@@ -19,6 +19,8 @@ public class HttpQueryArgs {
     private String contentType;
     private String originalUrl = "";
 
+    protected boolean dynamicParameters;
+
     public void addHeaders(Map<String, Object> newHeaders) {
         newHeaders.forEach(headers::putIfAbsent);
     }

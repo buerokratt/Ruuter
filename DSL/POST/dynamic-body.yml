@@ -1,0 +1,11 @@
+dynamicTest:
+  call: http.post
+  args:
+    url: http://host.docker.internal:9001/test_endpoint
+    dynamicParameters: true
+    body:
+      dynamicBody: ${incoming.body.input}
+    result: value
+
+returnStep:
+  return: ${value}
