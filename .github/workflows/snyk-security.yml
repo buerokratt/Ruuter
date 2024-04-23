@@ -43,8 +43,8 @@ jobs:
         run: snyk code test --sarif > snyk-code.sarif || true
 
       #   # Install Dependencies
-      # - name: Install Dependencies
-      #   run:  cd GUI/ && npm install --legacy-peer-deps  
+      - name: Install Dependencies
+        run:  ./gradlew -Pprod clean bootJar 
 
         # Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
       - name: Snyk Open Source monitor
