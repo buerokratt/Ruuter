@@ -5,10 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
-import ee.buerokratt.ruuter.domain.steps.AssignStep;
-import ee.buerokratt.ruuter.domain.steps.DslStep;
-import ee.buerokratt.ruuter.domain.steps.ReturnStep;
-import ee.buerokratt.ruuter.domain.steps.TemplateStep;
+import ee.buerokratt.ruuter.domain.Dsl;
+import ee.buerokratt.ruuter.domain.steps.*;
 import ee.buerokratt.ruuter.domain.steps.http.HttpMockStep;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.domain.steps.http.HttpStep;
@@ -63,7 +61,7 @@ public class DslMappingHelper {
             ));*/
     }
 
-    public Map<String, DslStep> getDslSteps(Path path) {
+    public Dsl getDslSteps(Path path) {
         try {
             if (FileUtils.isFiletype(path, properties.getDsl().getProcessedFiletypes())
                || FileUtils.isGuard(path)) {
@@ -86,8 +84,8 @@ public class DslMappingHelper {
         }
     }
 
-    private Map<String, DslStep> convertNodeMapToStepMap(Map<String, JsonNode> stepNodes) {
-        return stepNodes.entrySet().stream().collect(toMap(Map.Entry::getKey, map -> {
+    private Dsl convertNodeMapToStepMap(Map<String, JsonNode> stepNodes) {
+        return new Dsl(stepNodes.entrySet().stream().collect(toMap(Map.Entry::getKey, map -> {
             try {
                 DslStep step = convertJsonNodeToDslStep(map.getValue());
                 step.setName(map.getKey());
@@ -95,16 +93,22 @@ public class DslMappingHelper {
             } catch (Exception e) {
                 throw new InvalidDslStepException(map.getKey(), e.getMessage(), e);
             }
-        }, (x, y) -> y, LinkedHashMap::new));
+        }, (x, y) -> y, LinkedHashMap::new)));
     }
 
     private DslStep convertJsonNodeToDslStep(JsonNode jsonNode) throws JsonProcessingException {
+
+        if (jsonNode.get("declare") != null ){
+            return mapper.treeToValue(jsonNode, DeclarationStep.class);
+        }
+
         if (jsonNode.get("call") != null) {
             if (jsonNode.get("call").asText().equals("reflect.mock")) {
                 return mapper.treeToValue(jsonNode, HttpMockStep.class);
             }
             return mapper.treeToValue(jsonNode, HttpStep.class);
         }
+
         if (jsonNode.get("template") != null) {
             return mapper.treeToValue(jsonNode, TemplateStep.class);
         }
@@ -117,6 +121,7 @@ public class DslMappingHelper {
         if (jsonNode.get("switch") != null) {
             return mapper.treeToValue(jsonNode, SwitchStep.class);
         }
+
         throw new IllegalArgumentException(INVALID_STEP_ERROR_MESSAGE);
     }
 
