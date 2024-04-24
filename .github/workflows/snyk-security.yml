@@ -42,9 +42,9 @@ jobs:
       - name: Snyk Code test
         run: snyk code test --sarif > snyk-code.sarif || true
 
-      #   # Install Dependencies
+        # Install Dependencies
       - name: Install Dependencies
-        run:  chmod 754 ./gradlew && ./gradlew -Pprod clean bootJar 
+        run:  chmod 754 ./gradlew && ./gradlew -Pprod clean bootJar -d
 
         # Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
       - name: Snyk Open Source monitor
