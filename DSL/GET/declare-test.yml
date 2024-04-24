@@ -1,0 +1,36 @@
+declare:
+  call: declare
+  declare: declare-test
+  version: 0.1
+  description: Test declara block functionality
+  method: post
+  accepts: json
+  returns: json
+  namespace:  backoffice
+  allowlist:
+    body:
+    - field: input
+      type: string
+      description: Usual input field for declaration test
+
+return_step_1:
+  return: ${incoming.body}
+
+get_step:
+  call: http.get
+  args:
+    url: "https://dashboard.elering.ee/api/nps/price"
+  result: elering
+  logging:
+    request:  true
+    response: false
+
+assign_step:
+  assign:
+    value:
+      elering: ${elering.response.body.data.ee.sort( (a,b) =>  a.price-b.price )[0]}
+      input: ${incoming.body.input}
+#      missing: ${incoming.body.missing}
+
+return_step:
+  return: ${value}
