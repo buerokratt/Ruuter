@@ -12,7 +12,6 @@ import java.util.List;
 @ToString(callSuper = true)
 @NoArgsConstructor
 public class DeclarationStep extends DslStep {
-
     String version;
     String description;
 
@@ -21,7 +20,7 @@ public class DeclarationStep extends DslStep {
     String returns;
 
     String namespace;
-
+  
     AllowList allowlist;
 
     List<String> allowedBody;
@@ -36,7 +35,7 @@ public class DeclarationStep extends DslStep {
     public String getType() {
         return "declare";
     }
-
+  
     public List<String> getAllowedBody() {
         if (allowedBody == null) {
             allowedBody = allowlist.body.stream().map(field -> field.getField()).toList();
@@ -57,5 +56,3 @@ public class DeclarationStep extends DslStep {
         List<DslField> header;
     }
 }
-
-
