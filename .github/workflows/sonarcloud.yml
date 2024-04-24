@@ -1,0 +1,39 @@
+name: SonarCloud analysis
+
+on:
+  push:
+    branches: [ "dev" ]
+  schedule:
+    - cron: '0 0 * * *'  
+  workflow_dispatch:
+
+defaults:
+ run:
+  working-directory: ./
+
+permissions:
+  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
+
+jobs:
+  Analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Install Dependencies
+        run: chmod 754 ./gradlew && ./gradlew -Pprod clean bootJar
+        
+      - name: Analyze with SonarCloud
+        # uses: ./gradlew sonarqube -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+        run: ./gradlew build -x test sonar --info || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Generate a token on Sonarcloud.io, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
+          SONAR_HOST_URL: https://sonarcloud.io
