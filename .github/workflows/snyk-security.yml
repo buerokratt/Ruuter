@@ -42,6 +42,13 @@ jobs:
       - name: Snyk Code test
         run: snyk code test --sarif > snyk-code.sarif || true
 
+        # Setup Java
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'   
+
         # Install Dependencies
       - name: Install Dependencies
         run:  chmod 754 ./gradlew && ./gradlew -Pprod clean bootJar -d
