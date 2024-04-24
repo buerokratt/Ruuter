@@ -1,6 +1,5 @@
 declare:
   call: declare
-  declare: declare-test
   version: 0.1
   description: Test declara block functionality
   method: post

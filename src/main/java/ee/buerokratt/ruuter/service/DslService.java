@@ -105,7 +105,7 @@ public class DslService {
         Dsl dsl = dslMappingHelper.getDslSteps(path);
         if (dsl.getDeclaration() == null)
             log.warn("Found DSL without declaration: {}", path.toString());
-        if (dsl.getDeclaration() != null) {
+        else {
             openApiBuilder.addService(dsl, FileUtils.getFileNameWithPathWithoutSuffix(path));
         }
         return dsl;
@@ -137,8 +137,10 @@ public class DslService {
             log.info("Executing DSLv2 with declare:{}", mappingHelper.convertObjectToString(dsl.getDeclaration()));
             steps = dsl.steps();
             log.info("body before: {}", LoggingUtils.mapDeepToString(requestBody));
-            requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
-            requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
+            if (dsl.getDeclaration() != null) {
+                requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
+                requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
+            }
             log.info("body after: "+ LoggingUtils.mapDeepToString(requestBody));
         } else {
             log.info("Executing DSLv1 (without declare)");
@@ -222,7 +224,11 @@ public class DslService {
     }
 
     <V> Map<String, V> filterFields(Map<String, V> requestFields, List<String> allowedFields) {
-        return requestFields == null ? null : requestFields.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
+        return allowedFields == null ?
+                        requestFields :
+                        requestFields == null ?
+                            null :
+                            requestFields.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
