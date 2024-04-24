@@ -55,4 +55,5 @@ public class DeclarationStep extends DslStep {
         List<DslField> body;
         List<DslField> header;
     }
+
 }

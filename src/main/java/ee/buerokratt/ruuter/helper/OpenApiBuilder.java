@@ -64,12 +64,10 @@ public class OpenApiBuilder {
             );
         }
 
-
         pathItem.setDescription(declaration.getDescription());
 
         Paths paths = new Paths();
         paths.addPathItem("/" + declaration.getNamespace() + "/" + path, pathItem);
-
 
         this.openAPI.setPaths(paths);
 

@@ -2,6 +2,7 @@ package ee.buerokratt.ruuter.helper;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.DslInstance;
+import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -40,27 +41,27 @@ public class HttpHelper {
 
     final private ScriptingHelper scriptingHelper;
 
-    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, DslInstance di) {
-        return doPost(url, body, query, headers, this.getClass().getName(), di);
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, DslInstance di, boolean dynamicBody) {
+        return doPost(url, body, query, headers, this.getClass().getName(), di, dynamicBody);
     }
-    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
-        return doMethod(POST, url, query, body,headers, contentType, null, null, di);
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di, boolean dynamicBody) {
+        return doMethod(POST, url, query, body,headers, contentType, null, null, di, dynamicBody);
     }
 
     public ResponseEntity<Object> doPostPlaintext(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String plaintext, DslInstance di) {
-        return doMethod(POST, url, body, query, headers, "plaintext", plaintext, null, di);
+        return doMethod(POST, url, body, query, headers, "plaintext", plaintext, null, di, false);
     }
 
     public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers, DslInstance di) {
-        return doMethod(HttpMethod.GET, url, query, null, headers, null, null, null, di);
+        return doMethod(HttpMethod.GET, url, query, null, headers, null, null, null, di, false);
     }
 
-    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
-        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null, null, di);
+    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di, boolean dynamicBody) {
+        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null, null, di, dynamicBody);
     }
 
     public ResponseEntity<Object> doDelete(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
-        return doMethod(HttpMethod.DELETE, url, query, body, headers, contentType, null, null, di);
+        return doMethod(HttpMethod.DELETE, url, query, body, headers, contentType, null, null, di, false);
     }
 
     public ResponseEntity<Object> doMethod(HttpMethod method,
@@ -71,14 +72,14 @@ public class HttpHelper {
                                            String contentType,
                                            String plaintextValue,
                                            Integer limit,
-                                           DslInstance instance) {
+                                           DslInstance instance,
+                                           boolean dynamicBody) {
         try {
             MultiValueMap<String, String> qp = new LinkedMultiValueMap<>(
                 query.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e-> Arrays.asList(e.getValue().toString()))));
 
             BodyInserter bodyValue;
             String mediaType;
-
             if (method == POST &&
                 "plaintext".equals(contentType) && plaintextValue != null) {
                 bodyValue = BodyInserters.fromValue(plaintextValue);;
@@ -112,7 +113,12 @@ public class HttpHelper {
                 bodyValue = BodyInserters.empty();
                 mediaType = MediaType.APPLICATION_JSON_VALUE;
             } else {
-                bodyValue = BodyInserters.fromValue(body);
+                if (dynamicBody) {
+                    log.warn("Sending dynamic body request is considered unsecure");
+                    bodyValue = BodyInserters.fromValue(body.get("dynamicBody"));
+                } else {
+                    bodyValue = BodyInserters.fromValue(body);
+                }
                 mediaType = MediaType.APPLICATION_JSON_VALUE;
             }
 
