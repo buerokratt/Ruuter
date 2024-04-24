@@ -12,6 +12,8 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public class OpenApiBuilder {
@@ -27,18 +29,15 @@ public class OpenApiBuilder {
         );
     }
 
-    public OpenApiBuilder addService(Dsl dsl) {
+    public OpenApiBuilder addService(Dsl dsl, String path) {
 
         DeclarationStep declaration = dsl.getDeclaration();
-
-
-
 
         PathItem pathItem = new PathItem();
         if (declaration.getMethod().toUpperCase().equals("POST")) {
             Schema requestBodySchema = new Schema();
             requestBodySchema.setType("object");
-            declaration.getUsedFields().forEach(
+            declaration.getAllowlist().getBody().forEach(
                 field -> requestBodySchema.addProperties(field.getField(),
                     new Schema().type(field.getType()).description(field.getDescription()))
             );
@@ -48,10 +47,14 @@ public class OpenApiBuilder {
                     .addMediaType("application/json",
                         new MediaType().schema(requestBodySchema))
             );
-            pathItem.post( new Operation().requestBody(requestBody));
-        }  if (declaration.getMethod().toUpperCase().equals("GET")) {
+            ApiResponse success = new ApiResponse();
+            success.setDescription(declaration.getReturns());
 
-            declaration.getUsedFields().forEach(
+            pathItem.post( new Operation().requestBody(requestBody)
+                .responses(new ApiResponses().addApiResponse("200", success)));
+        } else if (declaration.getMethod().toUpperCase().equals("GET")) {
+
+            declaration.getAllowlist().getBody().forEach(
                 field -> {
                     Parameter requestParam = new Parameter();
                     requestParam.setName(field.getField());
@@ -59,13 +62,13 @@ public class OpenApiBuilder {
                     pathItem.get(new Operation().addParametersItem(requestParam));
                 }
             );
-
         }
+
 
         pathItem.setDescription(declaration.getDescription());
 
         Paths paths = new Paths();
-        paths.addPathItem("/" + declaration.getNamespace() + "/" + declaration.getDeclare(), pathItem);
+        paths.addPathItem("/" + declaration.getNamespace() + "/" + path, pathItem);
 
 
         this.openAPI.setPaths(paths);
