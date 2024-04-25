@@ -158,7 +158,7 @@ public class DslService {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dslName), requestOrigin, INCOMING_REQUEST);
 
             if ( !allowedToExecuteDSLFrom(di, requestOrigin, requestHeaders.get("referer"))) {
-                LoggingUtils.logError(log, "Internal DSL not allowed: %s".formatted(dslName), requestOrigin, INCOMING_RESPONSE);
+                LoggingUtils.logError(log, "Internal DSL not allowed: %s (%s)".formatted(dslName, requestOrigin), requestOrigin, INCOMING_RESPONSE);
                 return di;
             };
 
