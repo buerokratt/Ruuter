@@ -1,6 +1,6 @@
 ## DSL Service Declaration step
 
-Service declaration step allows and possibly forces devfefloper to
+Service declaration step allows and possibly forces deveopers to
 define and thus document the DSL.
 
 DSL declaration block should be first in DSL file. If found in any
