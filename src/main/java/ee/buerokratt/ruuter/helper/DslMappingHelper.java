@@ -98,11 +98,11 @@ public class DslMappingHelper {
 
     private DslStep convertJsonNodeToDslStep(JsonNode jsonNode) throws JsonProcessingException {
 
-        if (jsonNode.get("declare") != null ){
-            return mapper.treeToValue(jsonNode, DeclarationStep.class);
-        }
-
         if (jsonNode.get("call") != null) {
+            if ("declare".equals(jsonNode.get("call").asText())) {
+                return mapper.treeToValue(jsonNode, DeclarationStep.class);
+            }
+
             if (jsonNode.get("call").asText().equals("reflect.mock")) {
                 return mapper.treeToValue(jsonNode, HttpMockStep.class);
             }

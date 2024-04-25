@@ -136,12 +136,17 @@ public class DslService {
 
         if (dsl != null) {
             steps = dsl.steps();
+            log.debug("body before: {}", LoggingUtils.mapDeepToString(requestBody));
+
             if (dsl.getDeclaration() != null) {
-                log.debug("Executing DSLv2 with declare:{}", mappingHelper.convertObjectToString(dsl.getDeclaration()));
                 requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
                 requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
-            } else
-                log.debug("Executing DSLv1 (without declare)");
+                requestQuery = filterFields(requestQuery, dsl.getDeclaration().getAllowedParams());
+            }
+            log.debug("body after: "+ LoggingUtils.mapDeepToString(requestBody));
+        } else {
+            log.info("Executing DSLv1 (without declare)");
+            steps = null;
         }
 
         DslInstance di = new DslInstance(dslName,
@@ -221,7 +226,11 @@ public class DslService {
     }
 
     <V> Map<String, V> filterFields(Map<String, V> requestFields, List<String> allowedFields) {
-        return requestFields == null ? null : requestFields.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
+        return allowedFields == null ?
+                        requestFields :
+                        requestFields == null ?
+                            null :
+                            requestFields.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

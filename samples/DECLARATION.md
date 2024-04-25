@@ -33,13 +33,15 @@ declare:
     - field: <field name>
       type: <field data type>
       description: <field type description>
-        
-
+    params:
+    - field: <field name>
+      type: <field data type>
+      description: <field type description>
 ```
 
 Currently only `allowlist` part is used for validation, all
 other declaration fields are used for documentation only.
 
-Only fields in `allowlist.body` block can be used in DSL's.
+Only fields in `allowlist.body`/`allowlist.params` block can be used in DSL's.
 DSL evalutor maps body.response/GET parameters to these fields.
 The same filter is run on header fields with `allowlist.header` block as input. 
