@@ -20,11 +20,12 @@ public class DeclarationStep extends DslStep {
     String returns;
 
     String namespace;
-  
+
     AllowList allowlist;
 
     List<String> allowedBody;
     List<String> allowedHeader;
+    List<String> allowedParams;
 
     @Override
     protected void executeStepAction(DslInstance di) {
@@ -35,7 +36,7 @@ public class DeclarationStep extends DslStep {
     public String getType() {
         return "declare";
     }
-  
+
     public List<String> getAllowedBody() {
         if (allowedBody == null) {
             allowedBody = allowlist.body.stream().map(field -> field.getField()).toList();
@@ -50,10 +51,18 @@ public class DeclarationStep extends DslStep {
         return allowedHeader;
     }
 
+    public List<String> getAllowedParams() {
+        if (allowedParams == null) {
+            allowedParams = allowlist.params.stream().map(field -> field.getField()).toList();
+        }
+        return allowedParams;
+    }
+
     @Getter
     public class AllowList {
         List<DslField> body;
         List<DslField> header;
+        List<DslField> params;
     }
 
 }

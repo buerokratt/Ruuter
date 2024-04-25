@@ -11,10 +11,9 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.parameters.RequestBody
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.springframework.web.bind.annotation.RequestParam;
 
 public class OpenApiBuilder {
 
@@ -54,7 +53,7 @@ public class OpenApiBuilder {
                 .responses(new ApiResponses().addApiResponse("200", success)));
         } else if (declaration.getMethod().toUpperCase().equals("GET")) {
 
-            declaration.getAllowlist().getBody().forEach(
+            declaration.getAllowlist().getParams().forEach(
                 field -> {
                     Parameter requestParam = new Parameter();
                     requestParam.setName(field.getField());
