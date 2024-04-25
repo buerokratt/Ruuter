@@ -14,21 +14,20 @@ import java.util.List;
 public class DeclarationStep extends DslStep {
     String version;
     String description;
-    String declare;
 
     String method;
     String accepts;
     String returns;
 
     String namespace;
+  
+    AllowList allowlist;
 
-    List<DslField> usedFields;
-
-    List<String> allowedFields;
+    List<String> allowedBody;
+    List<String> allowedHeader;
 
     @Override
     protected void executeStepAction(DslInstance di) {
-        log.info("Executing declare (%s)".formatted(this.declare));
         return;
     }
 
@@ -36,13 +35,25 @@ public class DeclarationStep extends DslStep {
     public String getType() {
         return "declare";
     }
-
-    public List<String> getAllowedFields() {
-        if (allowedFields == null) {
-            allowedFields = usedFields.stream().map(field -> field.getField()).toList();
-            log.info("Generated allowed fields for "+ declare + "(" + allowedFields.size() + ")" );
+  
+    public List<String> getAllowedBody() {
+        if (allowedBody == null) {
+            allowedBody = allowlist.body.stream().map(field -> field.getField()).toList();
         }
-        return allowedFields;
+        return allowedBody;
+    }
+
+    public List<String> getAllowedHeader() {
+        if (allowedHeader == null) {
+            allowedHeader = allowlist.header.stream().map(field -> field.getField()).toList();
+        }
+        return allowedHeader;
+    }
+
+    @Getter
+    public class AllowList {
+        List<DslField> body;
+        List<DslField> header;
     }
 
 }

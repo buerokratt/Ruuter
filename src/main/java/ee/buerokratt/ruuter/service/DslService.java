@@ -104,8 +104,10 @@ public class DslService {
 
     private Dsl getDslFromPath(Path path) {
         Dsl dsl = dslMappingHelper.getDslSteps(path);
-        if (dsl.getDeclaration() != null) {
-            openApiBuilder.addService(dsl);
+        if (dsl.getDeclaration() == null)
+            log.warn("Found DSL without declaration: {}", path.toString());
+        else {
+            openApiBuilder.addService(dsl, FileUtils.getFileNameWithPathWithoutSuffix(path));
         }
         return dsl;
     }
@@ -133,10 +135,12 @@ public class DslService {
         Map<String, DslStep> steps;
 
         if (dsl != null) {
-            log.info("Executing DSLv2 with declare:" + mappingHelper.convertObjectToString(dsl.getDeclaration()));
+            log.info("Executing DSLv2 with declare:{}", mappingHelper.convertObjectToString(dsl.getDeclaration()));
             steps = dsl.steps();
-            log.info("body before: "+ LoggingUtils.mapDeepToString(requestBody));
-            requestBody = filterBody(requestBody, dsl.getDeclaration().getAllowedFields());
+            log.info("body before: {}", LoggingUtils.mapDeepToString(requestBody));
+            requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
+            requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
+
             log.info("body after: "+ LoggingUtils.mapDeepToString(requestBody));
         } else {
             log.info("Executing DSLv1 (without declare)");
@@ -219,8 +223,8 @@ public class DslService {
         return guards.get(method).containsKey(path) ? guards.get(method).get(path).steps() : getGuard(method, path);
     }
 
-    Map<String, Object> filterBody(Map<String, Object> requestbody, List<String> allowedFields) {
-        return requestbody == null ? null : requestbody.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
+    <V> Map<String, V> filterFields(Map<String, V> requestFields, List<String> allowedFields) {
+        return requestFields == null ? null : requestFields.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
