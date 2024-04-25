@@ -210,7 +210,7 @@ public class DslService {
             return true;
         boolean ipAllowed = properties.getInternalRequests().getAllowedIPs().contains(origin);
         boolean urlAllowed = properties.getInternalRequests().getAllowedURLs().contains(referer);
-        return ipAllowed && urlAllowed;
+        return ipAllowed || urlAllowed;
     }
 
     private Map<String, DslStep> getGuard(String method, String dslPath) {
