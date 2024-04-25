@@ -132,19 +132,18 @@ public class DslService {
     public DslInstance execute(String dslName, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
 
         Dsl dsl = dsls.get(requestType.toUpperCase()).get(dslName);
-        Map<String, DslStep> steps;
+        Map<String, DslStep> steps = null;
 
         if (dsl != null) {
-            log.info("Executing DSLv2 with declare:{}", mappingHelper.convertObjectToString(dsl.getDeclaration()));
             steps = dsl.steps();
-            log.info("body before: {}", LoggingUtils.mapDeepToString(requestBody));
+            log.debug("body before: {}", LoggingUtils.mapDeepToString(requestBody));
 
             if (dsl.getDeclaration() != null) {
                 requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
                 requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
                 requestQuery = filterFields(requestQuery, dsl.getDeclaration().getAllowedParams());
             }
-            log.info("body after: "+ LoggingUtils.mapDeepToString(requestBody));
+            log.debug("body after: "+ LoggingUtils.mapDeepToString(requestBody));
         } else {
             log.info("Executing DSLv1 (without declare)");
             steps = null;
@@ -164,7 +163,7 @@ public class DslService {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dslName), requestOrigin, INCOMING_REQUEST);
 
             if ( !allowedToExecuteDSLFrom(di, requestOrigin, requestHeaders.get("referer"))) {
-                LoggingUtils.logError(log, "Internal DSL not allowed: %s".formatted(dslName), requestOrigin, INCOMING_RESPONSE);
+                LoggingUtils.logError(log, "Internal DSL not allowed: %s (%s)".formatted(dslName, requestOrigin), requestOrigin, INCOMING_RESPONSE);
                 return di;
             };
 
@@ -187,7 +186,7 @@ public class DslService {
                     guard.setReturnStatus(HttpStatus.OK.value());
 
                 if (guard.getReturnStatus() != HttpStatus.OK.value()) {
-                    LoggingUtils.logError(log, "Guard failed for DSL: %s".formatted(dslName), requestOrigin, INCOMING_RESPONSE);
+                    LoggingUtils.logError(log, "Guard failed for DSL: %s (%s)".formatted(dslName, requestOrigin), requestOrigin, INCOMING_RESPONSE);
                     return guard;
                 }
             }
@@ -216,7 +215,7 @@ public class DslService {
             return true;
         boolean ipAllowed = properties.getInternalRequests().getAllowedIPs().contains(origin);
         boolean urlAllowed = properties.getInternalRequests().getAllowedURLs().contains(referer);
-        return ipAllowed && urlAllowed;
+        return ipAllowed || urlAllowed;
     }
 
     private Map<String, DslStep> getGuard(String method, String dslPath) {
