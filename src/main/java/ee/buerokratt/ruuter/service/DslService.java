@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -137,9 +138,11 @@ public class DslService {
             log.info("Executing DSLv2 with declare:{}", mappingHelper.convertObjectToString(dsl.getDeclaration()));
             steps = dsl.steps();
             log.info("body before: {}", LoggingUtils.mapDeepToString(requestBody));
+
             if (dsl.getDeclaration() != null) {
                 requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
                 requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
+                requestQuery = filterFields(requestQuery, dsl.getDeclaration().getAllowedParams());
             }
             log.info("body after: "+ LoggingUtils.mapDeepToString(requestBody));
         } else {
