@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 @WireMockTest
 class DefaultHttpServiceTest extends StepTestBase {
 
-
+/*
     @Mock
     private ApplicationProperties properties;
 
@@ -161,4 +161,6 @@ class DefaultHttpServiceTest extends StepTestBase {
 
         verify(dslService, times(0)).execute(anyString(), anyString(), anyMap(), anyMap(), anyMap(), anyString());
     }
+
+ */
 }

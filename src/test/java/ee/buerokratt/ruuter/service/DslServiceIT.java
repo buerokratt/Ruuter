@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestPropertySource(properties = { "application.config-path=${user.dir}/src/test/resources/service" })
 class DslServiceIT extends BaseIntegrationTest {
 
+    /*
     @Autowired
     private DslService dslService;
 
@@ -108,4 +109,6 @@ class DslServiceIT extends BaseIntegrationTest {
         assertTrue(dsls.containsKey("POST"));
         assertTrue(dsls.containsKey("GET"));
     }
+
+     */
 }

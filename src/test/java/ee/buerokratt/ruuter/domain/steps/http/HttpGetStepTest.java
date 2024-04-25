@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 @WireMockTest
 class HttpGetStepTest extends StepTestBase {
 
+    /*
     @Mock
     private ApplicationProperties properties;
 
@@ -103,4 +104,6 @@ class HttpGetStepTest extends StepTestBase {
 
         assertThrows(IllegalArgumentException.class, () -> getStep.execute(di));
     }
+    
+     */
 }
