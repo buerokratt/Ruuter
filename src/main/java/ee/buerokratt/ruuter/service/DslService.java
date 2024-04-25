@@ -181,7 +181,7 @@ public class DslService {
                     guard.setReturnStatus(HttpStatus.OK.value());
 
                 if (guard.getReturnStatus() != HttpStatus.OK.value()) {
-                    LoggingUtils.logError(log, "Guard failed for DSL: %s".formatted(dslName), requestOrigin, INCOMING_RESPONSE);
+                    LoggingUtils.logError(log, "Guard failed for DSL: %s (%s)".formatted(dslName, requestOrigin), requestOrigin, INCOMING_RESPONSE);
                     return guard;
                 }
             }
