@@ -132,19 +132,16 @@ public class DslService {
     public DslInstance execute(String dslName, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
 
         Dsl dsl = dsls.get(requestType.toUpperCase()).get(dslName);
-        Map<String, DslStep> steps;
+        Map<String, DslStep> steps = null;
 
         if (dsl != null) {
-            log.info("Executing DSLv2 with declare:{}", mappingHelper.convertObjectToString(dsl.getDeclaration()));
             steps = dsl.steps();
-            log.info("body before: {}", LoggingUtils.mapDeepToString(requestBody));
-            requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
-            requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
-
-            log.info("body after: "+ LoggingUtils.mapDeepToString(requestBody));
-        } else {
-            log.info("Executing DSLv1 (without declare)");
-            steps = null;
+            if (dsl.getDeclaration() != null) {
+                log.debug("Executing DSLv2 with declare:{}", mappingHelper.convertObjectToString(dsl.getDeclaration()));
+                requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
+                requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
+            } else
+                log.debug("Executing DSLv1 (without declare)");
         }
 
         DslInstance di = new DslInstance(dslName,
