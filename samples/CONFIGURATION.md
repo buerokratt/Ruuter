@@ -233,3 +233,8 @@ Default value is 256 (kB).
 ```
     "httpResponseSizeLimit": response size limit in KB
 ```
+
+### Allow duplicate request keys
+
+Duplicate keys in request JSON is allowed by default. 
+This functionality can be changed with setting `allowDuplicateRequestKeys` to false.
