@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.converter.HttpMessageConverter;
+
+import java.util.Map;
 
 @Configuration
 public class JacksonConfiguration {
@@ -22,7 +25,6 @@ public class JacksonConfiguration {
             return new ObjectMapper();
         else
             return new ObjectMapper().configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true);
-
     }
 
     @Bean
@@ -30,3 +32,4 @@ public class JacksonConfiguration {
         return new ObjectMapper(new YAMLFactory()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 }
+
