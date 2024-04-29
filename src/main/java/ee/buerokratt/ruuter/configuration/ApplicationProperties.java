@@ -30,6 +30,8 @@ public class ApplicationProperties {
 
     private Integer httpResponseSizeLimit;
 
+    private Boolean allowDuplicateRequestKeys;
+
     @Setter
     @Getter
     public static class FinalResponse {
