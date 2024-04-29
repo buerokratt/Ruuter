@@ -12,7 +12,7 @@ RUN chmod 754 ./gradlew
 RUN ./gradlew -Pprod clean bootJar
 RUN mkdir -p build/libs && (cd build/libs; jar -xf *.jar)
 
-FROM openjdk:17-jdk
+FROM eclipse-temurin:17-jdk-alpine
 VOLUME /build/tmp
 
 ARG DEPENDENCY=/workspace/app/build/libs
