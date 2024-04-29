@@ -25,7 +25,7 @@ ENV application.config-path=/DSL
 COPY .env /app/.env
 RUN echo BUILDTIME=`date +%s` >> /app/.env
 
-RUN adduser  ruuter
+RUN adduser -D ruuter
 RUN mkdir logs
 RUN mkdir DSL
 RUN chown ruuter:ruuter /logs
