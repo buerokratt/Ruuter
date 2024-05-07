@@ -2,7 +2,7 @@
 
 The template step allows to call out/execute other DSL files.
 
-```
+```yaml
 template_step:
   template: template-to-call
   requestType: post
@@ -15,6 +15,27 @@ template_step:
 * `requestType` - since DSL files are categorized by HTTP method types, this indicates which method type DSL to call
   out ([Request types](../GUIDE.md#Request-types))
 * `result` - name of the variable to store the response of the template in, for use in other steps
+
+**Templates and guards**
+
+If there are guards that apply to specific DSL folder
+(for example to the whole POST hierarchy), the guard 
+will also apply to the template. If that template is called
+from guard, it causes an endless loop that crashes handling of
+that DSL. 
+
+To eliminate this problem, it is recommended to put
+templates under a different pseudo-method layer, usually
+called TEMPLATES and use it as `requestType` in template 
+call:
+
+```yaml
+template_step:
+  template: template-to-call
+  requestType: templates
+  result: resultVariableName
+```
+
 
 **Optional fields:**
 
@@ -34,7 +55,7 @@ Template results are stored "as-is" into the application context.
 
 [`template.yml`](../../DSL/GET/steps/template/template.yml)
 
-```
+```yaml
 call_template:
   template: steps/return/return-with-script
   requestType: get
@@ -48,7 +69,7 @@ return_result:
 
 [`template-with-params.yml`](../../DSL/GET/steps/template/template-with-params.yml)
 
-```
+```yaml
 call_template:
   template: scripting/passing-post-parameters
   requestType: post
