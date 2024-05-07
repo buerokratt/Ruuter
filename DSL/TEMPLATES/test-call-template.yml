@@ -1,0 +1,6 @@
+logstep:
+  log: test-call-template RAN
+
+returnstep:
+  status: 200
+  return: OK

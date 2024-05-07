@@ -122,6 +122,10 @@ public class DslMappingHelper {
             return mapper.treeToValue(jsonNode, SwitchStep.class);
         }
 
+        if (jsonNode.get("log") != null) {
+            return mapper.treeToValue(jsonNode, LogStep.class);
+        }
+
         throw new IllegalArgumentException(INVALID_STEP_ERROR_MESSAGE);
     }
 

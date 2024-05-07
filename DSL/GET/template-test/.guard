@@ -1,0 +1,11 @@
+callstep:
+  template: test-call-template
+  requestType: templates
+  result: templateresult
+
+logstep:
+  log: "executed from guard and got: ${templateresult}"
+
+returnstep:
+  status: 200
+  return: OK
