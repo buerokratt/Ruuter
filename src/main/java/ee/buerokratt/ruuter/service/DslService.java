@@ -182,7 +182,7 @@ public class DslService {
 
                 // In case the guard does not specifically return a status code or throw an exception, it
                 // should be considered as HTTP OK.
-                if (guard.getReturnStatus() != null)
+                if (guard.getReturnStatus() == null)
                     guard.setReturnStatus(HttpStatus.OK.value());
 
                 if (guard.getReturnStatus() != HttpStatus.OK.value()) {
