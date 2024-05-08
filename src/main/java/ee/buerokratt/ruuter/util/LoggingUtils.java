@@ -62,8 +62,11 @@ public class LoggingUtils {
     }
 
     public static <T> String mapDeepToString(Map<String, T> map) {
-        return map == null ? "" : map.entrySet().stream()
-            .map(e ->"{ " + e.getKey() + " => " + (e.getValue() instanceof Map ? mapDeepToString((Map)e.getValue()) : e.getValue().toString()) + " }")
+        return map == null ? "<null>" : map.entrySet().stream()
+            .map(e -> "{ " + e.getKey() + " => " +
+                (e.getValue() == null ? "<null>" :
+                    e.getValue() instanceof Map ? mapDeepToString((Map) e.getValue()) :
+                    e.getValue().toString()) + " }")
             .collect(Collectors.joining(","));
     }
 }
