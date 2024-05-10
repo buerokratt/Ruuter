@@ -9,10 +9,11 @@ import ee.buerokratt.ruuter.service.DslService;
 import ee.buerokratt.ruuter.service.OpenSearchSender;
 import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
+import io.opentelemetry.api.trace.Tracer;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.Tracer;
+
 import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 @Slf4j
 @Data
@@ -59,7 +59,6 @@ public class DslInstance {
         recursions = stepNames.stream().collect(Collectors.toMap(Function.identity(), a -> 0));
         try {
             executeStep(stepNames.get(0), stepNames);
-
         } catch (Exception e) {
             LoggingUtils.logError(log, "Error executing DSL: %s".formatted(name), requestOrigin, "", e);
             clearReturnValues();

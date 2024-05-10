@@ -36,6 +36,15 @@ application:
 #    index: ruuterlog
   httpResponseSizeLimit: 256
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include=prometheus:
+  tracing:
+    enabled:
+      true
+
 spring:
   application:
     name: ruuter

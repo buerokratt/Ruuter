@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-alpine as build
+FROM eclipse-temurin:21-jdk-alpine as build
 WORKDIR /workspace/app
 
 COPY gradlew .
@@ -12,7 +12,7 @@ RUN chmod 754 ./gradlew
 RUN ./gradlew -Pprod clean bootJar
 RUN mkdir -p build/libs && (cd build/libs; jar -xf *.jar)
 
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine
 VOLUME /build/tmp
 
 ARG DEPENDENCY=/workspace/app/build/libs

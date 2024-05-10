@@ -11,7 +11,7 @@ import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.core.util.Yaml;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.Tracer;
+import io.opentelemetry.api.trace.Tracer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

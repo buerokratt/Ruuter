@@ -67,7 +67,7 @@ public abstract class HttpStep extends DslStep {
                 setNextStepName(getOnErrorStep());
             }
             else {
-                di.setErrorStatus(response.getStatusCode());
+                di.setErrorStatus(HttpStatus.valueOf(response.getStatusCodeValue()));
                 di.setErrorMessage("HTTP returned with non-OK");
                 throw new IllegalArgumentException();
             }

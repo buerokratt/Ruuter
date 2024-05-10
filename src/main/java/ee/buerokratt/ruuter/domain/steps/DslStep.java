@@ -9,8 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.Tracer;
+import io.opentelemetry.api.trace.Span;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -30,10 +29,10 @@ public abstract class DslStep {
     private boolean reloadDsl = false;
 
     public final void execute(DslInstance di) throws StepExecutionException {
-        Span newSpan = di.getTracer().nextSpan().name(name);
+        Span newSpan = di.getTracer().spanBuilder(name).startSpan();
         long startTime = System.currentTimeMillis();
 
-        try (Tracer.SpanInScope ws = di.getTracer().withSpan(newSpan.start())) {
+        try {
             if (sleep != null) {
                 Thread.sleep(sleep);
             }
