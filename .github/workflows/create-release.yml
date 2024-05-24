@@ -1,0 +1,23 @@
+name: Create Release
+
+on:
+  push:
+    branches: ["test", "stage", "main"]
+  workflow_dispatch:
+env:
+  BRANCH: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Load environment variables
+        run: awk -v branch=${{ env.BRANCH }} '/^BRANCH=/{p = ($0 == "BRANCH=" branch)} p && NF' release.env >> $GITHUB_ENV
+      - name: Create-Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}${{ env.TYPE != '' && format('-{0}',env.TYPE) || '' }}${{ env.TYPE_VERSION != '' && format('.{0}',env.TYPE_VERSION) || '' }}
+          generate_release_notes: true
+          body_path: ${{ github.workspace }}/RELEASE_NOTES
