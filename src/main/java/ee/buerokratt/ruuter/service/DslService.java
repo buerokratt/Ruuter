@@ -26,8 +26,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
-import static ee.buerokratt.ruuter.util.LoggingUtils.INCOMING_REQUEST;
-import static ee.buerokratt.ruuter.util.LoggingUtils.INCOMING_RESPONSE;
+import static ee.buerokratt.ruuter.util.LoggingUtils.*;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
@@ -42,9 +41,9 @@ public class DslService {
     private final Tracer tracer;
     private final OpenSearchSender openSearchSender;
 
-    private Map<String, Map<String, Dsl>> dsls;
+    private Map<String, Map<String, Map<String, Dsl>>> dsls;
 
-    private Map<String, Map<String, Dsl>> guards;
+    private Map<String, Map<String, Map<String, Dsl>>> guards;
 
     public static final String UNSUPPORTED_FILETYPE_ERROR_MESSAGE = "Unsupported filetype";
 
@@ -73,30 +72,38 @@ public class DslService {
         this.guards = getGuards(properties.getConfigPath());
     }
 
-    public Map<String, Map<String, Dsl>> getDsls(String configPath) {
+    public Map<String, Map<String, Map<String, Dsl>>> getDsls(String configPath) {
         openApiBuilder = new OpenApiBuilder("BYK", "1.0");
 
-        Map<String, Map<String, Dsl>> _dsls =
-               Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory)))
-                   .collect(toMap(File::getName, directory -> {
-                       return getDslDirectory(directory);
-                   }));
+
+        Map<String, Map<String, Map<String, Dsl>>> _dsls =
+                Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory)))
+                        .collect(toMap(File::getName, f -> getDslsForProject(configPath+"/" + f.getName()+"/")));
+
         log.info("Built OpenAPI spec: " + Yaml.pretty(getOpenAPISpec()));
-        //writeSpecToFile();
+
         return _dsls;
     }
 
-    private Map<String, Dsl> getDslDirectory(File directory) {
+    public Map<String, Map<String, Dsl>> getDslsForProject(String projectPath) {
+        Map<String, Map<String, Dsl>> _dsls =
+                Arrays.stream(Objects.requireNonNull(new File(projectPath).listFiles(File::isDirectory)))
+                        .collect(toMap(File::getName, this::extractDSL));
+        log.debug("Loaded DSLs: " + mapDeepToString(_dsls));
+        return _dsls;
+    }
+
+    private Map<String, Dsl> extractDSL(File directory) {
         try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
-            .filter(path -> !FileUtils.isGuard(path))
-            .filter(path -> {
-            if (!FileUtils.isFiletype(path, properties.getDsl().getAllowedFiletypes()))
-                throw new IllegalArgumentException(UNSUPPORTED_FILETYPE_ERROR_MESSAGE + " " + path.toString().substring(path.toString().lastIndexOf('.')) + " (" + path + ")");
-            return true;
-        }).filter(path -> FileUtils.isFiletype(path, properties.getDsl().getProcessedFiletypes()))) {
+                .filter(path -> !FileUtils.isGuard(path))
+                .filter(path -> {
+                    if (!FileUtils.isFiletype(path, properties.getDsl().getAllowedFiletypes()))
+                        throw new IllegalArgumentException(UNSUPPORTED_FILETYPE_ERROR_MESSAGE + " " + path.toString().substring(path.toString().lastIndexOf('.')) + " (" + path + ")");
+                    return true;
+                }).filter(path -> FileUtils.isFiletype(path, properties.getDsl().getProcessedFiletypes()))) {
             return paths
-                .filter(Files::isRegularFile)
-                .collect(toMap(FileUtils::getFileNameWithPathWithoutSuffix, this::getDslFromPath));
+                    .filter(Files::isRegularFile)
+                    .collect(toMap(FileUtils::getFileNameWithPathWithoutSuffix, path -> getDslFromPath(path)));
         } catch (Exception e) {
             throw new LoadDslsException(e);
         }
@@ -112,26 +119,50 @@ public class DslService {
         return dsl;
     }
 
-    public Map<String, Map<String, Dsl>> getGuards(String configPath) {
-        Map<String, Map<String, Dsl>> _dsls = Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory))).collect(toMap(File::getName, directory -> {
-            try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
-                .filter(path -> FileUtils.isGuard(path))) {
-                return paths
-                    .filter(Files::isRegularFile)
-                    .collect(toMap(FileUtils::getGuardWithPath, dslMappingHelper::getDslSteps));
-            } catch (Exception e) {
-                throw new LoadDslsException(e);
-            }
-        }));
+
+    public Map<String, Map<String, Map<String, Dsl>>> getGuards(String configPath) {
+        Map<String, Map<String, Map<String, Dsl>>> _dsls =
+            Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory)))
+                .collect(toMap(File::getName, f -> getGuardsForProject(configPath+"/" + f.getName()+"/")));
+        log.debug("Loaded Guards: " + mapDeepToString(_dsls));
         return _dsls;
+    }
+
+    public Map<String, Map<String, Dsl>> getGuardsForProject(String projectPath) {
+        Map<String, Map<String, Dsl>> _dsls =
+            Arrays.stream(Objects.requireNonNull(new File(projectPath).listFiles(File::isDirectory)))
+                .collect(toMap(File::getName, this::extractGuard));
+        return _dsls;
+    }
+
+    private Map<String, Dsl> extractGuard(File directory) {
+        try (Stream<Path> paths = Files.walk(getFolderPath(directory.toString()))
+            .filter(path -> FileUtils.isGuard(path))) {
+            return paths
+                .filter(Files::isRegularFile)
+                .collect(toMap(FileUtils::getGuardWithPath, dslMappingHelper::getDslSteps));
+        } catch (Exception e) {
+            throw new LoadDslsException(e);
+        }
     }
 
     public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
         return execute(dsl, requestType, requestBody, requestQuery, requestHeaders, requestOrigin, this.getClass().getName());
     }
-    public DslInstance execute(String dslName, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
 
-        Dsl dsl = dsls.get(requestType.toUpperCase()).get(dslName);
+    public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
+        String project = dsl.substring(0, dsl.indexOf('/'));
+        dsl = dsl.substring(dsl.indexOf('/')+1);
+        return execute(project, dsl, requestType, requestBody, requestQuery,requestHeaders, requestOrigin, contentType);
+    }
+
+    public DslInstance execute(String project, String dslName, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
+        log.info("Loading DSL: "+ dslName + " from project: " + project);
+        Dsl dsl = dsls.get(project).get(requestType.toUpperCase()).get(dslName);
+
+        log.info("DSLs in project "+ project +" => " + LoggingUtils.mapDeepToString(dsls.get(project).get(requestType.toUpperCase())));
+        log.info("DSL=> " + dsls.get(project).get(requestType.toUpperCase()).get(dslName));
+
         Map<String, DslStep> steps = null;
 
         if (dsl != null) {
@@ -142,11 +173,13 @@ public class DslService {
                 requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
                 requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
                 requestQuery = filterFields(requestQuery, dsl.getDeclaration().getAllowedParams());
+            } else {
+                log.info("xecuting DSLv1 (without declare) "+ project + "/" + dslName);
             }
+
             log.debug("body after: "+ LoggingUtils.mapDeepToString(requestBody));
         } else {
-            log.info("Executing DSLv1 (without declare)");
-            steps = null;
+            log.info("DSL in project "+ project+" not found: "+dslName);
         }
 
         DslInstance di = new DslInstance(dslName,
@@ -167,16 +200,19 @@ public class DslService {
                 return di;
             };
 
-            DslInstance guard = new DslInstance(dslName, requestType.toUpperCase(),
-                getGuard(requestType.toUpperCase(), dslName),
-                requestBody,
-                requestQuery,
-                requestHeaders,
-                requestOrigin,
-                this,
-                properties, scriptingHelper, mappingHelper, httpHelper, tracer, openSearchSender);
+            Dsl _guard =  getGuard(project,requestType.toUpperCase(), dslName);
 
-            if (guard != null && guard.getSteps() != null) {
+            if (_guard != null && _guard.steps() != null) {
+
+                DslInstance guard = new DslInstance(dslName, requestType.toUpperCase(),
+                    _guard.steps(),
+                    requestBody,
+                    requestQuery,
+                    requestHeaders,
+                    requestOrigin,
+                    this,
+                    properties, scriptingHelper, mappingHelper, httpHelper, tracer, openSearchSender);
+
                 LoggingUtils.logInfo(log, "Executing guard for DSL: %s".formatted(dslName), requestOrigin, INCOMING_REQUEST);
                 guard.execute();
 
@@ -218,12 +254,13 @@ public class DslService {
         return ipAllowed || urlAllowed;
     }
 
-    private Map<String, DslStep> getGuard(String method, String dslPath) {
+    private Dsl getGuard(String project, String method, String dslPath) {
         if (dslPath.length()<=1)
             return null;
         String path = dslPath.contains("/") ? dslPath.substring(0, dslPath.lastIndexOf('/')) : "";
-        return guards.get(method).containsKey(path) ? guards.get(method).get(path).steps() : getGuard(method, path);
+        return guards.get(project).get(method).containsKey(path) ? guards.get(project).get(method).get(path) : getGuard(project, method, path);
     }
+
 
     <V> Map<String, V> filterFields(Map<String, V> requestFields, List<String> allowedFields) {
         return allowedFields == null ?

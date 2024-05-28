@@ -7,8 +7,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.nio.file.Files.exists;
@@ -17,6 +21,8 @@ import static java.nio.file.Files.isDirectory;
 public class FileUtils {
     public static final String SUFFIX_YAML = ".yaml";
     public static final String SUFFIX_YML = ".yml";
+
+    private static final String PATH_MATCHER = "[^/]+(/.*?){3}(.[^.]+)?$";
 
     private FileUtils() {
     }
@@ -50,7 +56,13 @@ public class FileUtils {
 
     public static String getFileNameWithPathWithoutSuffix(Path path) {
         String fullPath = path.toAbsolutePath().toString();
-        fullPath = fullPath.substring(fullPath.indexOf('/', fullPath.indexOf('/', fullPath.indexOf('/')+1)+1)+1, fullPath.lastIndexOf('.'));
+
+        Pattern pattern = Pattern.compile(PATH_MATCHER);
+        Matcher matcher = pattern.matcher(fullPath);
+
+        matcher.find();
+        fullPath = matcher.group(1).substring(1);
+
         return fullPath;
     }
 
