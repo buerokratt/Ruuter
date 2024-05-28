@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.domain.steps;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import ee.buerokratt.ruuter.domain.DslInstance;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +62,7 @@ public class DeclarationStep extends DslStep {
     @Getter
     public class AllowList {
         List<DslField> body;
+        @JsonAlias("headers")
         List<DslField> header;
         List<DslField> params;
     }
