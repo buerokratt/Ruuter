@@ -39,21 +39,21 @@ public class DeclarationStep extends DslStep {
     }
 
     public List<String> getAllowedBody() {
-        if (allowedBody == null && allowlist.body != null) {
+        if (allowedBody == null && allowlist != null && allowlist.body != null) {
             allowedBody = allowlist.body.stream().map(field -> field.getField()).toList();
         }
         return allowedBody;
     }
 
     public List<String> getAllowedHeader() {
-        if (allowedHeader == null && allowlist.header != null) {
+        if (allowedHeader == null && allowlist != null && allowlist.header != null) {
             allowedHeader = allowlist.header.stream().map(field -> field.getField()).toList();
         }
         return allowedHeader;
     }
 
     public List<String> getAllowedParams() {
-        if (allowedParams == null && allowlist.params != null) {
+        if (allowedParams == null && allowlist != null && allowlist.params != null) {
             allowedParams = allowlist.params.stream().map(field -> field.getField()).toList();
         }
         return allowedParams;
