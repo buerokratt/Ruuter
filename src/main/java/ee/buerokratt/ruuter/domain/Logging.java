@@ -16,4 +16,6 @@ public class Logging {
     private Boolean displayResponseContent;
 
     private Boolean meaningfulErrors;
+
+    private Boolean printStackTrace;
 }

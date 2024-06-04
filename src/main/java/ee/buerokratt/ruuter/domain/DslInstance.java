@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
@@ -94,7 +95,11 @@ public class DslInstance {
 
                 if (getProperties().getStopInCaseOfException() != null && getProperties().getStopInCaseOfException()) {
                     Thread.currentThread().interrupt();
-                    throw new StepExecutionException(name, e);
+                    if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
+                        throw new StepExecutionException(name, e);
+                    else {
+                        log.error("%s: %s".formatted(name, e.getMessage()));
+                    }
                 }
             }
 

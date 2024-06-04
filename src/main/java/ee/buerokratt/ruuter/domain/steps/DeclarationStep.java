@@ -38,6 +38,7 @@ public class DeclarationStep extends DslStep {
         return "declare";
     }
 
+
     public List<String> getAllowedBody() {
         if (allowedBody == null && allowlist != null && allowlist.body != null) {
             allowedBody = allowlist.body.stream().map(field -> field.getField()).toList();
@@ -66,5 +67,4 @@ public class DeclarationStep extends DslStep {
         List<DslField> header;
         List<DslField> params;
     }
-
 }
