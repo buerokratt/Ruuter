@@ -49,6 +49,8 @@ dependencies {
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.21' // For annotations approach
     implementation 'io.swagger.core.v3:swagger-core:2.2.21' // For programmatic approach
 
+    implementation 'commons-codec:commons-codec:1.17.0'
+    
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
