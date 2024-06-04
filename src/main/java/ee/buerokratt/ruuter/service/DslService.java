@@ -6,6 +6,7 @@ import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.helper.*;
 import ee.buerokratt.ruuter.helper.exception.LoadDslsException;
+import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -140,8 +141,13 @@ public class DslService {
 
             if (dsl.getDeclaration() != null) {
                 requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
+                if ("POST".equals(requestType.toUpperCase()))
+                    checkFields(requestBody, dsl.getDeclaration().getAllowedBody());
+
                 requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
                 requestQuery = filterFields(requestQuery, dsl.getDeclaration().getAllowedParams());
+                if ("GET".equals(requestType.toUpperCase()))
+                    checkFields(requestQuery, dsl.getDeclaration().getAllowedBody());
             }
             log.debug("body after: "+ LoggingUtils.mapDeepToString(requestBody));
         } else {
@@ -232,6 +238,21 @@ public class DslService {
                             null :
                             requestFields.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    <V> void checkFields(Map<String, V> requestFields, List<String> requestedFields) {
+        requestedFields.forEach((field) -> {
+                if (!requestFields.containsKey(field)) {
+                    String message = "Field missing: %s".formatted(field);
+                    if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
+                        throw new StepExecutionException("declare", new Exception(message));
+                    else {
+                        log.error(message);
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        );
     }
 
     public OpenAPI getOpenAPISpec() {
