@@ -1,5 +1,6 @@
 package ee.buerokratt.ruuter.domain.steps;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import ee.buerokratt.ruuter.domain.DslInstance;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -37,22 +38,23 @@ public class DeclarationStep extends DslStep {
         return "declare";
     }
 
+
     public List<String> getAllowedBody() {
-        if (allowedBody == null) {
+        if (allowedBody == null && allowlist != null && allowlist.body != null) {
             allowedBody = allowlist.body.stream().map(field -> field.getField()).toList();
         }
         return allowedBody;
     }
 
     public List<String> getAllowedHeader() {
-        if (allowedHeader == null) {
+        if (allowedHeader == null && allowlist != null && allowlist.header != null) {
             allowedHeader = allowlist.header.stream().map(field -> field.getField()).toList();
         }
         return allowedHeader;
     }
 
     public List<String> getAllowedParams() {
-        if (allowedParams == null) {
+        if (allowedParams == null && allowlist != null && allowlist.params != null) {
             allowedParams = allowlist.params.stream().map(field -> field.getField()).toList();
         }
         return allowedParams;
@@ -61,8 +63,8 @@ public class DeclarationStep extends DslStep {
     @Getter
     public class AllowList {
         List<DslField> body;
+        @JsonAlias("headers")
         List<DslField> header;
         List<DslField> params;
     }
-
 }
