@@ -151,7 +151,7 @@ public class DslService {
             }
             log.debug("body after: "+ LoggingUtils.mapDeepToString(requestBody));
         } else {
-            log.info("Executing DSLv1 (without declare)");
+            log.debug("Executing DSLv1 (without declare)");
             steps = null;
         }
 
@@ -217,7 +217,8 @@ public class DslService {
     }
 
     private boolean allowedToExecuteDSLFrom(DslInstance dsl, String origin, String referer) {
-        if (!dsl.isInternal())
+        if ((properties.getInternalRequests().getDisabled() != null && properties.getInternalRequests().getDisabled())
+            || !dsl.isInternal())
             return true;
         boolean ipAllowed = properties.getInternalRequests().getAllowedIPs().contains(origin);
         boolean urlAllowed = properties.getInternalRequests().getAllowedURLs().contains(referer);

@@ -95,6 +95,7 @@ public class ApplicationProperties {
     @Getter
     @Setter
     public static class InternalRequests {
+        private Boolean disabled;
         private List<String> allowedIPs;
         private List<String> allowedURLs;
     }
