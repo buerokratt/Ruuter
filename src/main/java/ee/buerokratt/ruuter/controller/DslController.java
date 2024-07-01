@@ -31,13 +31,13 @@ import static org.springframework.http.ResponseEntity.status;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "**", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+@RequestMapping(path = "**")
 public class DslController {
     private final DslService dslService;
     private final ApplicationProperties properties;
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Object> queryDsl(@RequestBody(required = false) MultipartFile[] file,
+    public ResponseEntity<Object> queryDslMultipart(@RequestBody(required = true) MultipartFile[] file,
                                            @RequestParam(required = false) Map<String, Object> requestQuery,
                                            @RequestHeader(required = false) Map<String, String> requestHeaders,
                                            HttpServletRequest request) {
@@ -54,7 +54,7 @@ public class DslController {
     }
 
     @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity<Object> queryDsl(@RequestBody(required = false) MultiValueMap<String, Object> requestBody,
+    public ResponseEntity<Object> queryDslFormdata(@RequestBody(required = true) MultiValueMap<String, Object> requestBody,
                                            @RequestParam(required = false) Map<String, Object> requestQuery,
                                            @RequestHeader(required = false) Map<String, String> requestHeaders,
                                            HttpServletRequest request) {
@@ -94,6 +94,18 @@ public class DslController {
         return status(di.getReturnStatus() == null ? getReturnStatus(di.getReturnValue()) : HttpStatus.valueOf(di.getReturnStatus()))
             .headers(httpHeaders -> di.getReturnHeaders().forEach(httpHeaders::add))
             .body(returnObj);
+    }
+
+    @PostMapping(consumes = "text/*")
+    public ResponseEntity<Object> queryDslText(@RequestBody(required = false) String requestBody,
+                                           @RequestParam(required = false) Map<String, Object> requestQuery,
+                                           @RequestHeader(required = false) Map<String, String> requestHeaders,
+                                           HttpServletRequest request) {
+        String subType = request.getContentType().substring(5);
+        log.info("queryDSL for media type text/"+ subType);
+        return queryDsl(
+            requestBody != null ? Map.of(subType, requestBody) : Map.of(),
+            requestQuery,requestHeaders, request);
     }
 
     private HttpStatus getReturnStatus(Object response) {

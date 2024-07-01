@@ -1,0 +1,17 @@
+declare:
+  call: declare
+  version: 0.1
+  description: Test declararation for text/plain type
+  method: post
+  accepts: text/plain
+  returns: json
+  namespace:  backoffice
+  allowlist:
+    body:
+    - field: plain
+      type: string
+      description: Input field for plaintext
+
+
+return_step:
+  return: ${incoming.body}

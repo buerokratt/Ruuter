@@ -130,40 +130,54 @@ public class DslService {
     public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
         return execute(dsl, requestType, requestBody, requestQuery, requestHeaders, requestOrigin, this.getClass().getName());
     }
+
     public DslInstance execute(String dslName, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
 
         Dsl dsl = dsls.get(requestType.toUpperCase()).get(dslName);
         Map<String, DslStep> steps = null;
 
+        DslInstance di = null;
+
         if (dsl != null) {
             steps = dsl.steps();
+
+            di = new DslInstance(dslName,
+                requestType.toUpperCase(),
+                steps,
+                requestBody,
+                requestQuery,
+                requestHeaders,
+                requestOrigin,
+                this,
+                properties, scriptingHelper, mappingHelper, httpHelper, tracer, openSearchSender);
+
             log.debug("body before: {}", LoggingUtils.mapDeepToString(requestBody));
 
             if (dsl.getDeclaration() != null) {
                 requestBody = filterFields(requestBody, dsl.getDeclaration().getAllowedBody());
                 if ("POST".equals(requestType.toUpperCase()))
-                    checkFields(requestBody, dsl.getDeclaration().getAllowedBody());
+                    try {
+                        checkFields(requestBody, dsl.getDeclaration().getAllowedBody());
+                    } catch (StepExecutionException stex) {
+                        if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
+                            throw stex;
+                        else {
+                            log.error(stex.getCause().getMessage());
+                        }
+                        return di;
+                    }
 
                 requestHeaders = filterFields(requestHeaders, dsl.getDeclaration().getAllowedHeader());
                 requestQuery = filterFields(requestQuery, dsl.getDeclaration().getAllowedParams());
                 if ("GET".equals(requestType.toUpperCase()))
                     checkFields(requestQuery, dsl.getDeclaration().getAllowedBody());
+            } else {
+                log.debug("Executing DSLv1 (without declare)");
             }
             log.debug("body after: "+ LoggingUtils.mapDeepToString(requestBody));
         } else {
-            log.debug("Executing DSLv1 (without declare)");
             steps = null;
         }
-
-        DslInstance di = new DslInstance(dslName,
-            requestType.toUpperCase(),
-            steps,
-            requestBody,
-            requestQuery,
-            requestHeaders,
-            requestOrigin,
-            this,
-            properties, scriptingHelper, mappingHelper, httpHelper, tracer, openSearchSender);
 
         if (steps != null) {
             LoggingUtils.logInfo(log, "Request received for DSL: %s".formatted(dslName), requestOrigin, INCOMING_REQUEST);
@@ -245,12 +259,7 @@ public class DslService {
         requestedFields.forEach((field) -> {
                 if (!requestFields.containsKey(field)) {
                     String message = "Field missing: %s".formatted(field);
-                    if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
-                        throw new StepExecutionException("declare", new Exception(message));
-                    else {
-                        log.error(message);
-                        Thread.currentThread().interrupt();
-                    }
+                    throw new StepExecutionException("declare", new Exception(message));
                 }
             }
         );
