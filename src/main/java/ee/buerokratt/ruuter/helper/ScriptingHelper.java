@@ -54,8 +54,6 @@ public class ScriptingHelper {
             return toEval;
         }
 
-        System.out.println("DEBUG: "+ toEval);
-
         // Simple evaluation: value is one variable only
         if (toEval.toString().matches(SCRIPT_REGEX)) {
             return evaluateSimple(toEval, context, requestBody, requestQuery, requestHeaders, scriptPattern);
@@ -160,7 +158,6 @@ public class ScriptingHelper {
                                  Map<String, Object> requestQuery,
                                  Map<String, String> requestHeaders,
                                  Pattern pattern) {
-        System.out.println("DEBUG SIMPLE: " + toEval);
         List<Object> evaluatedScripts = getEvaluatedScripts(toEval, context, requestBody, requestQuery, requestHeaders, pattern);
         return evaluatedScripts.size() == 1 ? evaluatedScripts.get(0) : evaluatedScripts.stream().reduce("", (o, o2) -> o + o2.toString());
     }
