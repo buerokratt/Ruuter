@@ -63,6 +63,7 @@ public class ScriptingHelper {
             return evaluateSimple(toEval, context, requestBody, requestQuery, requestHeaders, linePattern);
         }
 
+
         // Recursive evaluation: value is of complex type (List/Map)
         if (toEval instanceof List)
             return ((List)toEval).stream().map( obj -> replaceVariables(obj, context, requestBody, requestQuery, requestHeaders)).collect(toList());
@@ -71,10 +72,7 @@ public class ScriptingHelper {
                 .collect(toMap(Map.Entry::getKey,entry -> replaceVariables(entry.getValue(), context, requestBody, requestQuery, requestHeaders)));
 
         // Complex evaluation: value is a string formula
-        if (toEval.toString().contains(SCRIPT_REGEX))
             return evaluateComplex(toEval, context, requestBody, requestQuery, requestHeaders, SCRIPT_REGEX, scriptPattern);
-        else
-            return evaluateComplex(toEval, context, requestBody, requestQuery, requestHeaders, SCRIPT_LINE_REGEX, linePattern);
     }
 
     private Object filterEmptyOptional(Bindings bindings, String evaluableScript) {
