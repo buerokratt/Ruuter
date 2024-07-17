@@ -41,8 +41,8 @@ dependencies {
     implementation 'io.opentelemetry:opentelemetry-exporter-logging'
 
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-    implementation 'org.graalvm.js:js:23.0.1'
-    implementation 'org.graalvm.js:js-scriptengine:23.0.1'
+    implementation 'org.graalvm.js:js:23.0.5'
+    implementation 'org.graalvm.js:js-scriptengine:23.0.5'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.ini4j:ini4j:0.5.4'
 
