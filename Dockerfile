@@ -15,6 +15,8 @@ RUN mkdir -p build/libs && (cd build/libs; jar -xf *.jar)
 FROM eclipse-temurin:21-jdk-alpine
 VOLUME /build/tmp
 
+RUN apk add curl 
+
 ARG DEPENDENCY=/workspace/app/build/libs
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
