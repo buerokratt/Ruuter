@@ -32,6 +32,8 @@ public class ApplicationProperties {
 
     private Boolean allowDuplicateRequestKeys;
 
+    private SSO sso;
+
     @Setter
     @Getter
     public static class FinalResponse {
@@ -105,5 +107,11 @@ public class ApplicationProperties {
     public static class OpenSearchConfiguration {
         private String url;
         private String index;
+    }
+
+    @Getter
+    @Setter
+    public static class SSO {
+        private String master;
     }
 }
