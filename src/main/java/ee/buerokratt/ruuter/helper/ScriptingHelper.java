@@ -100,8 +100,8 @@ public class ScriptingHelper {
         if (requestHeaders != null) {
             incoming.put("headers", new HashMap<>(requestHeaders));
         }
-            
-        if (properties.getSso().getMaster() != null) {
+
+        if (properties.getSso() != null && properties.getSso().getMaster() != null) {
             incoming.put("eval", Map.of("ssoMaster", properties.getSso().getMaster()))                  ;
         }
 
