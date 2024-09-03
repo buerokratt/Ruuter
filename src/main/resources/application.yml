@@ -37,8 +37,9 @@ application:
 #    url: http://host.docker.internal:9200
 #    index: ruuterlog
   httpResponseSizeLimit: 256
-  sso:
-    master: test.buerokratt.ee/
+  
+#  sso:
+#    master: test.buerokratt.ee/
 
 management:
   endpoints:
