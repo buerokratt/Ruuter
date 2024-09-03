@@ -2,7 +2,7 @@ name: Build and publish Ruuter
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ ruuter-with-sso-eval ]
     paths:
       - '.env'
 
