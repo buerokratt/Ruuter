@@ -100,9 +100,7 @@ public class ScriptingHelper {
         if (requestHeaders != null) {
             incoming.put("headers", new HashMap<>(requestHeaders));
         }
-
-        System.out.println("SSO: " + properties.getSso().getMaster());
-
+            
         if (properties.getSso().getMaster() != null) {
             incoming.put("eval", Map.of("ssoMaster", properties.getSso().getMaster()))                  ;
         }
