@@ -1,6 +1,5 @@
 package ee.buerokratt.ruuter.helper;
 
-import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.helper.exception.ScriptEvaluationException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
@@ -23,8 +22,6 @@ public class ScriptingHelper {
 
     private final MappingHelper mappingHelper;
     private final ScriptEngine engine;
-
-    private final ApplicationProperties properties;
 
     private Pattern scriptPattern = Pattern.compile(SCRIPT_REGEX);
     private Pattern linePattern = Pattern.compile(SCRIPT_LINE_REGEX);
@@ -100,11 +97,6 @@ public class ScriptingHelper {
         if (requestHeaders != null) {
             incoming.put("headers", new HashMap<>(requestHeaders));
         }
-
-        if (properties.getSso() != null && properties.getSso().getMaster() != null) {
-            incoming.put("eval", Map.of("ssoMaster", properties.getSso().getMaster()))                  ;
-        }
-
         HashMap<String, Object> evalContext = new HashMap<>(context);
         evalContext.put("incoming", incoming);
         return evalContext;
