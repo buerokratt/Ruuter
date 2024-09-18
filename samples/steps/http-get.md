@@ -16,6 +16,8 @@ get_step:
 * `call`, with value `http.get` - determines the step type
 * `args`
     * `url` - the desired resource to query
+      * `contentType` - if set to `json_override` 
+  overrides response content type with application/json.
 
 **Optional fields:**
 

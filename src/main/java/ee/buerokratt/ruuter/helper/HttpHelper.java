@@ -22,6 +22,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.apache.logging.log4j.message.ParameterizedMessage.deepToString;
 import static org.springframework.http.HttpMethod.POST;
 
 @Slf4j
@@ -117,6 +119,7 @@ public class HttpHelper {
                     log.warn("Sending dynamic body request is considered unsecure");
                     bodyValue = BodyInserters.fromValue(body.get("dynamicBody"));
                 } else {
+                    log.info("REQUEST BODY: " + deepToString(body));
                     bodyValue = BodyInserters.fromValue(body);
                 }
                 mediaType = MediaType.APPLICATION_JSON_VALUE;
@@ -124,6 +127,11 @@ public class HttpHelper {
 
             Integer finalLimit = limit == null ? properties.getHttpResponseSizeLimit() : limit;
             return WebClient.builder()
+                .filter((request, next) -> !("json_override".equals(contentType)) ? next.exchange(request)
+                     :next.exchange(request)
+                        .flatMap(response -> Mono.just(response.mutate()
+                            .headers(httpHeaders -> httpHeaders.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                            .build())))
                 .exchangeStrategies(
                     ExchangeStrategies.builder().codecs(
                         configurer -> configurer.defaultCodecs().maxInMemorySize(finalLimit * 1024 )).build())
@@ -133,7 +141,6 @@ public class HttpHelper {
                 .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
                 .body(bodyValue)
                 .header(HttpHeaders.CONTENT_TYPE, mediaType)
-
                 .retrieve()
                 .toEntity(Object.class)
                 .block();
@@ -152,7 +159,7 @@ public class HttpHelper {
     private HttpClient getHttpClient() {
         return HttpClient.create()
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-            .responseTimeout(Duration.ofMillis(15000))
+                    .responseTimeout(Duration.ofMillis(15000))
             .doOnConnected(conn ->
                 conn.addHandlerLast(new ReadTimeoutHandler(15000, TimeUnit.MILLISECONDS))
                     .addHandlerLast(new WriteTimeoutHandler(15000, TimeUnit.MILLISECONDS)));
