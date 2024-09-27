@@ -158,7 +158,7 @@ public class HttpHelper {
 
     private HttpClient getHttpClient() {
         return HttpClient.create()
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
                     .responseTimeout(Duration.ofMillis(15000))
             .doOnConnected(conn ->
                 conn.addHandlerLast(new ReadTimeoutHandler(15000, TimeUnit.MILLISECONDS))
