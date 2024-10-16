@@ -1,0 +1,8 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "MOCK - 5 most recent voting results service"
+  description: "Provides information for 5 most-recent voting results"
+  method: get
+  returns: json
+  namespace:  common-services
