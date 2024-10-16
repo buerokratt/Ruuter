@@ -1,0 +1,69 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: MOCK Member Participation Statistics Service
+  description: A MOCK service that provides participation statistics for Riigikogu members.
+  method: get
+  returns: json
+  namespace: common-services
+
+prepareVariables:
+  assign:
+    currentDate: ${new Date().toISOString().split('T')[0]} # yyyy-mm-dd
+    endDate: ${ incoming.params.endDate || currentDate}
+    startDate: ${ incoming.params.startDate || new Date(new Date(endDate).setMonth(new Date(endDate).getMonth() - 1)).toISOString().split('T')[0] } # yyyy-mm-dd
+    lang: "ET"
+    memberName:  ${incoming.params.memberName} #"Jüri Ratas"
+  next: checkMember
+
+checkMember:
+  switch:
+    - condition: ${!memberName}
+      next: memberNotFound
+  next: mockAPIResponse
+
+mockAPIResponse:
+  assign:
+    kohaloluData: 
+      response:
+        body: [
+          { 
+            fullName: "Jüri Ratas",
+            participated: 20,
+            absent: 5
+          },
+          { 
+            fullName: "Kaja Kallas",
+            participated: 25,
+            absent: 3
+          },
+          { 
+            fullName: "Mart Helme",
+            participated: 15,
+            absent: 10
+          }
+        ]
+  next: filterMember
+
+filterMember:
+  assign:
+    memberData: ${kohaloluData.response.body.find(member => member.fullName === memberName)}
+  next: checkMemberExists
+
+checkMemberExists:
+  switch:
+    - condition: ${memberData !== undefined && memberData !== null}
+      next: returnResult
+  next: memberNotFound
+
+returnResult:
+  return: ${memberData.fullName + " on olnud perioodil " + startDate + " - " + endDate + " kohal " + memberData.participated + " korda ja puudunud " + memberData.absent + " korda."}
+  next: end
+
+memberNotFound:
+  return: "Error: Member not found."
+  next: end
+
+returnError:
+  return: "Error: failed to get participation data."
+  next: end

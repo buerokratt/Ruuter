@@ -1,0 +1,24 @@
+<!--
+### Input example:
+{
+    "response": [
+        {
+            "date": "2024-01-01",
+            "name": "uusaasta"
+        },
+        ...
+        {
+            "date": "2024-12-26",
+            "name": "teine jõulupüha"
+        }
+    ]
+}
+
+### Output example:
+{
+  "result": "Kõik pühad sellel aastal on:\n * 2024-01-01\nuusaasta\n\n * 2024-02-24\niseseisvuspäev, Eesti Vabariigi aastapäev\n\n * 2024-03-29\nsuur reede\n\n * 2024-03-31\nülestõusmispühade 1. püha\n\n * 2024-05-01\nkevadpüha\n\n * 2024-05-19\nnelipühade 1. püha\n\n * 2024-06-23\nvõidupüha\n\n * 2024-06-24\njaanipäev\n\n * 2024-08-20\ntaasiseseisvumispäev\n\n * 2024-12-24\njõululaupäev\n\n * 2024-12-25\nesimene jõulupüha\n\n * 2024-12-26\nteine jõulupüha\n\n"
+}
+-->
+{
+  "result": "Kõik pühad sellel aastal on:\n{{#each response}} * {{this.date}}\n{{this.name}}\n{{/each}}"
+}

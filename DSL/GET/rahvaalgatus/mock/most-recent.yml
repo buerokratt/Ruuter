@@ -1,0 +1,179 @@
+declaration:
+  call: declare
+  version: 0.1
+  description: MOCK - common-services - get 5 most-recent active initiavites
+  method: get
+  returns: json
+  namespace:  common-services
+
+prepareVariables:
+  assign:
+    order: "-occurredAt"
+    distinct: "initiativeId"
+    limit: "5"
+    rahvalagatus: "https://rahvaalgatus.ee/"
+    acceptHeader: "application/vnd.rahvaalgatus.initiative-event+json; v=1"
+  next: getEvents
+
+getEvents:
+  call: reflect.mock
+  args:
+    request:
+      url: "${rahvalagatus}/initiative-events?order=${order}&distinct=${distinct}&limit=${limit}"
+      headers:
+        Accept: ${acceptHeader} # accept predefined header
+    response:
+      initiatives: # mock response of predefined variables
+      - id: "sent-to-government"
+        initiativeId: "f799449f-d1e6-4ecf-a326-cf870ef36a54"
+        title: "Algatus saadeti menetlusse"
+        occurredAt: "2024-10-04T17:56:42.932Z"
+
+      - id: 1559
+        initiativeId: "5bc29033-61eb-4e1d-8686-f4d52785aed1"
+        title: "Kiri Riigikogult"
+        occurredAt: "2024-10-02T14:21:11.916Z"
+
+      - id: "sent-to-parliament"
+        initiativeId: "20bfdc55-c8b9-4cb4-aeb2-afabefb33d5b"
+        title: "Algatus saadeti riigikokku"
+        occurredAt: "2024-10-02T06:42:08.566Z"
+
+      - id: "sent-to-government"
+        initiativeId: "79c09b23-ab23-4082-b912-0a2c7388d621"
+        title: "Algatus saadeti menetlusse"
+        occurredAt: "2024-09-30T20:28:22.988Z"
+
+      - id: "milestone-163"
+        initiativeId: "dfa755b6-9db6-43f6-91cf-f8cb6c7c7b8f"
+        title: "Algatus kogus 163 allkirja"
+        occurredAt: "2024-09-28T19:25:18.136Z"
+  result: mockEvents
+  next: extractIds
+
+extractIds:
+  assign:
+    initiativeIds: ${mockEvents.response.body.initiatives.map(event => event.initiativeId)}
+  next: getFirstEvent
+
+
+getFirstEvent:
+  call: reflect.mock
+  args:
+    request:
+      url: "${rahvalagatus}/initiatives/${initiativeIds[0]}" # f799449f-d1e6-4ecf-a326-cf870ef36a54
+      headers:
+        Accept: "${acceptHeader}"
+    response:
+      initiative:
+        id: "f799449f-d1e6-4ecf-a326-cf870ef36a54"
+        for: "kose-vald"
+        title: "Toetusavaldus Piret Sappi jätkamiseks Ardu kooli ja lasteaia juhina"
+        phase: "government"
+        signingEndsAt: "2024-10-04T21:00:00.000Z"
+        signatureCount: 138
+        signatureThreshold: 59
+  result: firstInitiative
+  error: returnError
+  next: getSecondEvent
+
+
+getSecondEvent:
+  call: reflect.mock
+  args:
+    request:
+      url: "${rahvalagatus}/initiatives/${initiativeIds[1]}" # 5bc29033-61eb-4e1d-8686-f4d52785aed1
+      headers:
+        Accept: "${acceptHeader}"
+    response:
+      initiative:
+        id: "5bc29033-61eb-4e1d-8686-f4d52785aed1"
+        for: "parliament"
+        title: "JAH SAESAARE PAISJÄRVE SÄILITAMISELE TAEVASKOJAS!"
+        phase: "done"
+        signingEndsAt: "2024-03-22T22:00:00.000Z"
+        signatureCount: 5309
+        signatureThreshold: 1000
+  result: secondInitiative
+  error: returnError
+  next: getThirdEvent
+
+
+getThirdEvent:
+  call: reflect.mock
+  args:
+    request:
+      url: "${rahvalagatus}/initiatives/${initiativeIds[2]}" # 20bfdc55-c8b9-4cb4-aeb2-afabefb33d5b
+      headers:
+        Accept: "${acceptHeader}"
+    response:
+      initiative:
+        id: "20bfdc55-c8b9-4cb4-aeb2-afabefb33d5b"
+        for: "parliament"
+        title: "Kiiremini uued reisirongide peatused Tallinnasse!"
+        phase: "parliament"
+        signingEndsAt: "2024-10-01T21:00:00.000Z"
+        signatureCount: 1249
+        signatureThreshold: 1000
+  result: thirdInitiative
+  error: returnError
+  next: getFourthEvent
+
+getFourthEvent:
+  call: reflect.mock
+  args:
+    request:
+      url: "${rahvalagatus}/initiatives/${initiativeIds[3]}" # 79c09b23-ab23-4082-b912-0a2c7388d621
+      headers:
+        Accept: "${acceptHeader}"
+    response:
+      initiative:
+        id: "79c09b23-ab23-4082-b912-0a2c7388d621"
+        for: "elva-vald"
+        title: "Palume lõpetada detailplaneering raadiosidemasti paigaldamiseks, et säilitada Urmi küla ainulaadne looduslik ja kultuuriline keskkond."
+        phase: "government"
+        signingEndsAt: "2024-09-30T21:00:00.000Z"
+        signatureCount: 135
+        signatureThreshold: 116
+  result: fourthInitiative
+  error: returnError
+  next: getFifthEvent
+
+
+getFifthEvent:
+  call: reflect.mock
+  args:
+    request:
+      url: "${rahvalagatus}/initiatives/${initiativeIds[4]}" # dfa755b6-9db6-43f6-91cf-f8cb6c7c7b8f
+      headers:
+        Accept: "${acceptHeader}"
+    response:
+      initiative:
+        id: "dfa755b6-9db6-43f6-91cf-f8cb6c7c7b8f"
+        for: "rae-vald"
+        title: "Rae valla lastehoiu lisakulude hüvitamise määrus"
+        phase: "sign"
+        signingEndsAt: "2024-11-30T22:00:00.000Z"
+        signatureCount: 250
+        signatureThreshold: 163
+  result: fifthInitiative
+  error: returnError
+  next: assignVariables2
+
+
+assignVariables2:
+  assign:
+    first: ${firstInitiative.response.body.initiative}
+    second: ${secondInitiative.response.body.initiative}
+    third: ${thirdInitiative.response.body.initiative}
+    fourth: ${fourthInitiative.response.body.initiative}
+    fifth: ${fifthInitiative.response.body.initiative}
+  next: returnResult
+
+returnResult:
+  return: ${[first, second, third, fourth, fifth]}
+  next: end
+
+returnError:
+  return: "Error: failed to get initiative details."
+  next: end

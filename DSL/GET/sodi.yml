@@ -1,0 +1,74 @@
+# assignVariables:
+#   assign:
+#     array:
+#       - date: "2024-10-10"
+#         hour: "01:00"
+#         price: "5.50"
+#       - date: "2024-10-10"
+#         hour: "02:00"
+#         price: "6.50"
+#       - date: "2024-10-10"
+#         hour: "03:00"
+#         price: "12.50"
+#   next: returnResult
+
+makeApiCall:
+  call: reflect.mock
+  args:
+    request:
+      url: https://www.example-url.com
+    response:
+      array: # mock data
+        - timestamp: 1728507600
+          price: 6.9500
+        - timestamp: 1728511200
+          price: 58.6900
+        - timestamp: 1728514800
+          price: 45.6700
+        - timestamp: 1728518400
+          price: 24.9100
+        - timestamp: 1728522000
+          price: 12.8900
+        - timestamp: 1728525600
+          price: 14.2400
+        - timestamp: 1728529200
+          price: 38.8700
+        - timestamp: 1728532800
+          price: 61.6000
+        - timestamp: 1728536400
+          price: 86.7100
+        - timestamp: 1728540000
+          price: 80.4600
+        - timestamp: 1728543600
+          price: 67.5000
+        - timestamp: 1728547200
+          price: 24.9800
+        - timestamp: 1728550800
+          price: 24.7400
+        - timestamp: 1728554400
+          price: 21.8300
+        - timestamp: 1728558000
+          price: 15.9400
+        - timestamp: 1728561600
+          price: 19.7800
+        - timestamp: 1728565200
+          price: 20.1100
+        - timestamp: 1728568800
+          price: 17.9100
+        - timestamp: 1728572400
+          price: 70.0200
+        - timestamp: 1728576000
+          price: 70.0600
+        - timestamp: 1728579600
+          price: 27.0300
+        - timestamp: 1728583200
+          price: 6.1600
+        - timestamp: 1728586800
+          price: 3.3200
+        - timestamp: 1728590400
+          price: 0.0000
+  result: timePeriod
+  next: returnResult
+
+returnResult:
+  return: ${timePeriod.response.body.array}

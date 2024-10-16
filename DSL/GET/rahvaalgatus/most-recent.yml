@@ -1,0 +1,99 @@
+declaration:
+  call: declare
+  version: 0.1
+  description: get 5 most-recent active initiatives
+  method: get
+  returns: json
+  namespace: common-services
+
+prepareVariables:
+  assign:
+    order: "-occurredAt"
+    distinct: "initiativeId"
+    limit: "5"
+    rahvaalgatus: "https://rahvaalgatus.ee"
+    initiativeEventHeader: "application/vnd.rahvaalgatus.initiative-event+json; v=1"
+    initiativeHeader: "application/vnd.rahvaalgatus.initiative+json; v=1"
+  next: getEvents
+
+getEvents:
+  call: http.get
+  args:
+    url: "${rahvaalgatus}/initiative-events?order=${order}&distinct=${distinct}&limit=${limit}"
+    headers:
+      Accept: "${initiativeEventHeader}"
+  result: events
+  error: returnError
+  next: extractIds
+
+extractIds:
+  assign:
+    initiativeIds: ${events.response.body.map(event => event.initiativeId)}
+  next: getFirstEvent
+
+getFirstEvent:
+  call: http.get
+  args:
+    url: "${rahvaalgatus}/initiatives/${initiativeIds[0]}"
+    headers:
+      Accept: "${initiativeHeader}"
+  result: firstInitiative
+  error: returnError
+  next: getSecondEvent
+
+getSecondEvent:
+  call: http.get
+  args:
+    url: "${rahvaalgatus}/initiatives/${initiativeIds[1]}"
+    headers:
+      Accept: "${initiativeHeader}"
+  result: secondInitiative
+  error: returnError
+  next: getThirdEvent
+
+getThirdEvent:
+  call: http.get
+  args:
+    url: "${rahvaalgatus}/initiatives/${initiativeIds[2]}"
+    headers:
+      Accept: "${initiativeHeader}"
+  result: thirdInitiative
+  error: returnError
+  next: getFourthEvent
+
+getFourthEvent:
+  call: http.get
+  args:
+    url: "${rahvaalgatus}/initiatives/${initiativeIds[3]}"
+    headers:
+      Accept: "${initiativeHeader}"
+  result: fourthInitiative
+  error: returnError
+  next: getFifthEvent
+
+getFifthEvent:
+  call: http.get
+  args:
+    url: "${rahvaalgatus}/initiatives/${initiativeIds[4]}"
+    headers:
+      Accept: "${initiativeHeader}"
+  result: fifthInitiative
+  error: returnError
+  next: assignVariables2
+
+assignVariables2:
+  assign:
+    first: ${firstInitiative.response.body}
+    second: ${secondInitiative.response.body}
+    third: ${thirdInitiative.response.body}
+    fourth: ${fourthInitiative.response.body}
+    fifth: ${fifthInitiative.response.body}
+  next: returnResult
+
+returnResult:
+  return: ${[first, second, third, fourth, fifth]}
+  next: end
+
+returnError:
+  return: "Error: failed to get initiative details."
+  next: end

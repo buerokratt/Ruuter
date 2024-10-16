@@ -1,0 +1,13 @@
+{
+    "ariregistri_kood": {{ ariregistri_kood }},
+    "nimi": {{ nimi }},
+    "sidevahendid": [
+    {{#each yldandmed.sidevahendid.item }}
+        {
+            "liik": {{ liik }},
+            "sisu": {{ sisu }}
+        }{{#unless @last}},{{/unless}}
+    {{/each}}
+    ],
+    "text": "{{nimi}} firma telefon on {{#each yldandmed.sidevahendid.item}}{{#if (eq liik 'TEL')}}{{sisu}}{{/if}}{{/each}} ja email on {{#each yldandmed.sidevahendid.item}}{{#if (eq liik 'EMAIL')}}{{sisu}}{{/if}}{{/each}}"
+}

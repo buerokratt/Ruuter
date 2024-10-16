@@ -1,0 +1,30 @@
+<!--
+### Input example:
+{
+    "response": null
+}
+
+### Output example:
+{
+    "result": "Täna on tavaline päev"
+}
+
+
+### Input example:
+{
+    "response": {
+        "date": "2024-01-01",
+        "name": "uusaasta"
+    }
+}
+
+### Output example:
+    {
+        "result": "Täna on uusaasta"
+    }
+
+-->
+
+{
+    "result": "{{#if response}}Täna on {{response.name}}{{else}}Täna on tavaline päev{{/if}}"
+}

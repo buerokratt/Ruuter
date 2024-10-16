@@ -1,0 +1,29 @@
+<!--
+### Input example:
+{
+    "response": [
+        {
+            "date": "2024-12-24",
+            "name": "jõululaupäev"
+        },
+        {
+            "date": "2024-12-25",
+            "name": "esimene jõulupüha"
+        },
+        {
+            "date": "2024-12-26",
+            "name": "teine jõulupüha"
+        }
+    ]
+}
+
+### Output example:
+{
+  "result": "Kõik riigipühad alates tänsest kuni aasta lõpuni on: \n*2024-12-24\n jõululaupäev\n\n *2024-12-25\n esimene jõulupüha\n\n *2024-12-26\n teine jõulupüha\n\n"
+}
+
+-->
+
+{
+  "result": "Kõik riigipühad alates tänsest kuni aasta lõpuni on: \n{{#each response}}*{{date}}\n {{name}}\n\n{{#unless @last}} {{/unless}}{{/each}}"
+}

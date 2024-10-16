@@ -1,0 +1,42 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "Electricity Price Service"
+  description: |
+    This service fetches the Nordpool electricity prices for a user-specified date and returns the highest price.
+  method: get
+  params:
+    userDate: string  # yyyy-mm-dd format
+  returns: json
+
+# Prepare Dates based on userDate
+prepareDates:
+  assign:
+    userDate: ${incoming.params.userDate || new Date().toISOString().split('T')[0]}  # yyyy-mm-dd
+    startDateTime: ${new Date(new Date(userDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0] + "T21:00:00.000Z"}
+    endDateTime: ${userDate + "T20:59:59.000Z"}
+  next: getPriceForPeriod
+
+getPriceForPeriod:
+  call: http.get
+  args:
+    url: https://dashboard.elering.ee/api/nps/price
+    query:
+      start: ${startDateTime}
+      end: ${endDateTime}
+  result: eleringToday
+  next: assignVariables
+
+assignVariables:
+  assign:
+    maxPrice: ${eleringToday.response.body.data.ee.sort((a, b) => b.price - a.price)[0].price}  # get highest price
+    maxPriceTimestamp: ${eleringToday.response.body.data.ee.sort((a, b) => b.price - a.price)[0].timestamp}  # get timestamp for highest price
+
+    tallinnOffset: 10800  # Tallinn is UTC+3 during DST (3 hours in seconds)
+    adjustedTimestamp: ${maxPriceTimestamp + tallinnOffset} 
+    adjustedHour: ${Math.floor((adjustedTimestamp % 86400) / 3600)}
+    timeVar: ${("0" + adjustedHour).slice(-2) + ":00"}
+  next: returnResult
+
+returnResult:
+  return: ${[userDate, timeVar, maxPrice]}

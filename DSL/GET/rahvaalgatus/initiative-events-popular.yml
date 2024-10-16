@@ -1,0 +1,44 @@
+makeAPIRequest:
+  call: http.get
+  args:
+    url: "https://rahvaalgatus.ee/initiatives/"
+    query:
+      signedSince: ${new Date().getFullYear() + "-01-01"}
+      order: "-signatureCount"
+    headers:
+      accept: "application/vnd.rahvaalgatus.initiative+json; v=1"
+  result: eventsData
+  error: returnError
+  next: filterActiveInitiatives
+
+filterActiveInitiatives:
+  assign:
+    activeInitiatives: ${eventsData.response.body.filter(event => new Date(event.signingEndsAt) > new Date())}
+  next: formatResponse
+
+formatResponse:
+  assign:
+    details: |
+      Algatus - ${activeInitiatives[0].title}
+      Allkirjade arv - ${activeInitiatives[0].signatureCount}
+
+      Algatus - ${activeInitiatives[1].title}
+      Allkirjade arv - ${activeInitiatives[1].signatureCount}
+
+      Algatus- ${activeInitiatives[2].title}
+      Allkirjade arv - ${activeInitiatives[2].signatureCount}
+
+      Algatus - ${activeInitiatives[3].title}
+      Allkirjade arv - ${activeInitiatives[3].signatureCount}
+
+      Algatus - ${activeInitiatives[4].title}
+      Allkirjade arv - ${activeInitiatives[4].signatureCount}
+  next: returnResult
+
+returnResult:
+  return: ${"Hetkel populaarsemad rahvaalgatused. " + details}
+  next: end
+
+returnError:
+  return: "Error: failed to get initiative details."
+  next: end

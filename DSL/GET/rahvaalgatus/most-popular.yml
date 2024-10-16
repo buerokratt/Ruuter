@@ -1,0 +1,31 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "Most Popular Initiatives Service"
+  description: Provides information for 5 most-popular active initiavites
+  method: get
+  returns: json
+  namespace:  common-services
+
+prepareVariables:
+  assign:
+    phase: "sign"
+    signingEndsAt: "${new Date().toISOString()}"
+    order: "-signatureCount"
+    limit: "5"
+    rahvalagatus: "https://rahvaalgatus.ee"
+    acceptHeader: "application/vnd.rahvaalgatus.initiative+json; v=1"
+  next: getEvents
+
+getEvents:
+  call: http.get
+  args:
+    url: "${rahvalagatus}/initiatives?phase=${phase}&signingEndsAt>${signingEndsAt}&order=${order}&limit=${limit}"
+    headers:
+      Accept: "${acceptHeader}"
+  result: events
+  next: returnResult
+
+returnResult:
+  return: ${events.response.body}
+  next: end

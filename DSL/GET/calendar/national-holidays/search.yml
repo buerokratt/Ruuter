@@ -1,0 +1,100 @@
+# Assign incoming keyword/ tag for service endpoint
+prepare_parameters:
+  assign:
+    keyWord: ${incoming.params.keyword}
+  next: switchStep
+
+
+# Route based on keyword
+switchStep:
+  switch:
+    - condition: ${keyWord == "#prev_national_holiday"}
+      next: get_previous_national_holiday
+      
+    - condition: ${keyWord == "#next_national_holiday"}
+      next: get_next_national_holiday
+
+    - condition: ${keyWord == "#national_holidays_today"}
+      next: get_national_holidays_today
+      
+    - condition: ${keyWord == "#national_holidays_ytd"}
+      next: get_national_holidays_ytd
+
+    - condition: ${keyWord == "#national_holidays_eoy"}
+      next: get_national_holidays_eoy
+      
+    - condition: ${keyWord == "#national_holidays_by_name"}
+      next: get_national_holidays_by_name
+
+    - condition: ${keyWord == "#national_holidays_by_month"}
+      next: get_national_holidays_by_month
+      
+    - condition: ${keyWord == "#all_national_holidays"}
+      next: get_all_national_holidays
+
+    - condition: true # Default case
+      next: handle_unknown_keyword
+
+
+# Execute get request for applicable keyword/ tag
+get_previous_national_holiday:
+  requestType: get
+  template: "calendar/national-holidays/previous"
+  result: get_result
+  next: log_step
+
+get_next_national_holiday:
+  requestType: get
+  template: "calendar/national-holidays/next"
+  result: get_result
+  next: log_step
+
+get_national_holidays_today:
+  requestType: get
+  template: "calendar/national-holidays/today"
+  result: get_result
+  next: log_step
+
+get_national_holidays_ytd:
+  requestType: get
+  template: "calendar/national-holidays/ytd"
+  result: get_result
+  next: log_step
+
+get_national_holidays_eoy:
+  requestType: get
+  template: "calendar/national-holidays/eoy"
+  result: get_result
+  next: log_step
+
+get_national_holidays_by_name:
+  requestType: get
+  template: "calendar/national-holidays/find/by-name"
+  result: get_result
+  next: log_step
+
+get_national_holidays_by_month:
+  requestType: get
+  template: "calendar/national-holidays/find/by-month"
+  result: get_result
+  next: log_step
+
+get_all_national_holidays:
+  requestType: get
+  template: "calendar/national-holidays/all"
+  result: get_result
+  next: log_step
+
+
+
+# Default handler for unknown keyword
+handle_unknown_keyword:
+  log: "Received unknown keyword: ${keyWord}"
+
+# Log the result
+log_step:
+  log: "Response received: ${get_result}"
+  next: returnValue
+
+returnValue:
+  return: ${get_result}

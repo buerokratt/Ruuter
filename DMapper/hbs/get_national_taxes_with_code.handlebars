@@ -1,0 +1,10 @@
+{
+    "national_taxes": [
+    {{#each hits}}
+            {
+              "result": "{{ _source.national_taxes }}",
+              "name": "{{ _source.name }}"
+            }{{#unless @last}},{{/unless}}
+    {{/each}}
+    ]
+}

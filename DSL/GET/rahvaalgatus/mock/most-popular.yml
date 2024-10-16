@@ -1,0 +1,73 @@
+declaration:
+  call: declare
+  version: 0.1
+  description: MOCK - common-services - get 5 most-popular active initiavites
+  method: get
+  returns: json
+  namespace:  common-services
+
+prepareVariables:
+  assign:
+    phase: "sign"
+    signingEndsAt: "${new Date().toISOString()}"
+    order: "-signatureCount"
+    limit: "5"
+    rahvalagatus: "https://rahvaalgatus.ee"
+    acceptHeader: "application/vnd.rahvaalgatus.initiative-event+json; v=1"
+  next: getEvents
+
+getEvents:
+  call: reflect.mock
+  args:
+    request:
+      url: "${rahvalagatus}/initiatives?phase=${phase}&signingEndsAt>${signingEndsAt}&order=${order}&limit=${limit}"
+      headers:
+        Accept: ${acceptHeader}
+    response:
+      initiatives:
+      - id: "b358b3a7-a131-4bb4-9647-bc6e6c8c8044"
+        for: "parliament"
+        title: "Tasuta kõrghariduse säilitamine"
+        phase: "sign"
+        signingEndsAt: "2024-10-18T21:00:00.000Z"
+        signatureCount: 7242
+        signatureThreshold: 1000
+      - id: "4554e981-966c-4dd2-8c7e-fd283f536812"
+        for: "tallinn"
+        title: "Nõuame bussiliini nr. 24 säilimist Mäepealse-Kadaka-Rehe asumi marsruudil"
+        phase: "sign"
+        signingEndsAt: "2024-10-17T21:00:00.000Z"
+        signatureCount: 3114
+        signatureThreshold: 3518
+      - id: "bee4fb45-de03-4584-b168-33ea0fd014e1"
+        for: "tallinn"
+        title: "Pöördumine Tallinna volikogule Pärtel-Peeter Pere tagandamiseks"
+        phase: "sign"
+        signingEndsAt: "2024-10-26T21:00:00.000Z"
+        signatureCount: 1808
+        signatureThreshold: 3518
+      - id: "eb10ce05-b360-4cf4-96fe-e9f1f5fc6812"
+        for: "tallinn"
+        title: "Palume bussiliini nr. 61 säilimist marsruudil: Kotermaa-Astangu-Järveotsa tee-Väike-Õismäe-Tammsaare tee-Tervise-Lastehaigla-Järve haigla."
+        phase: "sign"
+        signingEndsAt: "2024-10-10T21:00:00.000Z"
+        signatureCount: 1751
+        signatureThreshold: 3518
+      - id: "77f4a769-f33f-45fa-88e9-6368d94d22c4"
+        for: "parliament"
+        title: "Lapsi toetav nutiseadmekasutuse reguleerimine Eesti koolidesse!"
+        phase: "sign"
+        signingEndsAt: "2025-02-24T22:00:00.000Z"
+        signatureCount: 1673
+        signatureThreshold: 1000
+  result: mostPopular
+  error: returnError
+  next: returnResult
+
+returnResult:
+  return: ${mostPopular.response.body.initiatives}
+  next: end
+
+returnError:
+  return: "Error: failed to get initiative details."
+  next: end

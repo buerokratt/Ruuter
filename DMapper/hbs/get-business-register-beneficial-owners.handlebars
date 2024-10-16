@@ -1,0 +1,18 @@
+{
+    "kasusaajad": [
+        {{#each kasusaajad.kasusaaja }}
+            {
+                "eesnimi": "{{ eesnimi }}",
+                "nimi": "{{ nimi }}",
+                "isikukood": "{{ isikukood }}",
+                "aadress_riik": "{{ aadress_riik }}",
+                "aadress_riik_tekstina": "{{ aadress_riik_tekstina }}",
+                "kontrolli_teostamise_viis": "{{ kontrolli_teostamise_viis }}",
+                "kontrolli_teostamise_viis_tekstina": "{{ kontrolli_teostamise_viis_tekstina }}",
+                "algus_kpv": "{{ algus_kpv }}",
+                "lahknevusteade_esitatud": "{{ lahknevusteade_esitatud }}"
+            }{{#unless @last}},{{/unless}}
+        {{/each}}
+    ],
+    "text": "Tegelikud kasusaajad- {{#each kasusaajad.kasusaaja}}{{#if @first}}{{else}}; {{/if}}{{eesnimi}} {{nimi}} elab riigis {{aadress_riik_tekstina}} ja kontrolli teostamise viis on {{kontrolli_teostamise_viis_tekstina}}{{/each}}."
+}

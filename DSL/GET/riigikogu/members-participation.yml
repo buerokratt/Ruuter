@@ -1,0 +1,62 @@
+# Service Declaration
+declaration:
+  call: declare
+  version: 0.1
+  name: Member Participation Statistics Service
+  description: A service that provides participation statistics for Riigikogu members.
+  method: get
+  returns: json
+  namespace: common-services
+
+prepareVariables:
+  assign:
+    currentDate: ${new Date().toISOString().split('T')[0]} # yyyy-mm-dd
+    endDate: ${ incoming.params.endDate || currentDate}
+    startDate: ${ incoming.params.startDate || new Date(new Date(endDate).setMonth(new Date(endDate).getMonth() - 1)).toISOString().split('T')[0] } # yyyy-mm-dd
+    lang: "ET"
+    memberName: ${incoming.params.memberName}
+  next: checkMember
+
+checkMember:
+  switch:
+    - condition: ${!memberName}
+      next: memberNotFound
+  next: makeAPIRequest
+
+makeAPIRequest:
+  call: http.get
+  args:
+    url: "https://api.riigikogu.ee/api/statistics/participations/plenary?endDate=${endDate}&startDate=${startDate}&lang=${lang}"
+    headers:
+      accept: "application/json"
+  result: kohaloluData
+  error: returnError
+  next: filterMember
+
+filterMember:
+  assign:
+    memberData: ${kohaloluData.response.body.find(member => member.fullName === memberName)}
+  next: checkMemberExists
+
+checkMemberExists:
+  switch:
+    - condition: ${memberData !== undefined && memberData !== null}
+      next: returnResult
+  next: memberNotFound
+
+assigReturnVariables:
+  assign:
+    
+  next: returnResult
+
+returnResult:
+  return: ${memberData.fullName + " on olnud perioodil " + startDate + " - " + endDate + " kohal " + memberData.participated + " korda ja puudunud " + memberData.absent + " korda."}
+  next: end
+
+memberNotFound:
+  return: "Error: Member not found."
+  next: end
+
+returnError:
+  return: "Error: failed to get participation data."
+  next: end

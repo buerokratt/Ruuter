@@ -1,0 +1,33 @@
+<!--
+### Input example:
+{
+    "response": [
+        {
+            "timestamp": 1727730000,
+            "price": 5.01
+        },
+        {
+            "timestamp": 1727733600,
+            "price": 3.21
+        },
+        ...
+    ]
+}
+
+### Output example:
+{
+    "result" : "Electricity prices from 2024-10-01 til 2024-10-14
+    * 2024-10-01 00:00 5.01 €/MWh
+    * 2024-10-01 01:00 3.21 €/MWh
+    * 2024-10-01 02:00 0.07 €/MWh
+    ...
+}
+-->
+
+{
+"response" : "Elektrihinnad alates {{startDate response}} kuni {{endDate response}}
+Hinnad €/MWh käibemaksuga
+{{#each response}}
+* {{formatTimestamp this.timestamp}} {{addVAT this.price}}
+{{/each}}"
+}

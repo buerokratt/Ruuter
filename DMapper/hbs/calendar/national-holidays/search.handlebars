@@ -1,0 +1,18 @@
+
+{{#if (eq tag "previous")}}
+  {{> get_national_holiday_previous}}
+{{else if (eq tag "next")}}
+  {{> get_national_holiday_next}}
+{{else if (eq tag "today")}}
+  {{> get_national_holiday_today}}
+{{else if (eq tag "ytd")}}
+  {{> get_national_holiday_ytd}}
+{{else if (eq tag "eoy")}}
+  {{> get_national_holiday_eoy}}
+{{else if (eq tag "by-name")}}
+  {{> get_national_holiday_by_name}}
+{{else if (eq tag "by-month")}}
+  {{> get_national_holiday_by_month}}
+{{else}}
+  {{> get_unknown}}
+{{/if}}

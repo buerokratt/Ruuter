@@ -1,0 +1,30 @@
+makeAPIRequest:
+  call: http.get
+  args:
+    url: "https://api.riigikogu.ee/api/votings/last?lang=ET"
+    headers:
+      accept: "application/json"
+  result: votingData
+  error: returnError
+  next: formatResponse
+
+formatResponse:
+  assign:
+    votingTitle: ${votingData.response.body.relatedDocument.title}
+    # link: ${votingData.response.body.relatedDocument._links.self.href}
+    # inFavor: ${votingData.response.body.inFavor}
+    # against: ${votingData.response.body.against}
+    # neutral: ${votingData.response.body.neutral}
+    # abstained: ${votingData.response.body.abstained}
+  next: returnResult
+
+returnResult:
+  return: 
+
+# returnResult:
+#   return: ${votingTitle + ". Poolt- " + inFavor + " Vastu- " + against + " Neutraalsed- " + neutral + " Ei hääletanud- " + abstained + "\n\n(" + link + ")"}
+#   next: end
+
+returnError:
+  return: "Error: failed to get recent votings data."
+  next: end

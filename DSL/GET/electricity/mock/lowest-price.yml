@@ -1,0 +1,94 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "MOCK - Electricity Price Service"
+  description: |
+    This service fetches the Nordpool electricity prices for a user-specified date.
+  method: get
+  params:
+    userTime: string  # yyyy-mm-dd format
+  returns: json
+
+# Prepare Dates based on userTime
+prepareDates:
+  assign:
+    userTime: ${incoming.params.userTime || new Date().toISOString().split('T')[0]}  # yyyy-mm-dd 
+    startDateTime: ${new Date(new Date(userTime).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0] + "T21:00:00.000Z"} # day before at 9am
+    endDateTime: ${userTime + "T20:59:59.000Z"} # chosen date at 9pm - default time format
+  next: getPriceForPeriod
+
+getPriceForPeriod:
+  call: reflect.mock
+  args:
+    request:
+      url: https://dashboard.elering.ee/api/nps/price
+      query:
+        start: ${startDateTime}
+        end: ${endDateTime}
+    response:
+        data:
+          ee: # mock data
+            - timestamp: 1728507600
+              price: 6.9500
+            - timestamp: 1728511200
+              price: 58.6900
+            - timestamp: 1728514800
+              price: 45.6700
+            - timestamp: 1728518400
+              price: 24.9100
+            - timestamp: 1728522000
+              price: 12.8900
+            - timestamp: 1728525600
+              price: 14.2400
+            - timestamp: 1728529200
+              price: 38.8700
+            - timestamp: 1728532800
+              price: 61.6000
+            - timestamp: 1728536400
+              price: 86.7100
+            - timestamp: 1728540000
+              price: 80.4600
+            - timestamp: 1728543600
+              price: 67.5000
+            - timestamp: 1728547200
+              price: 24.9800
+            - timestamp: 1728550800
+              price: 24.7400
+            - timestamp: 1728554400
+              price: 21.8300
+            - timestamp: 1728558000
+              price: 15.9400
+            - timestamp: 1728561600
+              price: 19.7800
+            - timestamp: 1728565200
+              price: 20.1100
+            - timestamp: 1728568800
+              price: 17.9100
+            - timestamp: 1728572400
+              price: 70.0200
+            - timestamp: 1728576000
+              price: 70.0600
+            - timestamp: 1728579600
+              price: 27.0300
+            - timestamp: 1728583200
+              price: 6.1600
+            - timestamp: 1728586800
+              price: 3.3200
+            - timestamp: 1728590400
+              price: 0.0000
+  result: eleringToday
+  next: assignVariables
+
+assignVariables:
+  assign:
+    minPrice: ${eleringToday.response.body.data.ee.sort((a, b) => a.price - b.price)[0].price} # get lowest price
+    minPriceTimestamp: ${eleringToday.response.body.data.ee.sort((a, b) => a.price - b.price)[0].timestamp} # get lowest timestamp
+
+    tallinnOffset: 10800  # Tallinn is UTC+3 during DST (3 hours in seconds)
+    adjustedTimestamp: ${minPriceTimestamp + tallinnOffset} 
+    adjustedHour: ${Math.floor((adjustedTimestamp % 86400) / 3600)}
+    timeVar: ${("0" + adjustedHour).slice(-2) + ":00"}
+  next: returnResult
+
+returnResult:
+  return: ${[userTime, timeVar, minPrice]}

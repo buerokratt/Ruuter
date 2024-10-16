@@ -1,0 +1,10 @@
+{
+    "work_force_taxes": [
+    {{#each hits}}
+            {
+              "result": "{{ _source.labor_taxes_and_payments }}",
+              "name": "{{ _source.name }}"
+            }{{#unless @last}},{{/unless}}
+    {{/each}}
+    ]
+}

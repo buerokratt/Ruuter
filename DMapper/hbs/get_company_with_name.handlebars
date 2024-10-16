@@ -1,0 +1,10 @@
+{
+    "companies": [
+    {{#each hits}}
+            {
+              "registry_code": "{{ _source.registry_code }}",
+              "name": "{{ _source.name }}"
+            }{{#unless @last}},{{/unless}}
+    {{/each}}
+    ]
+}

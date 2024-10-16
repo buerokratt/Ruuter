@@ -1,0 +1,10 @@
+{
+    "revenue": [
+    {{#each hits}}
+            {
+              "result": "{{ _source.turnover }}",
+              "name": "{{ _source.name }}"
+            }{{#unless @last}},{{/unless}}
+    {{/each}}
+    ]
+}

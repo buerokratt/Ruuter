@@ -1,0 +1,46 @@
+prepare:
+  assign:
+    searchTerm: "${incoming.params.month}"
+
+logStep:
+  log: "Search term (month): ${searchTerm}"
+
+makeApiCall:
+  call: reflect.mock
+  args:
+    url: "www.example.com"
+    response: 
+      holidays:
+        # --- Riigipühad ja puhkepäevad 2024 ---
+        - date: "2024-01-01"
+          name: "uusaasta"
+        - date: "2024-02-24"
+          name: "iseseisvuspäev, Eesti Vabariigi aastapäev"
+        - date: "2024-03-29"
+          name: "suur reede"
+        - date: "2024-03-31"
+          name: "ülestõusmispühade 1. püha"
+        - date: "2024-05-01"
+          name: "kevadpüha"
+        - date: "2024-05-19"
+          name: "nelipühade 1. püha"
+        - date: "2024-06-23"
+          name: "võidupüha"
+        - date: "2024-06-24"
+          name: "jaanipäev"
+        - date: "2024-08-20"
+          name: "taasiseseisvumispäev"
+        - date: "2024-12-24"
+          name: "jõululaupäev"
+        - date: "2024-12-25"
+          name: "esimene jõulupüha"
+        - date: "2024-12-26"
+          name: "teine jõulupüha"
+  result: holidayData
+
+filterHolidaysByMonth:
+  assign:
+    filteredHolidays: ${holidayData.response.body.holidays.filter(holiday => !isNaN(searchTerm) && parseInt(searchTerm) >= 1 && parseInt(searchTerm) <= 12 && (new Date(holiday.date).getMonth() + 1 === parseInt(searchTerm)))}
+
+returnValue:
+  return: ${filteredHolidays}

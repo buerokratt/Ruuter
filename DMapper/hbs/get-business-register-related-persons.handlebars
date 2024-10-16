@@ -1,0 +1,13 @@
+{
+    "seosed": [
+        {{#each seosed}}
+            {
+                "eesnimi": "{{ eesnimi }}",
+                "nimi_arinimi": "{{ nimi_arinimi }}",
+                "isiku_roll": "{{ isiku_roll }}",
+                "isiku_roll_tekstina": "{{ isiku_roll_tekstina }}"
+            }{{#unless @last}},{{/unless}}
+        {{/each}}
+    ],
+    "text": "{{#each seosed}}{{#if @first}}{{else}}; {{/if}}{{#if eesnimi}}{{eesnimi}} {{nimi_arinimi}}{{else}}{{nimi_arinimi}}{{/if}} on {{isiku_roll_tekstina}}{{/each}}."
+}
