@@ -32,7 +32,7 @@ public class HttpPostStep extends HttpStep {
             args.getContentType(),
             "plaintext".equals(args.getContentType()) ? args.getPlaintext() : null,
             getLimit(), di,
-            args.isDynamicParameters());
+            args.isDynamicParameters(),resultName != null && !resultName.isEmpty() );
     }
 
     @Override
