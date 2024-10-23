@@ -1,7 +1,18 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "Find Holidays Until End of Year"
+  description: |
+    This service returns all holidays from today's date until the end of the year, based on a mock API response of 2024 public holidays.
+  method: get
+  params: []
+  returns: json
+
 prepare:
   assign:
     today: ${new Date().toISOString().split("T")[0]}
     yearEnd: ${today.split("-")[0] + "-12-31"}
+  next: makeApiCall
 
 makeApiCall:
   call: reflect.mock
@@ -35,12 +46,23 @@ makeApiCall:
         - date: "2024-12-26"
           name: "teine jõulupüha"
   result: holiday_data
+  next: validateHolidaysEOY
 
 validateHolidaysEOY:
   assign:
     holidaysEOY: ${holiday_data.response.body.holidays
         .filter(holiday => holiday.date >= today && holiday.date <= yearEnd)
         .sort((a, b) => new Date(a.date) - new Date(b.date))}
+  next: formatResult
+
+formatResult:
+  requestType: post
+  template: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holiday_eoy"
+  body:
+    holidaysEOY: ${holidaysEOY}
+  result: formattedHolidays
+  next: returnValue
 
 returnValue:
-  return: ${holidaysEOY}
+  return: ${formattedHolidays}
+  next: end

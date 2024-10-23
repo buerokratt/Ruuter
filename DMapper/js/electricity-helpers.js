@@ -20,6 +20,7 @@ Handlebars.registerHelper('formatTimestamp', function(timestamp) {
 });
 
 Handlebars.registerHelper('addVAT', function(price) {
-    const total = price * 1.22;
+    const VAT = 1.22;
+    const total = price * VAT;
     return Math.round(total * 100) / 100; // Round to 2 decimal places
 });

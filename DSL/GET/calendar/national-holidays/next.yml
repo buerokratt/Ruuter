@@ -1,6 +1,17 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "Find Upcoming Holiday"
+  description: |
+    This service returns the next upcoming national holiday from today's date, using a mock API response of public holidays in 2024.
+  method: get
+  params: []
+  returns: json
+
 prepare:
   assign:
-    today: ${new Date().toISOString().split("T")[0]}
+    today: ${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}
+  next: makeApiCall
 
 makeApiCall:
   call: reflect.mock
@@ -34,11 +45,19 @@ makeApiCall:
         - date: "2024-12-26"
           name: "teine jõulupüha"
   result: holiday_data
+  next: validateHoliday
 
 validateHoliday:
   assign:
     upcomingHoliday: ${holiday_data.response.body.holidays
         .filter(holiday => holiday.date >= today).sort((a, b) => new Date(a.date) - new Date(b.date))[0]}
+  next: formatValue
+
+formatValue:
+  assign:
+    upcomingHoliday:
+      result: "Tulev riigipüha on ${upcomingHoliday.name} - ${upcomingHoliday.date}"
+  next: returnValue
 
 returnValue:
-  return: ${upcomingHoliday}
+  return: "${upcomingHoliday}"

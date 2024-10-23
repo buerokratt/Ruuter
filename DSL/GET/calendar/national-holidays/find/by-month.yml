@@ -1,9 +1,15 @@
-prepare:
-  assign:
-    searchTerm: "${incoming.params.month}"
+declaration:
+  name: "Holiday Filter by Month"
+  description: "Fetches and filters Estonian national holidays for a specified month in 2024."
+  parameters:
+    - month: "The month (1-12) for which to retrieve holidays."
+  method: "get"
+  return: "json"
 
-logStep:
-  log: "Search term (month): ${searchTerm}"
+prepare:
+  assign: # MM - month
+    searchTerm: "${incoming.params.month || (new Date().getMonth() + 1).toString()}" # default to current month - ex."10"/MM for october 
+  next: makeApiCall
 
 makeApiCall:
   call: reflect.mock
@@ -37,10 +43,53 @@ makeApiCall:
         - date: "2024-12-26"
           name: "teine jõulupüha"
   result: holidayData
+  next: filterHolidaysByMonth
 
 filterHolidaysByMonth:
   assign:
     filteredHolidays: ${holidayData.response.body.holidays.filter(holiday => !isNaN(searchTerm) && parseInt(searchTerm) >= 1 && parseInt(searchTerm) <= 12 && (new Date(holiday.date).getMonth() + 1 === parseInt(searchTerm)))}
+  next: checkHolidays
+
+checkHolidays:
+  switch:
+    - condition: ${filteredHolidays.length < 1}
+      next: holidayNotFound
+    - condition: ${filteredHolidays.length > 1}
+      next: formatValue
+    - condition: ${filteredHolidays.length === 1}
+      next: assignValue
+
+assignValue:
+  assign:
+    holiday:
+      result: "Antud kuus on ${filteredHolidays[0].name} - ${filteredHolidays[0].date}"
+  next: returnValue
+
+formatValue:
+  requestType: post
+  template: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holiday_by_month"
+  body:
+    filteredHolidays: ${filteredHolidays}
+  result: holiday
+  next: returnDMValue
 
 returnValue:
-  return: ${filteredHolidays}
+  return: ${holiday.result}
+  next: end
+
+returnDMValue:
+  return: ${holiday.result}
+  next: end
+
+#--------------------------------
+holidayNotFound:
+  assign:
+    noHoliday:
+      result: "Ei leia riigipühi antud kuus"
+  next: returnNoHolidays
+
+returnNoHolidays:
+  return: ${noHoliday}
+  next: end
+
+

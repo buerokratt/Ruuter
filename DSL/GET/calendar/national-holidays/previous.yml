@@ -1,6 +1,17 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "Find Previous Holiday"
+  description: |
+    This service returns the most recent national holiday before today's date, using a mock API response of public holidays in 2024.
+  method: get
+  params: []
+  returns: json
+
 prepare:
   assign:
     today: ${new Date().toISOString().split("T")[0]}
+  next: makeApiCall
 
 makeApiCall:
   call: reflect.mock
@@ -24,7 +35,7 @@ makeApiCall:
         - date: "2024-06-23"
           name: "võidupüha"
         - date: "2024-06-24"
-          name: "jaanipäev"
+          name: "jaanipäev" 
         - date: "2024-08-20"
           name: "taasiseseisvumispäev"
         - date: "2024-12-24"
@@ -34,12 +45,20 @@ makeApiCall:
         - date: "2024-12-26"
           name: "teine jõulupüha"
   result: holiday_data
+  next: validateHoliday
 
 validateHoliday:
   assign:
     previousHoliday: ${holiday_data.response.body.holidays
-        .filter(holiday => holiday.date < today).sort((a, b) => new Date(b.date) - new Date(a.date))[0]}  
+        .filter(holiday => holiday.date < today).sort((a, b) => new Date(b.date) - new Date(a.date))[0]}
+  next: formatValue
+
+formatValue:
+  assign:
+    previousHoliday:
+      result: "Viimane riigipüha oli ${previousHoliday.name} - ${previousHoliday.date}"
+  next: returnValue
 
 returnValue:
-  return: ${previousHoliday}
-
+  return: "${previousHoliday}"
+  next: end

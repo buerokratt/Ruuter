@@ -1,3 +1,13 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "Mock Holiday Data Service"
+  description: |
+    This service mocks a call to an API that returns nationa holidays in Estonia for the year 2024.
+  method: get
+  params: []
+  returns: json
+
 makeApiCall:
   call: reflect.mock
   args:
@@ -30,9 +40,19 @@ makeApiCall:
         - date: "2024-12-26"
           name: "teine jõulupüha"
   result: holidayData
+  next: formatResult
+
+formatResult:
+  requestType: post
+  template: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holidays"
+  body:
+    holidaysEOY: ${holidayData.response.body.holidays}
+  result: formattedHolidays
+  next: returnValue
 
 returnValue:
-  return: ${holidayData.response.body.holidays}
+  return: ${formattedHolidays}
+  next: end
 
         # # --- Riiklikud tähtpäevad 2024 ---
         # - date: "2024-01-06"

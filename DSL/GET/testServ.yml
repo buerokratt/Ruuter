@@ -1,0 +1,108 @@
+apiCall:
+  call: reflect.mock
+  args:
+    request:
+      url: https://www.reddit.com/r/javascript.json
+    response:
+      data:
+        sessions:
+          - uuid: "12951e8e-d7c5-4fe9-abf0-88c18b2097de"
+            votingNumber: 13445
+            type:
+              code: "AVALIK"
+              value: "Avalik"
+            description: "Tagasi lükkamine"
+            startDateTime: "2024-10-17T10:37:53.9"
+            endDateTime: "2024-10-17T10:38:13.89"
+            present: 54
+            absent: 47
+            inFavor: 35
+            against: 15
+            neutral: 0
+            abstained: 51 
+            relatedDraft:
+              uuid: "409b4550-4edb-414b-9367-12bc3828402f"
+              title: "Tsiviilkohtumenetluse seadustiku ja täitemenetluse seadustiku rakendamise seaduse muutmise seadus"
+              mark: 439
+              copyOrOriginal: "ORIGINAL"
+            sitting:
+              uuid: "e92afab7-065f-4730-b051-813dd765d613"
+              title: "Täiskogu korraline istung neljapäev, 17.10.2024 10:00"
+              volumeType: "plenarySittingVolume"
+              created: "2024-05-13T12:46:40.242"
+              copyOrOriginal: "ORIGINAL"
+            chairman:
+              uuid: "906f1a0a-0000-4a96-866c-b30f2b6adc49"
+              fullName: "Toomas Kivimägi"
+
+          - uuid: "409b4550-4edb-414b-9367-12bc3828402f"
+            votingNumber: 13444
+            type:
+              code: "AVALIK"
+              value: "Avalik"
+            description: "Seaduseelnõu vastuvõtmine"
+            startDateTime: "2024-10-17T10:10:00.1"
+            endDateTime: "2024-10-17T10:20:13.89"
+            present: 60
+            absent: 40
+            inFavor: 40
+            against: 10
+            neutral: 5
+            abstained: 5
+            relatedDraft:
+              uuid: "abcdefg-1234-5678-91011-121314151617"
+              title: "Eesti Vabariigi seadus nr 5"
+              mark: 501
+              copyOrOriginal: "ORIGINAL"
+            sitting:
+              uuid: "zxcvbnm-7654-3210-09876-543210123456"
+              title: "Täiskogu korraline istung esmaspäev, 17.10.2024 10:00"
+              volumeType: "plenarySittingVolume"
+              created: "2024-05-13T10:46:40.242"
+              copyOrOriginal: "ORIGINAL"
+            chairman:
+              uuid: "dfrty789-0000-4a96-866c-b30f2b6adc49"
+              fullName: "Jüri Ratas"
+  result: mockData
+  next: firstValue
+
+firstValue:
+  assign:
+    votes: ${mockData.response.body.data.sessions}
+    results:
+      - title: ${votes[0].relatedDraft.title}
+        inFavor: ${votes[0].inFavor}
+        against: ${votes[0].against}
+      - title: ${votes[1].relatedDraft.title}
+        inFavor: ${votes[1].inFavor}
+        against: ${votes[1].against}
+  next: return_value
+
+return_value:
+  return: ${results}
+
+
+
+formatResult:
+  assign:
+    results:
+      - title: ${sortedVotes[0].relatedDraft.title}
+        inFavor: ${sortedVotes[0].inFavor}
+        against: ${sortedVotes[0].against}
+      - title: ${sortedVotes[1].relatedDraft.title}
+        inFavor: ${sortedVotes[1].inFavor}
+        against: ${sortedVotes[1].against}
+      - title: ${sortedVotes[2].relatedDraft.title}
+        inFavor: ${sortedVotes[2].inFavor}
+        against: ${sortedVotes[2].against}
+      - title: ${sortedVotes[3].relatedDraft.title}
+        inFavor: ${sortedVotes[3].inFavor}
+        against: ${sortedVotes[3].against}
+      - title: ${sortedVotes[4].relatedDraft.title}
+        inFavor: ${sortedVotes[4].inFavor}
+        against: ${sortedVotes[4].against}
+  next: returnResult
+
+returnResult:
+  return: ${results}
+  next: end

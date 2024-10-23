@@ -1,2 +1,0 @@
-# to get information about members participation statistics
-## return: ${memberData.fullName + " on olnud " + currentYear + " aastal kohal " + memberData.participated + " korda ja puudunud " + memberData.absent + " korda."}

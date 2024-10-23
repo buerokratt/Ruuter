@@ -1,6 +1,17 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "Check Today's Holiday"
+  description: |
+    This service checks if today is a national holiday based on a mocked API response.
+  method: get
+  params: []
+  returns: json
+
 prepare:
   assign:
     today: ${new Date().toISOString().split("T")[0]}
+  next: makeApiCall
 
 makeApiCall:
   call: reflect.mock
@@ -34,10 +45,35 @@ makeApiCall:
         - date: "2024-12-26"
           name: "teine jõulupüha"
   result: holidayData
+  next: validateHoliday
 
 validateHoliday:
   assign:
     holiday: ${holidayData.response.body.holidays.find(holiday => holiday.date === today)}
+  next: checkHoliday
+
+checkHoliday:
+  switch:
+    - condition: ${!holiday}
+      next: holidayNotFound
+  next: formatValue
+
+formatValue:
+  assign:
+    holiday:
+      result: "Täna on ${holiday.name}"
+  next: returnValue
 
 returnValue:
   return: ${holiday}
+  next: end
+# -------------------------------------------------- 
+holidayNotFound:
+  assign:
+    noHoliday:
+      result: "Täna ei ole riigpüha."
+  next: returnNoValue
+
+returnNoValue:
+  return: ${noHoliday}
+  next: end

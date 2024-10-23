@@ -2,7 +2,236 @@ declaration:
   call: declare
   version: 0.1
   name: "MOCK - 5 most recent voting results service"
-  description: "Provides information for 5 most-recent voting results"
+  description: "Provides mock information for 5 most-recent voting results"
   method: get
   returns: json
-  namespace:  common-services
+  namespace: common-services
+
+prepareVariables:
+  assign:
+    offSet: 4
+    end: ${new Date().toISOString().split('T')[0]}
+    start: ${new Date(new Date(end).setDate(new Date(end).getDate() - offSet)).toISOString().split('T')[0]}
+  next: apiCall
+
+apiCall:
+  call: reflect.mock
+  args:
+    request:
+      url: https://api.riigikogu.ee/api/votings?endDate=${end}&lang=ET&startDate=${start}
+    response:
+      sessions:
+        - uuid: "41c34d49-90dc-4857-a353-b7bbb44ffcbd"
+          title: "Täiskogu korraline istung esmaspäev, 14.10.2024 15:00"
+          membership: 15
+          sittingDateTime: "2024-10-14T15:00:00"
+          votings:
+            - uuid: "bb40918a-712d-4d19-927f-596b11b8cb7b"
+              votingNumber: 13423
+              type:
+                code: "AVALIK"
+                value: "Avalik"
+              description: "Tagasi lükkamine"
+              startDateTime: "2024-10-14T19:44:24.163"
+              endDateTime: "2024-10-14T19:44:44.153"
+              present: 81
+              absent: 20
+              inFavor: 16
+              against: 43
+              abstained: 42
+              relatedDraft:
+                uuid: "70fd3a41-edf8-45c4-a6f9-629223a43198"
+                title: "Vabariigi Valitsuse seaduse muutmise seadus"
+                mark: 505
+
+        - uuid: "b9ecb904-68a4-4a36-bd29-b980be83af05"
+          title: "Täiskogu korraline istung teisipäev, 15.10.2024 10:00"
+          membership: 15
+          sittingDateTime: "2024-10-15T10:00:00"
+          votings:
+            - uuid: "f5c3a88b-21b1-41ef-b389-8c55cd9cf1c2"
+              votingNumber: 13433
+              type:
+                code: "AVALIK"
+                value: "Avalik"
+              description: "Tagasi lükkamine"
+              startDateTime: "2024-10-15T10:53:20.92"
+              endDateTime: "2024-10-15T10:53:40.91"
+              present: 84
+              absent: 17
+              inFavor: 25
+              against: 53
+              abstained: 23
+              relatedDraft:
+                uuid: "6eeb74d6-eb2e-46c9-89ec-fa3fa5b16cdf"
+                title: "2024. aasta riigieelarve seaduse muutmise seadus"
+                mark: 517
+
+        - uuid: "1477b4d0-86a5-48dd-8d81-6862e1e81c5b"
+          title: "Täiskogu korraline istung kolmapäev, 16.10.2024 14:00"
+          membership: 15
+          sittingDateTime: "2024-10-16T14:00:00"
+          votings:
+            - uuid: "9de20424-fd5b-44ec-af5f-08c7a527xya7"
+              votingNumber: 13436
+              type:
+                code: "AVALIK"
+                value: "Avalik"
+              description: "Tööaja pikendamine"
+              startDateTime: "2024-10-16T12:01:00.73"
+              endDateTime: "2024-10-16T12:01:20.72"
+              present: 85
+              absent: 16
+              inFavor: 47
+              against: 20
+              abstained: 34
+              relatedDraft:
+                uuid: "6eeb74d6-eb2e-46c9-89ec-fa3fa5b16gaf"
+                title: "Maksureformi seaduse eelnõu"
+                mark: 507
+
+        - uuid: "031ca4eb-aaa4-4555-afee-6c3a158ec605"
+          title: "Täiskogu korraline istung neljapäev, 17.10.2024 10:00"
+          membership: 15
+          sittingDateTime: "2024-10-17T10:00:00"
+          votings:
+            - uuid: "cf88ad9a-32c1-477e-9b96-0ee111e900ff"
+              votingNumber: 13440
+              type:
+                code: "AVALIK"
+                value: "Avalik"
+              description: "Eelarve seaduse vastuvõtmine"
+              startDateTime: "2024-10-17T10:10:00.473"
+              endDateTime: "2024-10-17T10:10:30.47"
+              present: 79
+              absent: 22
+              inFavor: 56
+              against: 18
+              abstained: 25
+              relatedDraft:
+                uuid: "37cbf645-e5d2-4cb8-b1f2-731e0ab4d258"
+                title: "Eelarve seaduse muudatus"
+                mark: 512
+
+        - uuid: "d9abdf55-48a3-4c1f-8433-b1110b8aa1cb"
+          title: "Täiskogu korraline istung reede, 18.10.2024 09:00"
+          membership: 15
+          sittingDateTime: "2024-10-18T09:00:00"
+          votings:
+            - uuid: "69aa24d5-a9d2-438d-a916-163adafd2e8c"
+              votingNumber: 13445
+              type:
+                code: "AVALIK"
+                value: "Avalik"
+              description: "Sotsiaalhoolekande seaduse muutmine"
+              startDateTime: "2024-10-18T09:30:00.112"
+              endDateTime: "2024-10-18T09:30:30.112"
+              present: 83
+              absent: 18
+              inFavor: 44
+              against: 35
+              abstained: 22
+              relatedDraft:
+                uuid: "50f3da9d-ed1a-486f-9933-47cccf7d5e3e"
+                title: "Sotsiaalhoolekande seaduse eelnõu"
+                mark: 528
+
+        - uuid: "3b7e2fdd-8139-41c2-8e23-a8e7fe5a4121"
+          title: "Infotund kolmapäev, 16.10.2024 12:00"
+          membership: 15
+          sittingDateTime: "2024-10-16T12:00:00"
+          votings:
+            - uuid: "cf88ad9a-32c1-477e-9b96-0ee111e900ff"
+              votingNumber: 13420
+              type:
+                code: "KOHALOLEKU_KONTROLL"
+                value: "Kohaloleku kontroll"
+              description: "Kohaloleku kontroll"
+              startDateTime: "2024-10-16T12:01:00.473"
+              endDateTime: "2024-10-16T12:01:30.47"
+              present: 72
+              absent: 29
+              relatedDraft: null
+  error: requestError
+  result: mockData
+  next: votingDataFormatting
+
+votingDataFormatting:
+  assign:
+    recentVotings: ${mockData.response.body.sessions}
+    votingDetails: ${recentVotings.flatMap(session => session.votings)
+      .filter(voting => voting.type.value === "Avalik" && voting.relatedDraft)
+      .sort((voting1, voting2) => new Date(voting2.startDateTime) - new Date(voting1.startDateTime)).slice(0, 5)}  # Take the first 5 items
+  # error: dataFormattingError
+  next: returnResults
+
+returnResults:
+  return: ${"Viimased viis Riigikogu hääletust- " +
+           votingDetails[0].relatedDraft.title + 
+           ". Kohal-" + votingDetails[0].present + 
+           ". Puudus-" + votingDetails[0].absent + 
+           ". Poolt-" + votingDetails[0].inFavor + 
+           ". Vastu-" + votingDetails[0].against + 
+           ". Erapooletu-" + votingDetails[0].neutral + 
+           ". Erapooletuks jäi-" + votingDetails[0].abstained + 
+           ". " + votingDetails[1].relatedDraft.title + 
+           ". Kohal-" + votingDetails[1].present + 
+           ". Puudus-" + votingDetails[1].absent + 
+           ". Poolt-" + votingDetails[1].inFavor + 
+           ". Vastu-" + votingDetails[1].against + 
+           ". Erapooletu-" + votingDetails[1].neutral + 
+           ". Erapooletuks jäi-" + votingDetails[1].abstained + 
+           ". " + votingDetails[2].relatedDraft.title + 
+           ". Kohal-" + votingDetails[2].present + 
+           ". Puudus-" + votingDetails[2].absent + 
+           ". Poolt-" + votingDetails[2].inFavor + 
+           ". Vastu-" + votingDetails[2].against + 
+           ". Erapooletu-" + votingDetails[2].neutral + 
+           ". Erapooletuks jäi-" + votingDetails[2].abstained + 
+           ". " + votingDetails[3].relatedDraft.title + 
+           ". Kohal-" + votingDetails[3].present + 
+           ". Puudus-" + votingDetails[3].absent + 
+           ". Poolt-" + votingDetails[3].inFavor + 
+           ". Vastu-" + votingDetails[3].against + 
+           ". Erapooletu-" + votingDetails[3].neutral + 
+           ". Erapooletuks jäi-" + votingDetails[3].abstained + 
+           ". " + votingDetails[4].relatedDraft.title + 
+           ". Kohal-" + votingDetails[4].present + 
+           ". Puudus-" + votingDetails[4].absent + 
+           ". Poolt-" + votingDetails[4].inFavor + 
+           ". Vastu-" + votingDetails[4].against + 
+           ". Erapooletu-" + votingDetails[4].neutral + 
+           ". Erapooletuks jäi-" + votingDetails[4].abstained}
+  next: end
+
+requestError:
+  return: "Error: failed to get last 5 votings data."
+  next: end
+
+dataFormattingError:
+  return: "Error: failed to format voting data"
+  next: end
+
+assignResultsError:
+  return: "Error: failed to assign results"
+  next: end
+
+# assignResults: # will probably not be needed
+#   assign:
+#     results:
+#       - title: ${recentVotings.sessions[0].relatedDraft.title}
+#         present: ${recentVotings.sessions[0].present}
+#         absent: ${recentVotings.sessions[0].absent}
+#         inFavor: ${recentVotings.sessions[0].inFavor}
+#         against: ${recentVotings.sessions[0].against}
+#         neutral: ${recentVotings.sessions[0].neutral}
+#         abstained: ${recentVotings.sessions[0].abstained}
+#       - title: ${recentVotings.sessions[1].relatedDraft.title}
+#         present: ${recentVotings.sessions[1].present}
+#         absent: ${recentVotings.sessions[1].absent}
+#         inFavor: ${recentVotings.sessions[1].inFavor}
+#         against: ${recentVotings.sessions[1].against}
+#         neutral: ${recentVotings.sessions[1].neutral}
+#         abstained: ${recentVotings.sessions[1].abstained}
+#   error: assignResultsError
+#   next: returnResults
