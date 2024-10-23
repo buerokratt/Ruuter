@@ -1,0 +1,71 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "MOCK - Filter Holidays Year-to-Date"
+  description: |
+    This mock service filters holidays for the current year-to-date from a mocked API response.
+  method: get
+  params: []
+  returns: json
+
+prepare:
+  assign:
+    today: "2024-10-10" #${new Date().toISOString().split("T")[0]}
+    yearStart: ${today.split("-")[0] + "-01-01"}
+  next: makeApiCall
+
+makeApiCall:
+  call: reflect.mock
+  args:
+    url: "www.example.com"
+    response: 
+      holidays:
+        # --- Riigipühad ja puhkepäevad 2024 ---
+        - date: "2024-01-01"
+          name: "uusaasta"
+        - date: "2024-02-24"
+          name: "iseseisvuspäev, Eesti Vabariigi aastapäev"
+        - date: "2024-03-29"
+          name: "suur reede"
+        - date: "2024-03-31"
+          name: "ülestõusmispühade 1. püha"
+        - date: "2024-05-01"
+          name: "kevadpüha"
+        - date: "2024-05-19"
+          name: "nelipühade 1. püha"
+        - date: "2024-06-23"
+          name: "võidupüha"
+        - date: "2024-06-24"
+          name: "jaanipäev"
+        - date: "2024-08-20"
+          name: "taasiseseisvumispäev"
+        - date: "2024-12-24"
+          name: "jõululaupäev"
+        - date: "2024-12-25"
+          name: "esimene jõulupüha"
+        - date: "2024-12-26"
+          name: "teine jõulupüha"
+  result: holidayData
+  next: validateHolidaysYTD
+
+validateHolidaysYTD:
+  assign:
+    holidaysYTD: ${holidayData.response.body.holidays
+        .filter(holiday => holiday.date >= yearStart && holiday.date <= today)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))}
+  next: formatResult
+
+formatResult:
+  call: reflect.mock
+  args:
+    url: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holiday_ytd"
+    body:
+      holidaysYTD: ${holidaysYTD}
+    response:
+      result: "Kõik pühad aasta algusest kuni tänaseni:\n* 2024-01-01\nuusaasta\n\n* 2024-02-24\niseseisvuspäev, Eesti Vabariigi aastapäev\n\n* 2024-03-29\nsuur reede\n\n* 2024-03-31\nülestõusmispühade 1. püha\n\n* 2024-05-01\nkevadpüha\n\n* 2024-05-19\nnelipühade 1. püha\n\n* 2024-06-23\nvõidupüha\n\n* 2024-06-24\njaanipäev\n\n* 2024-08-20\ntaasiseseisvumispäev\n"
+  result: formattedHolidays
+  next: returnValue
+
+returnValue:
+  return: ${formattedHolidays.response.body}
+  next: end

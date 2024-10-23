@@ -1,7 +1,7 @@
 declaration:
   call: declare
   version: 0.1
-  name: "Mock Holiday Data Service"
+  name: "All Estonian National Holidays Data Service"
   description: |
     This service mocks a call to an API that returns nationa holidays in Estonia for the year 2024.
   method: get

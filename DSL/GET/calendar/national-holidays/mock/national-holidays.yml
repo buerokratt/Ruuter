@@ -1,0 +1,58 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "MOCK - All Estonian National Holidays Data Service"
+  description: |
+    This service mocks a call to an API that returns nationa holidays in Estonia for the year 2024.
+  method: get
+  params: []
+  returns: json
+
+makeApiCall:
+  call: reflect.mock
+  args:
+    url: "www.example.com"
+    response: 
+      holidays:
+        # --- Riigipühad ja puhkepäevad 2024 ---
+        - date: "2024-01-01"
+          name: "uusaasta"
+        - date: "2024-02-24"
+          name: "iseseisvuspäev, Eesti Vabariigi aastapäev"
+        - date: "2024-03-29"
+          name: "suur reede"
+        - date: "2024-03-31"
+          name: "ülestõusmispühade 1. püha"
+        - date: "2024-05-01"
+          name: "kevadpüha"
+        - date: "2024-05-19"
+          name: "nelipühade 1. püha"
+        - date: "2024-06-23"
+          name: "võidupüha"
+        - date: "2024-06-24"
+          name: "jaanipäev"
+        - date: "2024-08-20"
+          name: "taasiseseisvumispäev"
+        - date: "2024-12-24"
+          name: "jõululaupäev"
+        - date: "2024-12-25"
+          name: "esimene jõulupüha"
+        - date: "2024-12-26"
+          name: "teine jõulupüha"
+  result: holidayData
+  next: formatResult
+
+formatResult:
+  call: reflect.mock
+  args:
+    url: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holidays"
+    body:
+      holidaysYTD: ${holidaysYTD}
+    response:
+      result: "Kõik pühad sellel aastal on:\n* 2024-01-01\nuusaasta\n\n* 2024-02-24\niseseisvuspäev, Eesti Vabariigi aastapäev\n\n* 2024-03-29\nsuur reede\n\n* 2024-03-31\nülestõusmispühade 1. püha\n\n* 2024-05-01\nkevadpüha\n\n* 2024-05-19\nnelipühade 1. püha\n\n* 2024-06-23\nvõidupüha\n\n* 2024-06-24\njaanipäev\n\n* 2024-08-20\ntaasiseseisvumispäev\n\n* 2024-12-24\njõululaupäev\n\n* 2024-12-25\nesimene jõulupüha\n\n* 2024-12-26\nteine jõulupüha\n\n"
+  result: formattedHolidays
+  next: returnValue
+
+returnValue:
+  return: ${formattedHolidays.response.body}
+  next: end

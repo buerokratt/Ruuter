@@ -1,0 +1,95 @@
+declaration:
+  name: "MOCK - Holiday Filter by Month"
+  description: "Fetches and filters Estonian national holidays for a specified month in 2024."
+  method: "get"
+  return: "json"
+
+prepare:
+  assign: # MM - month
+    searchTerm: "06" #"${incoming.params.month || (new Date().getMonth() + 1).toString()}" # default to current month - ex."10"/MM for october 
+  next: makeApiCall
+
+makeApiCall:
+  call: reflect.mock
+  args:
+    url: "www.example.com"
+    response: 
+      holidays:
+        # --- Riigipühad ja puhkepäevad 2024 ---
+        - date: "2024-01-01"
+          name: "uusaasta"
+        - date: "2024-02-24"
+          name: "iseseisvuspäev, Eesti Vabariigi aastapäev"
+        - date: "2024-03-29"
+          name: "suur reede"
+        - date: "2024-03-31"
+          name: "ülestõusmispühade 1. püha"
+        - date: "2024-05-01"
+          name: "kevadpüha"
+        - date: "2024-05-19"
+          name: "nelipühade 1. püha"
+        - date: "2024-06-23"
+          name: "võidupüha"
+        - date: "2024-06-24"
+          name: "jaanipäev"
+        - date: "2024-08-20"
+          name: "taasiseseisvumispäev"
+        - date: "2024-12-24"
+          name: "jõululaupäev"
+        - date: "2024-12-25"
+          name: "esimene jõulupüha"
+        - date: "2024-12-26"
+          name: "teine jõulupüha"
+  result: holidayData
+  next: filterHolidaysByMonth
+
+filterHolidaysByMonth:
+  assign:
+    filteredHolidays: ${holidayData.response.body.holidays.filter(holiday => !isNaN(searchTerm) && parseInt(searchTerm) >= 1 && parseInt(searchTerm) <= 12 && (new Date(holiday.date).getMonth() + 1 === parseInt(searchTerm)))}
+  next: checkHolidays
+
+checkHolidays:
+  switch:
+    - condition: ${filteredHolidays.length < 1}
+      next: holidayNotFound
+    - condition: ${filteredHolidays.length > 1}
+      next: formatResult
+    - condition: ${filteredHolidays.length === 1}
+      next: assignValue
+  next: assignValue
+
+assignValue:
+  assign:
+    holiday:
+      result: "Antud kuus on ${filteredHolidays[0].name} - ${filteredHolidays[0].date}"
+  next: returnValue
+
+formatResult:
+  call: reflect.mock
+  args:
+    url: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holiday_by_month"
+    response:
+      result: "Kõik riigipühad antud kuus on: \n*2024-06-23\n võidupüha\n\n*2024-06-24\n jaanipäev\n\n"
+  result: holiday
+  next: returnValue
+
+returnValue:
+  return: ${holiday.response.body}
+  next: end
+
+returnDMValue:
+  return: ${holiday.result}
+  next: end
+
+#--------------------------------
+holidayNotFound:
+  assign:
+    noHoliday:
+      result: "Ei leia riigipühi antud kuus"
+  next: returnNoHolidays
+
+returnNoHolidays:
+  return: ${noHoliday}
+  next: end
+
+

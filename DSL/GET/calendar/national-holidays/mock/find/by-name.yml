@@ -1,0 +1,85 @@
+declaration:
+  call: declare
+  version: 0.1
+  name: "MOCK - Holiday Search Service"
+  description: "Searches for a national holiday by name in the 2024 calendar"
+  method: get
+  returns: json
+
+prepare:
+  # Assign incoming 'name' parameter to 'searchTerm'
+  assign:
+    searchTerm: "${incoming.params.name || 'uusaasta'}" # default to 'uusaasta'
+  next: makeApiCall
+
+makeApiCall:
+  # Mock API call returning 2024 holidays
+  call: reflect.mock
+  args:
+    url: "www.example.com"
+    response: 
+      holidays:
+        # List of holidays
+        - date: "2024-01-01"
+          name: "uusaasta"
+        - date: "2024-02-24"
+          name: "iseseisvuspäev, Eesti Vabariigi aastapäev"
+        - date: "2024-03-29"
+          name: "suur reede"
+        - date: "2024-03-31"
+          name: "ülestõusmispühade 1. püha"
+        - date: "2024-05-01"
+          name: "kevadpüha"
+        - date: "2024-05-19"
+          name: "nelipühade 1. püha"
+        - date: "2024-06-23"
+          name: "võidupüha"
+        - date: "2024-06-24"
+          name: "jaanipäev"
+        - date: "2024-08-20"
+          name: "taasiseseisvumispäev"
+        - date: "2024-12-24"
+          name: "jõululaupäev"
+        - date: "2024-12-25"
+          name: "esimene jõulupüha"
+        - date: "2024-12-26"
+          name: "teine jõulupüha"
+  result: holidayData
+  next: filterHolidaysByName
+
+filterHolidaysByName:
+  # Filter holidays by 'searchTerm'
+  assign:
+    filteredHolidays: ${holidayData.response.body.holidays.filter(holiday => holiday.name.toLowerCase().includes(searchTerm.toLowerCase()))}
+  next: checkHoliday
+
+checkHoliday:
+  # Check if no holidays match
+  switch:
+    - condition: ${filteredHolidays.length < 1}
+      next: holidayNotFound
+  next: formatValue
+
+formatValue:
+  # Capitalize and format result
+  assign:
+    holiday:
+      result: "${filteredHolidays[0].name.charAt(0).toUpperCase() + filteredHolidays[0].name.slice(1)} on ${filteredHolidays[0].date}"
+  next: returnValue
+
+returnValue:
+  # Return holiday result
+  return: ${holiday}
+  next: end
+
+holidayNotFound:
+  # Default message if no holiday found
+  assign:
+    noHoliday:
+      result: "Ei leia sellist riigipüha"
+  next: returnNoValue 
+
+returnNoValue:
+  # Return no-holiday message
+  return: ${noHoliday}
+  next: end
