@@ -10,6 +10,8 @@ declaration:
 
 prepare:
   assign:
+    chatId: ${incoming.body.chatId}
+    authorId: ${incoming.body.authorId}
     today: ${new Date().toISOString().split("T")[0]}
     yearEnd: ${today.split("-")[0] + "-12-31"}
   next: makeApiCall
@@ -45,24 +47,49 @@ makeApiCall:
           name: "esimene jõulupüha"
         - date: "2024-12-26"
           name: "teine jõulupüha"
-  result: holiday_data
+  result: holidayData
   next: validateHolidaysEOY
 
 validateHolidaysEOY:
   assign:
-    holidaysEOY: ${holiday_data.response.body.holidays
+    holidaysEOY: ${holidayData.response.body.holidays
         .filter(holiday => holiday.date >= today && holiday.date <= yearEnd)
         .sort((a, b) => new Date(a.date) - new Date(b.date))}
   next: formatResult
 
 formatResult:
-  requestType: post
-  template: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holiday_eoy"
-  body:
-    holidaysEOY: ${holidaysEOY}
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services/hbs/calendar/national-holidays/get_national_holiday_eoy"
+    body:
+      data: ${holidaysEOY}
   result: formattedHolidays
-  next: returnValue
+  next: assignResponse
 
-returnValue:
-  return: ${formattedHolidays}
-  next: end
+assignResponse:
+  assign:
+    res: ${formattedHolidays.response.body}
+  next: formatMessages
+
+# format throgh DM bot response to messages
+formatMessages:
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services/hbs/bot_responses_to_messages"
+    headers:
+      type: json
+    body:
+      data:
+        {
+          "botMessages": "${[res]}",
+          "chatId": "${chatId}",
+          "authorId": "${authorId}",
+          "authorFirstName": "",
+          "authorLastName": "",
+          "authorTimestamp": "${new Date().toISOString()}",
+          "created": "${new Date().toISOString()}",
+        }
+  result: formatMessage
+
+return_result:
+  return: ${formatMessage.response.body}

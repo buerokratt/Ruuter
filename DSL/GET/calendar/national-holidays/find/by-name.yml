@@ -9,7 +9,9 @@ declaration:
 prepare:
   # Assign incoming 'name' parameter to 'searchTerm'
   assign:
-    searchTerm: "${incoming.params.name || 'uusaasta'}"
+    chatId: ${incoming.body.chatId}
+    authorId: ${incoming.body.authorId}
+    searchTerm: "${incoming.body.input}"
   next: makeApiCall
 
 makeApiCall:
@@ -48,9 +50,8 @@ makeApiCall:
   next: filterHolidaysByName
 
 filterHolidaysByName:
-  # Filter holidays by 'searchTerm'
   assign:
-    filteredHolidays: ${holidayData.response.body.holidays.filter(holiday => holiday.name.toLowerCase().includes(searchTerm.toLowerCase()))}
+    filteredHolidays: ${holidayData.response.body.holidays.filter(holiday => holiday.name.toLowerCase().includes(searchTerm[0].toLowerCase()))}
   next: checkHoliday
 
 checkHoliday:
@@ -60,26 +61,34 @@ checkHoliday:
       next: holidayNotFound
   next: formatValue
 
-formatValue:
-  # Capitalize and format result
-  assign:
-    holiday:
-      result: "${filteredHolidays[0].name.charAt(0).toUpperCase() + filteredHolidays[0].name.slice(1)} on ${filteredHolidays[0].date}"
-  next: returnValue
-
-returnValue:
-  # Return holiday result
-  return: ${holiday}
-  next: end
-
 holidayNotFound:
-  # Default message if no holiday found
   assign:
-    noHoliday:
-      result: "Ei leia sellist riigipüha"
-  next: returnNoValue 
+    res: "Ei leia sellist riigipüha"
+  next: formatMessages 
 
-returnNoValue:
-  # Return no-holiday message
-  return: ${noHoliday}
-  next: end
+formatValue:
+  assign:
+    res: "${filteredHolidays[0].name.charAt(0).toUpperCase() + filteredHolidays[0].name.slice(1)} on ${filteredHolidays[0].date}"
+  next: formatMessages
+
+formatMessages:
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services/hbs/bot_responses_to_messages"
+    headers:
+      type: json
+    body:
+      data:
+        {
+          "botMessages": "${[res]}",
+          "chatId": "${chatId}",
+          "authorId": "${authorId}",
+          "authorFirstName": "",
+          "authorLastName": "",
+          "authorTimestamp": "${new Date().toISOString()}",
+          "created": "${new Date().toISOString()}",
+        }
+  result: formatMessage
+
+return_result:
+  return: ${formatMessage.response.body}

@@ -8,7 +8,9 @@ declaration:
 
 prepare:
   assign: # MM - month
-    searchTerm: "${incoming.params.month || (new Date().getMonth() + 1).toString()}" # default to current month - ex."10"/MM for october 
+    chatId: ${incoming.body.chatId}
+    authorId: ${incoming.body.authorId}
+    searchTerm: "${incoming.body.input || [(new Date().getMonth() + 1).toString()]}" # default to current month - ex."10"/MM for october 
   next: makeApiCall
 
 makeApiCall:
@@ -47,49 +49,63 @@ makeApiCall:
 
 filterHolidaysByMonth:
   assign:
-    filteredHolidays: ${holidayData.response.body.holidays.filter(holiday => !isNaN(searchTerm) && parseInt(searchTerm) >= 1 && parseInt(searchTerm) <= 12 && (new Date(holiday.date).getMonth() + 1 === parseInt(searchTerm)))}
+    filteredHolidays: ${holidayData.response.body.holidays.filter(holiday => !isNaN(searchTerm[0]) && parseInt(searchTerm[0]) >= 1 && parseInt(searchTerm[0]) <= 12 && (new Date(holiday.date).getMonth() + 1 === parseInt(searchTerm[0])))}
   next: checkHolidays
 
 checkHolidays:
   switch:
     - condition: ${filteredHolidays.length < 1}
       next: holidayNotFound
+    - condition: ${filteredHolidays.length === 1}
+      next: assignSingleValue
     - condition: ${filteredHolidays.length > 1}
       next: formatValue
-    - condition: ${filteredHolidays.length === 1}
-      next: assignValue
 
-assignValue:
-  assign:
-    holiday:
-      result: "Antud kuus on ${filteredHolidays[0].name} - ${filteredHolidays[0].date}"
-  next: returnValue
-
-formatValue:
-  requestType: post
-  template: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holiday_by_month"
-  body:
-    filteredHolidays: ${filteredHolidays}
-  result: holiday
-  next: returnDMValue
-
-returnValue:
-  return: ${holiday.result}
-  next: end
-
-returnDMValue:
-  return: ${holiday.result}
-  next: end
-
-#--------------------------------
 holidayNotFound:
   assign:
-    noHoliday:
-      result: "Ei leia riigipühi antud kuus"
-  next: returnNoHolidays
+    res: "Ei leia riigipühi antud kuus"
+  next: formatMessages
 
-returnNoHolidays:
-  return: ${noHoliday}
+assignSingleValue:
+  assign:
+    res: "Antud kuus on ${filteredHolidays[0].name} - ${filteredHolidays[0].date}"
+  next: formatMessages
+
+formatValue:
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services//hbs/calendar/national-holidays/get_national_holiday_by_month"
+    body:
+      data: ${filteredHolidays}
+  result: holiday
+  next: assignResponse
+
+assignResponse:
+  assign:
+    res: ${holiday.response.body}
+  next: formatMessages
+
+# format throgh DM bot response to messages
+formatMessages:
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services/hbs/bot_responses_to_messages"
+    headers:
+      type: json
+    body:
+      data:
+        {
+          "botMessages": "${[res]}",
+          "chatId": "${chatId}",
+          "authorId": "${authorId}",
+          "authorFirstName": "",
+          "authorLastName": "",
+          "authorTimestamp": "${new Date().toISOString()}",
+          "created": "${new Date().toISOString()}",
+        }
+  result: formatMessage
+  next: return_result
+
+return_result:
+  return: ${formatMessage.response.body}
   next: end
-
-

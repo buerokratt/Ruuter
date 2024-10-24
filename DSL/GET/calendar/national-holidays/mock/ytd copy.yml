@@ -1,18 +1,16 @@
 declaration:
   call: declare
   version: 0.1
-  name: "Filter Holidays Year-to-Date"
+  name: "MOCK - Filter Holidays Year-to-Date"
   description: |
-    This service filters  holidays for the current year-to-date from a mocked API response.
+    This mock service filters holidays for the current year-to-date from a mocked API response.
   method: get
   params: []
   returns: json
 
 prepare:
   assign:
-    chatId: ${incoming.body.chatId}
-    authorId: ${incoming.body.authorId}
-    today: ${new Date().toISOString().split("T")[0]}
+    today: "2024-10-10" #${new Date().toISOString().split("T")[0]}
     yearStart: ${today.split("-")[0] + "-01-01"}
   next: makeApiCall
 
@@ -58,38 +56,16 @@ validateHolidaysYTD:
   next: formatResult
 
 formatResult:
-  call: http.post
+  call: reflect.mock
   args:
-    url: "[#DMAPPER]/common-services/hbs/calendar/national-holidays/get_national_holiday_ytd"
+    url: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holiday_ytd"
     body:
-      data: ${holidaysYTD}
+      holidaysYTD: ${holidaysYTD}
+    response:
+      result: "Kõik pühad aasta algusest kuni tänaseni:\n* 2024-01-01\nuusaasta\n\n* 2024-02-24\niseseisvuspäev, Eesti Vabariigi aastapäev\n\n* 2024-03-29\nsuur reede\n\n* 2024-03-31\nülestõusmispühade 1. püha\n\n* 2024-05-01\nkevadpüha\n\n* 2024-05-19\nnelipühade 1. püha\n\n* 2024-06-23\nvõidupüha\n\n* 2024-06-24\njaanipäev\n\n* 2024-08-20\ntaasiseseisvumispäev\n"
   result: formattedHolidays
-  next: assignResponse
+  next: returnValue
 
-assignResponse:
-  assign:
-    res: ${formattedHolidays.response.body}
-  next: formatMessages
-
-# format throgh DM bot response to messages
-formatMessages:
-  call: http.post
-  args:
-    url: "[#DMAPPER]/common-services/hbs/bot_responses_to_messages"
-    headers:
-      type: json
-    body:
-      data:
-        {
-          "botMessages": "${[res]}",
-          "chatId": "${chatId}",
-          "authorId": "${authorId}",
-          "authorFirstName": "",
-          "authorLastName": "",
-          "authorTimestamp": "${new Date().toISOString()}",
-          "created": "${new Date().toISOString()}",
-        }
-  result: formatMessage
-
-return_result:
-  return: ${formatMessage.response.body}
+returnValue:
+  return: ${formattedHolidays.response.body}
+  next: end

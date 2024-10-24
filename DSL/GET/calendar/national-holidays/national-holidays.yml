@@ -1,12 +1,18 @@
 declaration:
   call: declare
   version: 0.1
-  name: "All Estonian National Holidays Data Service"
+  name: "Mock Holiday Data Service"
   description: |
     This service mocks a call to an API that returns nationa holidays in Estonia for the year 2024.
   method: get
   params: []
   returns: json
+
+prepare:
+  assign:
+    chatId: ${incoming.body.chatId}
+    authorId: ${incoming.body.authorId}
+  next: makeApiCall
 
 makeApiCall:
   call: reflect.mock
@@ -43,87 +49,37 @@ makeApiCall:
   next: formatResult
 
 formatResult:
-  requestType: post
-  template: "[#DMAPPER]/hbs/calendar/national-holidays/get_national_holidays"
-  body:
-    holidaysEOY: ${holidayData.response.body.holidays}
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services/hbs/calendar/national-holidays/get_national_holidays"
+    body:
+      data: ${holidayData.response.body.holidays}
   result: formattedHolidays
-  next: returnValue
+  next: assignResponse
 
-returnValue:
-  return: ${formattedHolidays}
-  next: end
+assignResponse:
+  assign:
+    res: ${formattedHolidays.response.body}
+  next: formatMessages
 
-        # # --- Riiklikud tähtpäevad 2024 ---
-        # - date: "2024-01-06"
-        #   name: "kolmekuningapäev"
-        # - date: "2024-01-30"
-        #   name: "eesti kirjanduse päev"
-        # - date: "2024-02-02"
-        #   name: "Tartu rahulepingu aastapäev"
-        # - date: "2024-03-14"
-        #   name: "emakeelepäev"
-        # - date: "2024-05-12"
-        #   name: "emadepäev"
-        # - date: "2024-06-01"
-        #   name: "lastekaitsepäev"
-        # - date: "2024-06-04"
-        #   name: "Eesti lipu päev"
-        # - date: "2024-06-14"
-        #   name: "leinapäev"
-        # - date: "2024-08-23"
-        #   name: "kommunismi ja natsismi ohvrite mälestuspäev"
-        # - date: "2024-09-08"
-        #   name: "vanavanemate päev"
-        # - date: "2024-09-22"
-        #   name: "vastupanuvõitluse päev"
-        # - date: "2024-10-01"
-        #   name: "omavalitsuspäev"
-        # - date: "2024-10-19"
-        #   name: "hõimupäev"
-        # - date: "2024-11-02"
-        #   name: "hingedepäev"
-        # - date: "2024-11-10"
-        #   name: "isadepäev"
-        # - date: "2024-11-16"
-        #   name: "taassünni päev"
+formatMessages:
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services/hbs/bot_responses_to_messages"
+    headers:
+      type: json
+    body:
+      data:
+        {
+          "botMessages": "${[res]}",
+          "chatId": "${chatId}",
+          "authorId": "${authorId}",
+          "authorFirstName": "",
+          "authorLastName": "",
+          "authorTimestamp": "${new Date().toISOString()}",
+          "created": "${new Date().toISOString()}",
+        }
+  result: formatMessage
 
-        # # --- Eesti lipupäevad 2024 ---
-        # - date: "2024-01-03"
-        #   name: "Vabadussõjas võidelnute mälestuspäev"
-        # - date: "2024-01-30"
-        #   name: "eesti kirjanduse päev"
-        # - date: "2024-02-02"
-        #   name: "Tartu rahulepingu aastapäev"
-        # - date: "2024-02-24"
-        #   name: "iseseisvuspäev, Eesti Vabariigi aastapäev"
-        # - date: "2024-03-14"
-        #   name: "emakeelepäev"
-        # - date: "2024-04-23"
-        #   name: "veteranipäev"
-        # - date: "2024-05-09"
-        #   name: "Euroopa päev"
-        # - date: "2024-05-12"
-        #   name: "emadepäev"
-        # - date: "2024-06-01"
-        #   name: "lastekaitsepäev"
-        # - date: "2024-06-04"
-        #   name: "Eesti lipu päev"
-        # - date: "2024-06-09"
-        #   name: "Euroopa Parlamendi valimise päev"
-        # - date: "2024-06-14"
-        #   name: "leinapäev (lipp heisatakse leinalipuna)"
-        # - date: "2024-06-23"
-        #   name: "võidupüha"
-        # - date: "2024-06-24"
-        #   name: "jaanipäev"
-        # - date: "2024-08-20"
-        #   name: "taasiseseisvumispäev"
-        # - date: "2024-09-01"
-        #   name: "teadmistepäev"
-        # - date: "2024-09-08"
-        #   name: "vanavanemate päev"
-        # - date: "2024-10-19"
-        #   name: "hõimupäev"
-        # - date: "2024-11-10"
-        #   name: "isadepäev"
+return_result:
+  return: ${formatMessage.response.body}

@@ -10,8 +10,11 @@ declaration:
 
 prepare:
   assign:
+    chatId: ${incoming.body.chatId}
+    authorId: ${incoming.body.authorId}
     today: ${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}
   next: makeApiCall
+
 
 makeApiCall:
   call: reflect.mock
@@ -55,9 +58,27 @@ validateHoliday:
 
 formatValue:
   assign:
-    upcomingHoliday:
-      result: "Tulev riigipüha on ${upcomingHoliday.name} - ${upcomingHoliday.date}"
-  next: returnValue
+    res: "Tulev riigipüha on ${upcomingHoliday.name} - ${upcomingHoliday.date}"
+  next: formatMessages
 
-returnValue:
-  return: "${upcomingHoliday}"
+formatMessages:
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services/hbs/bot_responses_to_messages"
+    headers:
+      type: json
+    body:
+      data:
+        {
+          "botMessages": "${[res]}",
+          "chatId": "${chatId}",
+          "authorId": "${authorId}",
+          "authorFirstName": "",
+          "authorLastName": "",
+          "authorTimestamp": "${new Date().toISOString()}",
+          "created": "${new Date().toISOString()}",
+        }
+  result: formatMessage
+
+return_result:
+  return: ${formatMessage.response.body}
