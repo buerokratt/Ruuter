@@ -1,0 +1,91 @@
+declaration:
+  call: declare
+  version: "0.1"
+  description: "Gets weather information for locations in EE - estonia"
+  method: post
+  returns: json
+  namespace: common-services
+
+# Assigns key variables for processing the request, including API endpoints.
+assignVariables:
+  assign:
+    chatId: ${incoming.params.chatId || "Win"}
+    authorId: ${incoming.params.authorId || "A bigger Win"}
+    countryCode: ${"EE"} #${incoming.params.input[0] || "EE" } # defaults to estonian
+    region: "tallinn" # ${ incoming.params.input[1]  || "tallinn"} # uncomment when publicapi.envir issue is solved
+
+    gazeteerUrl: "https://inaadress.maaamet.ee/inaadress"
+    publicapiUrl: "https://publicapi.envir.ee/v1/combinedWeatherData"
+    ilmmicroserviceUrl: "https://ilmmicroservice.envir.ee/api/forecasts"
+  next: getRegionData
+
+# Retrieves geographical data for the specified region from the gazetteer API.
+getRegionData:
+  call: http.get
+  args:
+    url: "${gazeteerUrl}/gazetteer?features=EHAK&results=3&address=${region}"
+  result: regionData
+  next: assingCoordinates
+
+# Extracts longitude and latitude from the region data for further API calls.
+assingCoordinates:
+  assign:
+    longitude: ${regionData.response.body.addresses[0].viitepunkt_l}
+    latitude: ${regionData.response.body.addresses[0].viitepunkt_b}
+  next: assignStationParameters
+
+# # uncomment when publicapi.envir issue is solved
+# # # Finds the nearest weather station using the provided coordinates.
+# # getNearestStation:
+# #   call: http.get
+# #   args:
+# #     # url: https://publicapi.envir.ee/v1/combinedWeatherData/nearestStationByCoordinates?longitude=24.7535&latitude=59.4370
+# #     url: "${publicapiUrl}/nearestStationByCoordinates?longitude=${longitude}&latitude=${latitude}"
+# #     header:
+# #       Accept: "application/json"
+# #   result: nearestWeatherStation
+# #   next: assignStationParameters
+
+
+# Assigns the station ID - nearest weather station response.
+assignStationParameters:
+  assign:
+    stationId: "199" # ${nearestWeatherStation.response.body.entries.entry[0].id} # uncomment when publicapi.envir issue is solved
+  next: getWeather
+
+# Get weather data from selected weather station.
+getWeather:
+  call: http.get
+  args:
+    url: "${ilmmicroserviceUrl}/mobileLocationForecast?latitude=${latitude}&longitude=${longitude}&stationId=${stationId}"
+  result: weather
+  next: assignResponse
+
+# Assigns the weather data response.
+assignResponse:
+  assign:
+    res: ${weather.response.body}
+  next: formatMessages
+
+# format throgh DM bot response to messages
+formatMessages:
+  call: http.post
+  args:
+    url: "[#DMAPPER]/common-services/hbs/bot_responses_to_messages"
+    headers:
+      type: json
+    body:
+      data:
+        {
+          "botMessages": "${[res]}",
+          "chatId": "${chatId}",
+          "authorId": "${authorId}",
+          "authorFirstName": "",
+          "authorLastName": "",
+          "authorTimestamp": "${new Date().toISOString()}",
+          "created": "${new Date().toISOString()}",
+        }
+  result: formatMessage
+
+return_result:
+  return: ${formatMessage.response.body}
