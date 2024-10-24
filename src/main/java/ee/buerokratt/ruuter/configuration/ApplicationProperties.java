@@ -32,6 +32,8 @@ public class ApplicationProperties {
 
     private Boolean allowDuplicateRequestKeys;
 
+    private Integer httpRequestTimeout;
+
     @Setter
     @Getter
     public static class FinalResponse {

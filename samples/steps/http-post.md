@@ -31,6 +31,9 @@ post_step:
     * `headers`
         * *..desired header values* - Scripts can be used for headers values
     * `result` - name of the variable to store the response of the query in, for use in other steps
+      - __NB!__ if `result` field is missing, the request will be done immediately and
+non-blockingly, so the DSL execution does not wait for response. Any data that would
+be sent with response is not handled by Ruuter.
     * `contentType` - specifies the contenttype to use, currently allowed values:
       * `"plaintext"` - uses field `plaintext` and mediaType 'text/plain'
       * `"formdata"` 
@@ -44,6 +47,8 @@ the key, for example `file:projectdata:Project.csv`, and mediatype "multipart/fo
       * If left empty, `body` is posted as JSON and 'application/json' is used as mediatype.
     * `plaintext` - used instead of `body` if a singular plaintext value is needed to be sent 
 * `limit` - limit the size of allowed response in kilobytes (default value is configured in application.yaml)
+* `timeout`- (in milliseconds) overwrites http request timeout set in application properties (or if not
+  defined there, 15000ms)
 
 * ***Note: POST step responses are stored the same way as [GET step responses](./http-get.md#How-responses-are-stored-with-the-result-field)***
 
