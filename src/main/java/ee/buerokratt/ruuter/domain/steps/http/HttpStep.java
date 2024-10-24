@@ -42,6 +42,7 @@ public abstract class HttpStep extends DslStep {
     protected Logging logging;
 
     protected Integer limit;
+    protected Integer timeout;
 
     @JsonAlias("error")
     protected String onErrorStep;
