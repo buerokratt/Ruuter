@@ -27,7 +27,12 @@ get_step:
     * `headers`
         * *..desired header values* - Scripts can be used for headers values
 * `result` - name of the variable to store the response of the query in, for use in other steps
+  - __NB!__ if `result` field is missing, the request will be done immediately and
+  non-blockingly, so the DSL execution does not wait for response. Any data that would
+  be sent with response is not handled by Ruuter.
 * `limit` - limit the size of allowed response in kilobytes (default value is configured in application.yaml) 
+* `timeout`- (in milliseconds) overwrites http request timeout set in application properties (or if not
+defined there, 15000ms)
 
 #### How responses are stored with the result field
 
