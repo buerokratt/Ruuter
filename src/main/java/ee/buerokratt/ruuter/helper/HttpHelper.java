@@ -2,7 +2,6 @@ package ee.buerokratt.ruuter.helper;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.DslInstance;
-import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -22,6 +21,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
@@ -47,24 +47,24 @@ public class HttpHelper {
         return doPost(url, body, query, headers, this.getClass().getName(), di, dynamicBody, timeout);
     }
 
-    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di, boolean dynamicBody, Integer timeout) {
-        return doMethod(POST, url, query, body,headers, contentType, null, null, di, dynamicBody, timeout);
+    public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di, boolean dynamicBody, Integer timeout ) {
+        return doMethod(POST, url, query, body,headers, contentType, null, null, di, dynamicBody, true, timeout);
     }
 
     public ResponseEntity<Object> doPostPlaintext(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String plaintext, DslInstance di) {
-        return doMethod(POST, url, body, query, headers, "plaintext", plaintext, null, di, false, null);
+        return doMethod(POST, url, body, query, headers, "plaintext", plaintext, null, di, false, true, null);
     }
 
     public ResponseEntity<Object> doGet(String url, Map<String, Object> query, Map<String, String> headers, DslInstance di, Integer timeout) {
-        return doMethod(HttpMethod.GET, url, query, null, headers, null, null, null, di, false, timeout);
+        return doMethod(HttpMethod.GET, url, query, null, headers, null, null, null, di, false, true, timeout );
     }
 
-    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di, boolean dynamicBody) {
-        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null, null, di, dynamicBody, null);
+    public ResponseEntity<Object> doPut(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di, boolean dynamicBody, boolean blockResult) {
+        return doMethod(HttpMethod.PUT, url, query, body,headers, contentType, null, null, di, dynamicBody, true, null);
     }
 
     public ResponseEntity<Object> doDelete(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, String contentType, DslInstance di) {
-        return doMethod(HttpMethod.DELETE, url, query, body, headers, contentType, null, null, di, false, null);
+        return doMethod(HttpMethod.DELETE, url, query, body, headers, contentType, null, null, di, false, true, null);
     }
 
     public ResponseEntity<Object> doMethod(HttpMethod method,
@@ -77,6 +77,7 @@ public class HttpHelper {
                                            Integer limit,
                                            DslInstance instance,
                                            boolean dynamicBody,
+                                           boolean blockResult,
                                            Integer timeout) {
         try {
             MultiValueMap<String, String> qp = new LinkedMultiValueMap<>(
@@ -128,24 +129,30 @@ public class HttpHelper {
             }
 
             Integer finalLimit = limit == null ? properties.getHttpResponseSizeLimit() : limit;
-            return WebClient.builder()
+            Mono<ResponseEntity<Object>> retrieve = WebClient.builder()
                 .filter((request, next) -> !("json_override".equals(contentType)) ? next.exchange(request)
-                     :next.exchange(request)
-                        .flatMap(response -> Mono.just(response.mutate()
-                            .headers(httpHeaders -> httpHeaders.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                            .build())))
+                    : next.exchange(request)
+                    .flatMap(response -> Mono.just(response.mutate()
+                        .headers(httpHeaders -> httpHeaders.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                        .build())))
                 .exchangeStrategies(
                     ExchangeStrategies.builder().codecs(
-                        configurer -> configurer.defaultCodecs().maxInMemorySize(finalLimit * 1024 )).build())
-            .clientConnector(new ReactorClientHttpConnector(getHttpClient(timeout                   ))).build()
+
+                        configurer -> configurer.defaultCodecs().maxInMemorySize(finalLimit * 1024)).build())
+                .clientConnector(new ReactorClientHttpConnector(getHttpClient(timeout))).build()
                 .method(method)
                 .uri(url, uriBuilder -> uriBuilder.queryParams(qp).build())
                 .headers(httpHeaders -> addHeadersIfNotNull(headers, httpHeaders))
                 .body(bodyValue)
                 .header(HttpHeaders.CONTENT_TYPE, mediaType)
                 .retrieve()
-                .toEntity(Object.class)
-                .block();
+                .toEntity(Object.class);
+            if (blockResult)
+                return retrieve.block();
+            else {
+                Disposable dis = retrieve.subscribe();
+                return ResponseEntity.ok(null);
+            }
         } catch (WebClientResponseException e) {
             log.error("Failed HTTP request: ", e);
             return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());

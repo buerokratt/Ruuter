@@ -33,7 +33,8 @@ public class HttpPostStep extends HttpStep {
             "plaintext".equals(args.getContentType()) ? args.getPlaintext() : null,
             getLimit(), di,
             args.isDynamicParameters(),
-            getTimeout());
+	    resultName != null && !resultName.isEmpty(),
+	    getTimeout() );
     }
 
     @Override
