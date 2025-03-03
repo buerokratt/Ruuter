@@ -51,7 +51,6 @@ public class ReturnStep extends DslStep {
         Map<String, String> _headers = evaluatedMap.entrySet().stream()
             .map(e -> addDefaultCookies(e, di))
             .collect(toMap(Entry::getKey, this::entryValueToHeaderString));
-//        _headers.put("Cache-control", "no-cache");
         addDefaultHeaders(_headers, di);
         return _headers;
     }
