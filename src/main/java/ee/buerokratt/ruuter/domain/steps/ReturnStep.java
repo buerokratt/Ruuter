@@ -48,18 +48,9 @@ public class ReturnStep extends DslStep {
 
     private Map<String, String> formatHeaders(DslInstance di) {
         Map<String, Object> evaluatedMap = di.getScriptingHelper().evaluateScripts(headers, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
-        Map<String, String> _headers = evaluatedMap.entrySet().stream()
+        return evaluatedMap.entrySet().stream()
             .map(e -> addDefaultCookies(e, di))
             .collect(toMap(Entry::getKey, this::entryValueToHeaderString));
-//        _headers.put("Cache-control", "no-cache");
-        addDefaultHeaders(_headers, di);
-        return _headers;
-    }
-
-    private void addDefaultHeaders(Map<String, String> _headers, DslInstance di) {
-        di.getProperties().getResponseDefaultHeaders().forEach((key, value) ->
-            _headers.merge(key, value.toString(), (oldValue, newValue) -> oldValue)
-        );
     }
 
     private void addToCookie(LinkedHashMap<String, Object> cookie, String key, Object value) {
