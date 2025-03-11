@@ -238,3 +238,11 @@ Default value is 256 (kB).
 
 Duplicate keys in request JSON is allowed by default. 
 This functionality can be changed with setting `allowDuplicateRequestKeys` to false.
+
+
+### Default response headers
+
+```
+    "responseDefaultHeaders" : list of HTTP headers that should be defined with every outgoing response.
+        (for example, adding no-cache so API endpoint responses would not be cached in browser)
+```

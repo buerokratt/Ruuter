@@ -30,6 +30,9 @@ public class ApplicationProperties {
 
     private Integer httpResponseSizeLimit;
 
+    private Map<String, Object> responseDefaultHeaders = new HashMap<>();
+
+
     private Boolean allowDuplicateRequestKeys;
 
     private Integer httpRequestTimeout;

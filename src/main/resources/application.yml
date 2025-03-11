@@ -9,6 +9,12 @@ application:
     allowedMethodTypes: [ POST, GET ]
     headers:
       header: value
+
+  responseDefaultHeaders:
+    Cache-Control: no-cache, no-store, must-revalidate
+    Pragma: no-cache
+    Expires: 0
+
   httpCodesAllowList: [ 200, 201, 202 ]
   defaultDslInCaseOfException:
     dsl: default-dsl

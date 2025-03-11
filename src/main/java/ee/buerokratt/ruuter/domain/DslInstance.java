@@ -65,7 +65,6 @@ public class DslInstance {
         } catch (Exception e) {
             LoggingUtils.logError(log, "Error executing DSL: %s".formatted(name), requestOrigin, "", e);
             clearReturnValues();
-            throw e;
         }
     }
 
@@ -97,7 +96,7 @@ public class DslInstance {
                 logEvent(stepToExecute, "RUNTIME", e.getStackTrace());
 
                 if (getProperties().getStopInCaseOfException() != null && getProperties().getStopInCaseOfException()) {
-//                    Thread.currentThread().interrupt();
+                    Thread.currentThread().interrupt();
                     if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
                         throw new StepExecutionException(name, e);
                     else {
