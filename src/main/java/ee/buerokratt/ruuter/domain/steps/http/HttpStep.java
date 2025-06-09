@@ -96,7 +96,9 @@ public abstract class HttpStep extends DslStep {
         String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) di.getContext().get(resultName)).getResponse().getBody());
         String responseContent = responseBody != null && displayResponseContent(properties) ? responseBody : "-";
         String requestContent = args.getBody() != null && displayRequestContent(properties) ? args.getBody().toString() : "-";
-        LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
+        String evaluatedBody = di.getScriptingHelper().evaluateScripts(requestContent, di).toString();
+
+        LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, args.getUrl(), evaluatedBody, responseContent, String.valueOf(responseStatus));
     }
 
     private boolean isAllowedHttpStatusCode(DslInstance di, Integer response) {
