@@ -17,7 +17,7 @@ public class Dsl {
     public Dsl(Map<String, DslStep> steps) {
         this.steps = steps;
         steps.entrySet().stream()
-            .filter(step -> "declare".equals(step.getKey())).findFirst()
+            .filter(step -> "declare".equals(step.getValue().getType())).findFirst()
             .ifPresent(step -> this.declaration = (DeclarationStep) step.getValue());
     }
 

@@ -33,39 +33,51 @@ public class OpenApiBuilder {
         DeclarationStep declaration = dsl.getDeclaration();
 
         PathItem pathItem = new PathItem();
-        if (declaration.getMethod().toUpperCase().equals("POST")) {
+        if (declaration.getMethod().toUpperCase().equals("POST")
+        || declaration.getMethod().toUpperCase().equals("PUT")) {
+            RequestBody requestBody = new RequestBody();
             Schema requestBodySchema = new Schema();
             requestBodySchema.setType("object");
-            declaration.getAllowlist().getBody().forEach(
-                field -> requestBodySchema.addProperties(field.getField(),
-                    new Schema().type(field.getType()).description(field.getDescription()))
-            );
-            RequestBody requestBody = new RequestBody();
+
+            if (declaration.getAllowlist() != null && declaration.getAllowlist().getBody() != null) {
+                declaration.getAllowlist().getBody().forEach(
+                    field -> {
+                        if (field.getField() != null) {
+                            requestBodySchema.addProperty(field.getField(),
+                                new Schema().type(field.getType()).description(field.getDescription()));
+                        }
+                    }
+                );
+            }
+
             requestBody.setContent(
                 new Content()
                     .addMediaType("application/json",
                         new MediaType().schema(requestBodySchema))
             );
+
             ApiResponse success = new ApiResponse();
             success.setDescription(declaration.getReturns());
 
             pathItem.post( new Operation().requestBody(requestBody)
                 .responses(new ApiResponses().addApiResponse("200", success)));
-        } else if (declaration.getMethod().toUpperCase().equals("GET")) {
-
-            declaration.getAllowlist().getParams().forEach(
-                field -> {
-                    Parameter requestParam = new Parameter();
-                    requestParam.setName(field.getField());
-                    requestParam.setDescription(field.getDescription());
-                    pathItem.get(new Operation().addParametersItem(requestParam));
-                }
-            );
+        } else if (declaration.getMethod().equalsIgnoreCase("GET") &&
+            declaration.getAllowlist() != null && declaration.getAllowlist().getBody() != null) {
+                declaration.getAllowlist().getParams().forEach(
+                    field -> {
+                        Parameter requestParam = new Parameter();
+                        requestParam.setName(field.getField());
+                        requestParam.setDescription(field.getDescription());
+                        pathItem.get(new Operation().addParametersItem(requestParam));
+                    }
+                );
         }
 
         pathItem.setDescription(declaration.getDescription());
 
-        Paths paths = new Paths();
+        Paths paths = this.openAPI.getPaths() == null ?
+            new Paths() :
+            this.openAPI.getPaths();
         paths.addPathItem("/" + declaration.getNamespace() + "/" + path, pathItem);
 
         this.openAPI.setPaths(paths);

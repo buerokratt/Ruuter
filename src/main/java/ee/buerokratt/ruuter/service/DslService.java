@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -74,14 +73,15 @@ public class DslService {
     }
 
     public Map<String, Map<String, Map<String, Dsl>>> getDsls(String configPath) {
-        openApiBuilder = new OpenApiBuilder("BYK", "1.0");
 
+        if (openApiBuilder == null)
+            openApiBuilder = new OpenApiBuilder("BYK", "1.0");
 
         Map<String, Map<String, Map<String, Dsl>>> _dsls =
                 Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory)))
                         .collect(toMap(File::getName, f -> getDslsForProject(configPath+"/" + f.getName()+"/")));
 
-        log.info("Built OpenAPI spec: " + Yaml.pretty(getOpenAPISpec()));
+        log.debug("Built OpenAPI spec (pretty): " + Yaml.pretty(getOpenAPISpec()));
 
         return _dsls;
     }
@@ -130,10 +130,8 @@ public class DslService {
     }
 
     public Map<String, Map<String, Dsl>> getGuardsForProject(String projectPath) {
-        Map<String, Map<String, Dsl>> _dsls =
-            Arrays.stream(Objects.requireNonNull(new File(projectPath).listFiles(File::isDirectory)))
+        return Arrays.stream(Objects.requireNonNull(new File(projectPath).listFiles(File::isDirectory)))
                 .collect(toMap(File::getName, this::extractGuard));
-        return _dsls;
     }
 
     private Map<String, Dsl> extractGuard(File directory) {
@@ -185,8 +183,21 @@ public class DslService {
             }
 
             log.debug("body after: "+ LoggingUtils.mapDeepToString(requestBody));
-        } else {
+        } else if (dslName == ""){
             log.info("DSL in project "+ project+" not found: "+dslName);
+            return null;
+        } else {
+            // handle path parameters recursively
+            String lastParam = dslName.substring(dslName.lastIndexOf('/')+1);
+            dslName = dslName.substring(0, dslName.lastIndexOf('/'));
+            if (requestQuery.get("pathParams") == null)
+                requestQuery.put("pathParams", new ArrayList<String>());
+
+            ((List<String>) requestQuery.get("pathParams")).add(0, lastParam);
+
+            log.debug("Executing " + dslName +
+                " with path parameters " + requestQuery.get("pathParams"));
+            return execute(project, dslName, requestType, requestBody, requestQuery, requestHeaders, requestOrigin, contentType);
         }
 
         DslInstance di = new DslInstance(dslName,
@@ -295,15 +306,27 @@ public class DslService {
     }
 
     <V> void checkFields(Map<String, V> requestFields, List<String> requestedFields) {
+
+        // Skip check if no fields are requested
+        if (requestedFields == null)
+            return;
+
         requestedFields.forEach((field) -> {
                 if (!requestFields.containsKey(field)) {
+
+                    log.warn("Request has errors: field(s) missing: %s".formatted(field));
+
+                    /** CURRENTLY REPLACED WITH WARNING, SEE Ruuter#369 **/
+                    /*
                     String message = "Field missing: %s".formatted(field);
+
                     if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
                         throw new StepExecutionException("declare", new Exception(message));
                     else {
                         log.error(message);
                         Thread.currentThread().interrupt();
                     }
+                    */
                 }
             }
         );
