@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -66,7 +67,7 @@ public class DslController {
                                                              @RequestParam(required = false) Map<String, Object> requestQuery,
                                                              @RequestHeader(required = false) Map<String, String> requestHeaders,
                                                              HttpServletRequest request) {
-        String dsl = request.getRequestURI();
+        String dsl = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
         // Remove '/' from beginning to read DSLs properly
         if (dsl.startsWith("/")) dsl = dsl.substring(1);
         if (!properties.getIncomingRequests().getAllowedMethodTypes().contains(request.getMethod())) {
