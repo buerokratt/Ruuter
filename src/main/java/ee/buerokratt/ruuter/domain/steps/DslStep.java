@@ -3,6 +3,7 @@ package ee.buerokratt.ruuter.domain.steps;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.helper.exception.ScriptEvaluationException;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
 import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import io.opentelemetry.api.trace.Span;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
 
 @Slf4j
 @Data
@@ -28,7 +28,7 @@ public abstract class DslStep {
     @JsonAlias({"reloadDsls"})
     private boolean reloadDsl = false;
 
-    public final void execute(DslInstance di) throws StepExecutionException {
+    public final void execute(DslInstance di) throws StepExecutionException, DSLExecutionException {
         Span newSpan = di.getTracer().spanBuilder(name).startSpan();
         long startTime = System.currentTimeMillis();
 
@@ -50,12 +50,12 @@ public abstract class DslStep {
             di.setErrorMessage(e.getMessage());
             di.setErrorStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             throw new StepExecutionException(name, e);
-        } finally {
+        }  finally {
             newSpan.end();
         }
     }
 
-    protected void handleFailedResult(DslInstance di) {
+    protected void handleFailedResult(DslInstance di) throws DSLExecutionException {
         LoggingUtils.logError(log, "Error: %s".formatted(name), di.getRequestOrigin(), getType());
 
         if (di.getProperties().getLogging().getMeaningfulErrors() != null &&
@@ -69,7 +69,7 @@ public abstract class DslStep {
         LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, "-", "-", "-", "-");
     }
 
-    protected abstract void executeStepAction(DslInstance di);
+    protected abstract void executeStepAction(DslInstance di) throws DSLExecutionException;
 
     public abstract String getType();
 }

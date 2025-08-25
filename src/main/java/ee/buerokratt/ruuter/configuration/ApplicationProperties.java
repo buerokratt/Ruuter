@@ -39,6 +39,8 @@ public class ApplicationProperties {
 
     private List<String> externalAuthAllowed;
 
+    private String apiRequestTestingKey;
+
     @Setter
     @Getter
     public static class FinalResponse {

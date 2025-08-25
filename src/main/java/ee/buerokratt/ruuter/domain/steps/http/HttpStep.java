@@ -8,6 +8,7 @@ import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.Logging;
 import ee.buerokratt.ruuter.helper.MappingHelper;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.netty.channel.ConnectTimeoutException;
 import lombok.*;
@@ -75,7 +76,7 @@ public abstract class HttpStep extends DslStep {
     }
 
     @Override
-    public void handleFailedResult(DslInstance di) {
+    public void handleFailedResult(DslInstance di) throws DSLExecutionException {
         super.handleFailedResult(di);
         HttpStepResult stepResult = (HttpStepResult) di.getContext().get(                   resultName);
         if (stepResult != null && !isAllowedHttpStatusCode(di, stepResult.getResponse().getStatusCodeValue())) {

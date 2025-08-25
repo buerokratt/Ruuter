@@ -7,6 +7,7 @@ import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.DslService;
 import ee.buerokratt.ruuter.service.OpenSearchSender;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
 import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.opentelemetry.api.trace.Tracer;
@@ -56,15 +57,20 @@ public class DslInstance {
 
     private String gotoStep = null;
 
-    public void execute() {
+    public void execute() throws DSLExecutionException, StepExecutionException {
         addGlobalIncomingHeadersToRequestHeaders();
         List<String> stepNames = steps.keySet().stream().toList();
         recursions = stepNames.stream().collect(Collectors.toMap(Function.identity(), a -> 0));
         try {
             executeStep(stepNames.get(0), stepNames);
-        } catch (Exception e) {
-            LoggingUtils.logError(log, "Error executing DSL: %s".formatted(name), requestOrigin, "", e);
+        } catch (DSLExecutionException | StepExecutionException e) {
+            if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
+                LoggingUtils.logError(log, "Error executing DSL: %s".formatted(name), requestOrigin, "", e);
+            else
+                LoggingUtils.logError(log, "Error executing DSL: %s".formatted(name), requestOrigin, "");
+
             clearReturnValues();
+            throw e;
         }
     }
 
@@ -84,7 +90,7 @@ public class DslInstance {
                 stackTrace
             ));
     }
-    private void executeStep(String stepName, List<String> stepNames) {
+    private void executeStep(String stepName, List<String> stepNames) throws DSLExecutionException, StepExecutionException {
         DslStep stepToExecute = steps.get(stepName);
         if (!Objects.equals(recursions.get(stepName), getStepMaxRecursions(stepToExecute))) {
             try {
@@ -96,12 +102,7 @@ public class DslInstance {
                 logEvent(stepToExecute, "RUNTIME", e.getStackTrace());
 
                 if (getProperties().getStopInCaseOfException() != null && getProperties().getStopInCaseOfException()) {
-                    Thread.currentThread().interrupt();
-                    if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
-                        throw new StepExecutionException(name, e);
-                    else {
-                        log.error("%s: %s".formatted(name, e.getMessage()));
-                    }
+                        throw e;
                 }
             }
 
@@ -120,7 +121,9 @@ public class DslInstance {
         executeNextStep(stepToExecute, stepNames);
     }
 
-    private void executeNextStep(DslStep previousStep, List<String> stepNames) {
+    private void executeNextStep(DslStep previousStep, List<String> stepNames)
+        throws DSLExecutionException,
+        StepExecutionException{
         if (getGotoStep() != null) {
             DslStep nextStep = steps.get(getGotoStep());
             setGotoStep(null);
@@ -138,7 +141,8 @@ public class DslInstance {
         }
     }
 
-    private void executeNextStepWithoutMaxRecursionsExceeded(DslStep nextStep, List<String> stepNames) {
+    private void executeNextStepWithoutMaxRecursionsExceeded(DslStep nextStep, List<String> stepNames)
+        throws DSLExecutionException, StepExecutionException {
         if (Objects.equals(recursions.get(nextStep.getName()), currentLoopMaxRecursions)) {
             int nextStepIndex = stepNames.indexOf(nextStep.getName());
             executeNextStepOutsideRecursion(nextStepIndex, stepNames);
@@ -147,7 +151,8 @@ public class DslInstance {
         }
     }
 
-    private void executeNextStepOutsideRecursion(int nextStepIndex, List<String> stepNames) {
+    private void executeNextStepOutsideRecursion(int nextStepIndex, List<String> stepNames)
+        throws DSLExecutionException, StepExecutionException {
         for (int i = nextStepIndex; i < stepNames.size(); i++) {
             DslStep nextStep = steps.get(stepNames.get(i));
             if (!Objects.equals(recursions.get(nextStep.getName()), getStepMaxRecursions(nextStep))) {

@@ -4,6 +4,7 @@ application:
   logging:
     displayRequestContent: false
     displayResponseContent: false
+    printStackTrace: false
     meaningfulErrors: false
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
@@ -42,6 +43,8 @@ application:
 #    url: http://host.docker.internal:9200
 #    index: ruuterlog
   httpResponseSizeLimit: 256
+
+  apiRequestTestingKey: voorshpellhappilo
 
 management:
   endpoints:
