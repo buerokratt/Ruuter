@@ -246,3 +246,32 @@ This functionality can be changed with setting `allowDuplicateRequestKeys` to fa
     "responseDefaultHeaders" : list of HTTP headers that should be defined with every outgoing response.
         (for example, adding no-cache so API endpoint responses would not be cached in browser)
 ```
+
+
+### API service testing flow
+
+If requests to Ruuter are sent with header 'x-ruuter-testing'
+with value that is defined in `application.apiRequestTestingKey`, Ruuter responds with error
+object if any errors occur. 
+
+Error object: 
+
+```
+    {
+        "dslName": <DSL where error occured>,
+        "stepName": <DSL step with error>,
+        "causeCode": <error code>,
+        "message": <error message (usually Exception header)>
+    }
+```
+
+Error codes are hardcoded in 
+`ee.buerokratt.ruuter.service.exception.DSLExecutionException`
+
+Currently these codes are used:
+
+| code     | reason                                                                  |
+|----------|-------------------------------------------------------------------------|
+| E_unknown  | undefined generic error occurred                                        |
+| E_null | DSL found null where not expected                                       |
+| E_script    | generic ScriptingEngine error (for example value resolves to undefined) |

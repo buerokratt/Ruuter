@@ -9,5 +9,6 @@ public class StepExecutionException extends Exception {
     public StepExecutionException(String stepName, Throwable err) {
         super("Error executing: %s".formatted(stepName), err);
         this.stepName = stepName;
+        this.message = err.getMessage();
     }
 }
