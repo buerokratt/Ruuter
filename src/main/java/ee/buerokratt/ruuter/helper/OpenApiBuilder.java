@@ -62,7 +62,7 @@ public class OpenApiBuilder {
             pathItem.post( new Operation().requestBody(requestBody)
                 .responses(new ApiResponses().addApiResponse("200", success)));
         } else if (declaration.getMethod().equalsIgnoreCase("GET") &&
-            declaration.getAllowlist() != null && declaration.getAllowlist().getBody() != null) {
+            declaration.getAllowlist() != null && declaration.getAllowlist().getParams() != null) {
                 declaration.getAllowlist().getParams().forEach(
                     field -> {
                         Parameter requestParam = new Parameter();
