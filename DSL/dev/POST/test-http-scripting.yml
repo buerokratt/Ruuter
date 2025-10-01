@@ -1,0 +1,15 @@
+assignstep:
+  assign:
+    newbody: ${incoming.body.ubody}
+    newquery: ${incoming.body.uquery}
+    newheader: ${incoming.body.uheader}
+
+http_request_blocking:
+  call: http.post
+  args:
+    url: http://host.docker.internal:9000/blocking_endpoint
+    headers: $! newheader !
+    body: $! newbody !
+    query: $! newquery !    
+#  timeout: 20000
+  result: blocked
