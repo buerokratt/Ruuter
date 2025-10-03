@@ -20,11 +20,17 @@ public class HttpPostStep extends HttpStep {
     protected ResponseEntity<Object> getRequestResponse(DslInstance di) {
         Map<String, Object> defaultHeaders = di.getProperties().getHttpPost().getHeaders();
         if (defaultHeaders != null && !defaultHeaders.isEmpty())
-            args.addHeaders(di.getProperties().getHttpPost().getHeaders());
+            args.addHeaders(di, di.getProperties().getHttpPost().getHeaders());
         String evaluatedURL = di.getScriptingHelper().evaluateScripts(args.getUrl(),di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders()).toString();
-        Map<String, Object> evaluatedBody = di.getScriptingHelper().evaluateScripts(args.getBody(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
-        Map<String, Object> evaluatedQuery = di.getScriptingHelper().evaluateScripts(args.getQuery(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
-        Map<String, Object> evaluatedHeaders = di.getScriptingHelper().evaluateScripts(args.getHeaders(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
+        Map<String, Object> evaluatedBody = di.getScriptingHelper().evaluateScripts(
+            di.getMappingHelper().mapPossibleScriptedObject(di, args.getBody()),
+            di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
+        Map<String, Object> evaluatedQuery = di.getScriptingHelper().evaluateScripts(
+            di.getMappingHelper().mapPossibleScriptedObject(di,args.getQuery()),
+            di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
+        Map<String, Object> evaluatedHeaders = di.getScriptingHelper().evaluateScripts(
+            di.getMappingHelper().mapPossibleScriptedObject(di,args.getHeaders()),
+            di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, String> mappedHeaders = di.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
 
         return di.getHttpHelper().doMethod(getMethod(), evaluatedURL,
