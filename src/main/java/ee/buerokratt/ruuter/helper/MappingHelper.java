@@ -29,14 +29,14 @@ public class MappingHelper {
     }
 
     public Map<String, Object> mapPossibleScriptedObject(DslInstance di, Object field) {
-        Map<String, Object> result = null;
+        Map<String, Object> result = Map.of();
         if (field instanceof LinkedHashMap<?,?>)
             result = (LinkedHashMap<String, Object>) field;
         if (field instanceof String)
             result = (Map<String, Object>) di.getScriptingHelper().evaluateScripts(
                 field,
                 di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
-        return result;
+        return result == null ? Map.of() : result;
     }
 
 }
