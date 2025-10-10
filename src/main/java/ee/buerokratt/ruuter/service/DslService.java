@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
 import static ee.buerokratt.ruuter.util.LoggingUtils.*;
+import static java.util.stream.Collectors.toConcurrentMap;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
@@ -316,8 +317,10 @@ public class DslService {
                         requestFields :
                         requestFields == null ?
                             null :
-                            requestFields.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
-            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+                            requestFields.entrySet().stream()
+                                .filter(e -> allowedFields.contains(e.getKey()))
+                                .filter(e -> e.getValue() != null)
+                                .collect(toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     <V> void checkFields(Map<String, V> requestFields, List<String> requestedFields) {
