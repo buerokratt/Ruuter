@@ -2,6 +2,7 @@ package ee.buerokratt.ruuter.domain.steps;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import ee.buerokratt.ruuter.domain.DslInstance;
+import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,7 @@ public class ReturnStep extends DslStep {
     private boolean withWrapper = true;
     @JsonAlias({"return"})
     private String returnValue;
-    private Map<String, Object> headers = new LinkedHashMap<>();
+    private Object headers = new LinkedHashMap<>();
     private Integer status;
 
     @Override
@@ -47,7 +48,9 @@ public class ReturnStep extends DslStep {
     }
 
     private Map<String, String> formatHeaders(DslInstance di) {
-        Map<String, Object> evaluatedMap = di.getScriptingHelper().evaluateScripts(headers, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
+        Map <String, Object> __headers = di.getMappingHelper().mapPossibleScriptedObject(di, headers);
+
+        Map<String, Object> evaluatedMap = di.getScriptingHelper().evaluateScripts(__headers, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, String> _headers = evaluatedMap.entrySet().stream()
             .map(e -> addDefaultCookies(e, di))
             .collect(toMap(Entry::getKey, this::entryValueToHeaderString));

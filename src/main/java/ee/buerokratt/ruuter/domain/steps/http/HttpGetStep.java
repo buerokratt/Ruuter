@@ -19,8 +19,12 @@ public class HttpGetStep extends HttpStep {
     @Override
     public ResponseEntity<Object> getRequestResponse(DslInstance di) {
         String evaluatedURL = di.getScriptingHelper().evaluateScripts(args.getUrl(),di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders()).toString();
-        Map<String, Object> evaluatedQuery = di.getScriptingHelper().evaluateScripts(args.getQuery(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
-        Map<String, Object> evaluatedHeaders = di.getScriptingHelper().evaluateScripts(args.getHeaders(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
+        Map<String, Object> evaluatedQuery = di.getScriptingHelper().evaluateScripts(
+            di.getMappingHelper().mapPossibleScriptedObject(di,args.getQuery()),
+            di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
+        Map<String, Object> evaluatedHeaders = di.getScriptingHelper().evaluateScripts(
+            di.getMappingHelper().mapPossibleScriptedObject(di,args.getHeaders()),
+            di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, String> mappedHeaders = di.getMappingHelper().convertMapObjectValuesToString(evaluatedHeaders);
         return di.getHttpHelper().doMethod(HttpMethod.GET, evaluatedURL, evaluatedQuery, null, mappedHeaders, args.getContentType() , null, getLimit(), di, args.isDynamicParameters(), resultName != null && !resultName.isEmpty(), getTimeout() );
     }

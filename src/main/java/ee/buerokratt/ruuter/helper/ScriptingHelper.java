@@ -19,16 +19,19 @@ public class ScriptingHelper {
     public static final String OBJECT_REGEX = "([a-zA-Z0-9_. \"]+\\.[a-zA-Z0-9_. \"]+)";
     public static final String SCRIPT_REGEX = "(\\$\\{[^}]+})";
     public static final String SCRIPT_LINE_REGEX = "(\\$=.+=$)";
+    public static final String SCRIPT_LINE_OBJECT = "(\\$!.+!$)";
 
     private final MappingHelper mappingHelper;
     private final ScriptEngine engine;
 
     private Pattern scriptPattern = Pattern.compile(SCRIPT_REGEX);
     private Pattern linePattern = Pattern.compile(SCRIPT_LINE_REGEX);
+    private Pattern objectPattern = Pattern.compile(SCRIPT_LINE_OBJECT);
 
     public boolean containsScript(String s) {
         return scriptPattern.matcher(s).find() ||
-            linePattern.matcher(s).find();
+            linePattern.matcher(s).find() ||
+            objectPattern.matcher(s).find();
     }
 
     public Map<String, Object> evaluateScripts(Map<String, Object> map, DslInstance di) {
@@ -63,6 +66,9 @@ public class ScriptingHelper {
             return evaluateSimple(toEval, context, requestBody, requestQuery, requestHeaders, linePattern);
         }
 
+        if (toEval.toString().matches(SCRIPT_LINE_OBJECT)) {
+            return evaluateObject(toEval, context, requestBody, requestQuery, requestHeaders, objectPattern);
+        }
 
         // Recursive evaluation: value is of complex type (List/Map)
         if (toEval instanceof List)
@@ -158,6 +164,15 @@ public class ScriptingHelper {
                                  Pattern pattern) {
         List<Object> evaluatedScripts = getEvaluatedScripts(toEval, context, requestBody, requestQuery, requestHeaders, pattern);
         return evaluatedScripts.size() == 1 ? evaluatedScripts.get(0) : evaluatedScripts.stream().reduce("", (o, o2) -> o + o2.toString());
+    }
+
+    public Object evaluateObject(Object toEval, Map<String, Object> context,
+                                 Map<String, Object> requestBody,
+                                 Map<String, Object> requestQuery,
+                                 Map<String, String> requestHeaders,
+                                 Pattern pattern) {
+        List<Object> evaluatedScripts = getEvaluatedScripts(toEval, context, requestBody, requestQuery, requestHeaders, pattern);
+        return !evaluatedScripts.isEmpty() ? evaluatedScripts.get(0) : null;
     }
 
     public Object evaluateComplex(Object toEval, Map<String, Object> context,

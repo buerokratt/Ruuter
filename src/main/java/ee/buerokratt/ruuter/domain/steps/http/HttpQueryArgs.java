@@ -12,17 +12,17 @@ import java.util.Map;
 @NoArgsConstructor
 public class HttpQueryArgs {
     private String url;
-    private Map<String, Object> query = new HashMap<>();
-    private Map<String, Object> headers = new HashMap<>();
-    private Map<String, Object> body = new HashMap<>();
+    private Object query = new HashMap<>();
+    private Object headers = new HashMap<>();
+    private Object body = new HashMap<>();
     private String plaintext;
     private String contentType;
     private String originalUrl = "";
 
     protected boolean dynamicParameters;
 
-    public void addHeaders(Map<String, Object> newHeaders) {
-        newHeaders.forEach(headers::putIfAbsent);
+    public void addHeaders(DslInstance di, Map<String, Object> newHeaders) {
+        newHeaders.forEach(di.getMappingHelper().mapPossibleScriptedObject(di,headers)::putIfAbsent);
     }
 
     public void checkUrl(DslInstance di) {
