@@ -159,6 +159,8 @@ public class DslService {
                 requestOrigin, this.getClass().getName());
         } catch (StepExecutionException stepEx) {
             throw new DSLExecutionException(stepEx.getStepName(), dsl, stepEx.getCause());
+        } catch (StringIndexOutOfBoundsException stex) {
+            throw new DSLExecutionException("", dsl, stex);
         }
     }
 
@@ -204,7 +206,12 @@ public class DslService {
         } else {
             // handle path parameters recursively
             String lastParam = dslName.substring(dslName.lastIndexOf('/')+1);
-            dslName = dslName.substring(0, dslName.lastIndexOf('/'));
+            try {
+                dslName = dslName.substring(0, dslName.lastIndexOf('/'));
+            } catch (StringIndexOutOfBoundsException e) {
+                throw new DSLExecutionException("Trying to access non-existent endpoint: %s".formatted(dsl), dslName, e);
+            }
+
             if (requestQuery.get("pathParams") == null)
                 requestQuery.put("pathParams", new ArrayList<String>());
 
