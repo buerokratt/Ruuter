@@ -111,7 +111,19 @@ public class DslController {
                 return status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getErrorObject());
             else
                 return status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (StringIndexOutOfBoundsException e) {
+            String warning = "Trying to access non-existent endpoint: %s".formatted(dsl);
+            if (properties.getLogging().getPrintStackTrace()) {
+                log.warn(warning, e);
+            } else {
+                log.warn(warning);
+            }
+            if (testingKey.equals(testingHeader))
+                return status(HttpStatus.INTERNAL_SERVER_ERROR).body(warning);
+            else
+                return status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+
     }
 
     @PostMapping(consumes = "text/*")
