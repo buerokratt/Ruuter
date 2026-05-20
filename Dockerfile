@@ -13,6 +13,9 @@ RUN ./gradlew -Pprod clean bootJar
 RUN mkdir -p build/libs && (cd build/libs; jar -xf *.jar)
 
 FROM eclipse-temurin:21-jdk-alpine
+
+RUN apk add --no-cache curl
+
 VOLUME /build/tmp
 
 ARG DEPENDENCY=/workspace/app/build/libs
