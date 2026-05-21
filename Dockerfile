@@ -34,7 +34,7 @@ RUN mkdir DSL
 RUN chown ruuter:ruuter /logs
 RUN chown -R ruuter:ruuter /app
 RUN chown -R ruuter:ruuter /DSL
-#USER ruuter
+USER ruuter
 
 
 ENTRYPOINT ["java","-cp","app:app/lib/*","ee.buerokratt.ruuter.RuuterApplication"]
