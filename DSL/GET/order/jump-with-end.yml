@@ -19,9 +19,3 @@ second_step:
       test: value
   next: third_step
 
-fourth_step:
-  call: reflect.mock
-  args:
-    response:
-      test: value
-  next: end
