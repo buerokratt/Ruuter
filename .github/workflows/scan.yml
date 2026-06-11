@@ -34,10 +34,6 @@ jobs:
         run: npm install
         working-directory: kratest-agent
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
-        working-directory: kratest-agent
-
       - name: Run kratest scan
         run: python -m kratest.main
         env:
