@@ -4,8 +4,10 @@ test_type: playwright_api
 target_repo: KoortHendrik/TDD-Playwright
 target_path: tests/api/smoke/
 
-# Branch to scan in run_scan_mode and base branch for generated test PRs.
+# Branch to scan in run_scan_mode.
 source_branch: main
+# Base branch for generated test PRs opened against target_repo.
+target_branch: main
 
 llm:
   provider: groq          # groq | ollama
