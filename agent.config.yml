@@ -1,0 +1,29 @@
+watch_patterns:
+  - "DSL/**/*.yml"
+test_type: playwright_api
+target_repo: KoortHendrik/TDD-Playwright
+target_path: tests/api/smoke/
+
+# Branch to scan in run_scan_mode and base branch for generated test PRs.
+source_branch: main
+
+llm:
+  provider: groq          # groq | ollama
+  model: llama-3.3-70b-versatile
+  temperature: 0.2
+  timeout: 60             # API request timeout in seconds (increase for Ollama: 120+)
+  retries: 2              # number of generation attempts on parse failure
+  # endpoint: ""          # override API URL (e.g. custom Ollama host or proxy)
+
+runner:
+  timeout: 300            # max seconds to wait for playwright test execution
+
+reporter:
+  pr_comment: true
+  # github_check requires a GitHub App token, not a PAT.
+  # Set to true once a GitHub App is configured.
+  github_check: false
+
+# Set to true to execute generated tests before opening the test PR.
+# Requires a running service at BASE_URL. Leave false in CI without a live env.
+run_tests: false

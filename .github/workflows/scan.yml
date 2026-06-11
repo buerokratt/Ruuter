@@ -1,0 +1,48 @@
+name: Kratest — initial scan
+
+on:
+  workflow_dispatch:
+
+jobs:
+  kratest-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      - name: Checkout kratest
+        uses: actions/checkout@v4
+        with:
+          repository: KoortHendrik/kratest
+          path: kratest-agent
+          token: ${{ secrets.KRATEST_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install -e kratest-agent/
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node dependencies
+        run: npm install
+        working-directory: kratest-agent
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+        working-directory: kratest-agent
+
+      - name: Run kratest scan
+        run: python -m kratest.main
+        env:
+          PYTHONPATH: ${{ github.workspace }}/kratest-agent
+          KRATEST_TOKEN: ${{ secrets.KRATEST_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          KRATEST_MODE: scan
+          SCAN_REPO: ${{ github.repository }}
