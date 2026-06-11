@@ -35,6 +35,15 @@ jobs:
         run: npm install
         working-directory: kratest-agent
 
+      - name: Use source repo agent config
+        run: |
+          if [ -f agent.config.yml ]; then
+            cp agent.config.yml kratest-agent/kratest/agent.config.yml
+            echo "Using source repo agent.config.yml"
+          else
+            echo "No agent.config.yml found in source repo, using kratest default"
+          fi
+
       - name: Run kratest
         run: python -m kratest.main
         env:
