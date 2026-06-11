@@ -6,7 +6,6 @@ target_path: tests/api/smoke/
 
 # Branch to scan in run_scan_mode and base branch for generated test PRs.
 source_branch: main
-target_branch: dev
 
 llm:
   provider: groq          # groq | ollama
