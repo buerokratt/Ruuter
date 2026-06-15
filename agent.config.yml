@@ -27,7 +27,7 @@ reporter:
 
 # Set to true to execute generated tests before opening the test PR.
 # Requires a running service at BASE_URL. Leave false in CI without a live env.
-run_tests: false
+run_tests: true
 
 generators:
   - name: api
