@@ -1,13 +1,9 @@
-watch_patterns:
-  - "DSL/**/*.yml"
-test_type: playwright_api
 target_repo: KoortHendrik/TDD-Playwright
-target_path: tests/api/smoke/
 
 # Branch to scan in run_scan_mode.
 source_branch: main
 # Base branch for generated test PRs opened against target_repo.
-target_branch: main
+target_branch: dev
 
 llm:
   provider: groq          # groq | ollama
@@ -25,7 +21,32 @@ reporter:
   # github_check requires a GitHub App token, not a PAT.
   # Set to true once a GitHub App is configured.
   github_check: false
+  # Label added to the generated test PR to trigger downstream CI workflows.
+  # Set to "" to disable.
+  trigger_label: "run-at-tests"
 
 # Set to true to execute generated tests before opening the test PR.
 # Requires a running service at BASE_URL. Leave false in CI without a live env.
 run_tests: false
+
+generators:
+  - name: api
+    type: playwright_api
+    watch_patterns:
+      - "DSL/GET/*.yml"
+      - "DSL/POST/*.yml"
+    target_path: tests/api/smoke/
+    template_pattern: "*.smoke.js"
+    context: >
+      Ruuter is a DSL orchestrator. Endpoints are defined as YAML files
+      in DSL/GET/ and DSL/POST/. All endpoints return {"response": value} JSON.
+    extra_rules:
+      - "Assert response body contains 'response' field"
+
+  - name: ui
+    type: playwright_ui
+    watch_patterns:
+      - "src/**/*.tsx"
+    target_path: tests/admin/
+    template_pattern: "*.spec.js"
+    context: "React admin components for Bürokratt admin interface."
