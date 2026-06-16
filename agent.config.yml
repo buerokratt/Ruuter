@@ -6,7 +6,7 @@ source_branch: main
 target_branch: dev
 
 llm:
-  provider: groq          # groq | ollama
+  provider: groq          # provider options: groq | ollama | anthropic | openai | gemini
   model: llama-3.3-70b-versatile
   temperature: 0.2
   timeout: 60             # API request timeout in seconds (increase for Ollama: 120+)
