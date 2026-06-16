@@ -35,7 +35,11 @@ jobs:
           node-version: '20'
 
       - name: Install Node dependencies
-        run: npm install && npm install playwright
+        run: npm install
+        working-directory: kratest-agent
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
         working-directory: kratest-agent
 
       - name: Use source repo agent config
