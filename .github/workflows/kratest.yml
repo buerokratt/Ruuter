@@ -84,3 +84,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           BASE_URL: http://localhost:8080
+
+      - name: Show Ruuter logs
+        if: always()
+        run: docker logs ruuter 2>&1 || true
