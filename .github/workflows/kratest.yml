@@ -48,12 +48,12 @@ jobs:
             --name ruuter \
             -p 8080:8080 \
             -v ${{ github.workspace }}/DSL:/DSL \
-            -e "application.config-path=/DSL" \
-            -e "application.incomingRequests.allowedMethodTypes=POST,GET" \
-            -e "application.DSL.allowedFiletypes=.yml,.yaml" \
-            -e "application.DSL.processedFiletypes=.yml,.yaml" \
-            -e "application.stopInCaseOfException=false" \
-            -e "application.CORS.allowedOrigins=*" \
+            -e "APPLICATION_CONFIG_PATH=/DSL" \
+            -e "APPLICATION_INCOMINGREQUESTS_ALLOWEDMETHODTYPES=POST,GET" \
+            -e "APPLICATION_DSL_ALLOWEDFILETYPES=.yml,.yaml" \
+            -e "APPLICATION_DSL_PROCESSEDFILETYPES=.yml,.yaml" \
+            -e "APPLICATION_STOPINCASEOFEXCEPTION=false" \
+            -e "APPLICATION_CORS_ALLOWEDORIGINS=*" \
             ghcr.io/buerokratt/ruuter:v2.2.8
 
       - name: Wait for Ruuter
