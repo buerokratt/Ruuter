@@ -10,18 +10,6 @@ on:
 jobs:
   kratest:
     runs-on: ubuntu-latest
-    services:
-      ruuter:
-        image: ghcr.io/buerokratt/ruuter:v2.2.8
-        ports:
-          - 8080:8080
-        env:
-          application.config-path: /DSL
-          application.incomingRequests.allowedMethodTypes: POST,GET
-          application.DSL.allowedFiletypes: .yml,.yaml
-          application.DSL.processedFiletypes: .yml,.yaml
-          application.CORS.allowedOrigins: "*"
-          application.stopInCaseOfException: "false"
     steps:
       - name: Checkout source repo
         uses: actions/checkout@v4
@@ -53,6 +41,20 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
         working-directory: kratest-agent
+
+      - name: Start Ruuter
+        run: |
+          docker run -d \
+            --name ruuter \
+            -p 8080:8080 \
+            -v ${{ github.workspace }}/DSL:/DSL \
+            -e "application.config-path=/DSL" \
+            -e "application.incomingRequests.allowedMethodTypes=POST,GET" \
+            -e "application.DSL.allowedFiletypes=.yml,.yaml" \
+            -e "application.DSL.processedFiletypes=.yml,.yaml" \
+            -e "application.stopInCaseOfException=false" \
+            -e "application.CORS.allowedOrigins=*" \
+            ghcr.io/buerokratt/ruuter:v2.2.8
 
       - name: Wait for Ruuter
         run: |
