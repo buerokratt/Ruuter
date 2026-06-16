@@ -10,6 +10,18 @@ on:
 jobs:
   kratest:
     runs-on: ubuntu-latest
+    services:
+      ruuter:
+        image: ghcr.io/buerokratt/ruuter:v2.2.8
+        ports:
+          - 8080:8080
+        env:
+          application.config-path: /DSL
+          application.incomingRequests.allowedMethodTypes: POST,GET
+          application.DSL.allowedFiletypes: .yml,.yaml
+          application.DSL.processedFiletypes: .yml,.yaml
+          application.CORS.allowedOrigins: "*"
+          application.stopInCaseOfException: "false"
     steps:
       - name: Checkout source repo
         uses: actions/checkout@v4
@@ -42,6 +54,14 @@ jobs:
         run: npx playwright install chromium
         working-directory: kratest-agent
 
+      - name: Wait for Ruuter
+        run: |
+          for i in {1..30}; do
+            curl -sf http://localhost:8080 && break
+            echo "Waiting for Ruuter... ($i/30)"
+            sleep 2
+          done
+
       - name: Use source repo agent config
         run: |
           if [ -f agent.config.yml ]; then
@@ -50,26 +70,6 @@ jobs:
           else
             echo "No agent.config.yml found in source repo, using kratest default"
           fi
-
-      - name: Start mock HTTP server
-        run: |
-          python3 -c "
-          from http.server import BaseHTTPRequestHandler, HTTPServer
-          import json
-          class Handler(BaseHTTPRequestHandler):
-              def do_GET(self): self._respond()
-              def do_POST(self): self._respond()
-              def _respond(self):
-                  body = json.dumps({'response': 'ok'}).encode()
-                  self.send_response(200)
-                  self.send_header('Content-Type', 'application/json')
-                  self.send_header('Content-Length', len(body))
-                  self.end_headers()
-                  self.wfile.write(body)
-              def log_message(self, *args): pass
-          HTTPServer(('', 3000), Handler).serve_forever()
-          " &
-          sleep 2
 
       - name: Run kratest
         run: python -m kratest.main
@@ -81,4 +81,4 @@ jobs:
           PR_REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BASE_URL: http://localhost:3000
+          BASE_URL: http://localhost:8080
