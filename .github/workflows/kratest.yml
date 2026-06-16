@@ -39,7 +39,7 @@ jobs:
         working-directory: kratest-agent
 
       - name: Install Playwright browsers
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
         working-directory: kratest-agent
 
       - name: Use source repo agent config
