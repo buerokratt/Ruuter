@@ -81,6 +81,8 @@ jobs:
           curl -v http://localhost:8080/test/health-check 2>&1 || true
           echo "=== curl /test/test-endpoint ==="
           curl -v http://localhost:8080/test/test-endpoint 2>&1 || true
+          echo "=== curl /order/jump-with-end ==="
+          curl -v http://localhost:8080/order/jump-with-end 2>&1 || true
 
       - name: Run kratest
         run: python -m kratest.main
