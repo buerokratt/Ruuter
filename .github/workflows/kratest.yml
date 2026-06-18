@@ -54,7 +54,7 @@ jobs:
             -e "APPLICATION_DSL_PROCESSEDFILETYPES=.yml,.yaml" \
             -e "APPLICATION_STOPINCASEOFEXCEPTION=false" \
             -e "APPLICATION_CORS_ALLOWEDORIGINS=*" \
-            ghcr.io/buerokratt/ruuter:v2.2.8
+            ghcr.io/buerokratt/ruuter:dev-curl-2.2.1
 
       - name: Wait for Ruuter
         run: |
