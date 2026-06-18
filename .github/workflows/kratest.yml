@@ -54,6 +54,7 @@ jobs:
             -e "APPLICATION_DSL_PROCESSEDFILETYPES=.yml,.yaml" \
             -e "APPLICATION_STOPINCASEOFEXCEPTION=false" \
             -e "APPLICATION_CORS_ALLOWEDORIGINS=*" \
+            -e "APPLICATION_LOGGING_MEANINGFULERRORS=true" \
             ghcr.io/buerokratt/ruuter:dev-curl-2.2.1
 
       - name: Debug Ruuter config
