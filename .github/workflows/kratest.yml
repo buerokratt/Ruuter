@@ -42,37 +42,6 @@ jobs:
         run: npx playwright install chromium
         working-directory: kratest-agent
 
-      - name: Start Ruuter
-        run: |
-          docker run -d \
-            --name ruuter \
-            -p 8080:8080 \
-            -v ${{ github.workspace }}/DSL:/DSL \
-            -e "APPLICATION_CONFIG_PATH=/DSL" \
-            -e "APPLICATION_INCOMINGREQUESTS_ALLOWEDMETHODTYPES=POST,GET" \
-            -e "APPLICATION_DSL_ALLOWEDFILETYPES=.yml,.yaml" \
-            -e "APPLICATION_DSL_PROCESSEDFILETYPES=.yml,.yaml" \
-            -e "APPLICATION_STOPINCASEOFEXCEPTION=false" \
-            -e "APPLICATION_CORS_ALLOWEDORIGINS=*" \
-            -e "APPLICATION_LOGGING_MEANINGFULERRORS=true" \
-            ghcr.io/buerokratt/ruuter:dev-curl-2.2.1
-
-      - name: Debug Ruuter config
-        run: |
-          sleep 3
-          docker exec ruuter find / -name "application.yml" 2>/dev/null | head -10 || true
-          docker exec ruuter cat /app/config/application.yml 2>/dev/null || true
-          docker exec ruuter cat /app/application.yml 2>/dev/null || true
-          docker exec ruuter env 2>/dev/null || true
-
-      - name: Wait for Ruuter
-        run: |
-          for i in {1..30}; do
-            curl -sf http://localhost:8080 && break
-            echo "Waiting for Ruuter... ($i/30)"
-            sleep 2
-          done
-
       - name: Use source repo agent config
         run: |
           if [ -f agent.config.yml ]; then
@@ -82,7 +51,20 @@ jobs:
             echo "No agent.config.yml found in source repo, using kratest default"
           fi
 
-      - name: Debug Ruuter endpoints
+      - name: Start dynamic mock server
+        run: |
+          node -e "
+          const http = require('http');
+          http.createServer((req, res) => {
+            console.log('[Mock] Received request:', req.method, req.url);
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify({ response: { status: 'ok', mock: true, path: req.url } }));
+          }).listen(8080);
+          console.log('Mock server running on port 8080');
+          " &
+          sleep 2
+
+      - name: Debug Mock endpoints
         run: |
           echo "=== curl /health-check ==="
           curl -v http://localhost:8080/health-check 2>&1 || true
@@ -104,7 +86,3 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           BASE_URL: http://localhost:8080
-
-      - name: Show Ruuter logs
-        if: always()
-        run: docker logs ruuter 2>&1 || true
