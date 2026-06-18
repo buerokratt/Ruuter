@@ -73,6 +73,15 @@ jobs:
             echo "No agent.config.yml found in source repo, using kratest default"
           fi
 
+      - name: Debug Ruuter endpoints
+        run: |
+          echo "=== curl /health-check ==="
+          curl -v http://localhost:8080/health-check 2>&1 || true
+          echo "=== curl /test/health-check ==="
+          curl -v http://localhost:8080/test/health-check 2>&1 || true
+          echo "=== curl /test/test-endpoint ==="
+          curl -v http://localhost:8080/test/test-endpoint 2>&1 || true
+
       - name: Run kratest
         run: python -m kratest.main
         env:
