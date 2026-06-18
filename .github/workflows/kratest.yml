@@ -56,6 +56,14 @@ jobs:
             -e "APPLICATION_CORS_ALLOWEDORIGINS=*" \
             ghcr.io/buerokratt/ruuter:dev-curl-2.2.1
 
+      - name: Debug Ruuter config
+        run: |
+          sleep 3
+          docker exec ruuter find / -name "application.yml" 2>/dev/null | head -10 || true
+          docker exec ruuter cat /app/config/application.yml 2>/dev/null || true
+          docker exec ruuter cat /app/application.yml 2>/dev/null || true
+          docker exec ruuter env 2>/dev/null || true
+
       - name: Wait for Ruuter
         run: |
           for i in {1..30}; do
