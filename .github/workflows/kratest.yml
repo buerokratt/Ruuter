@@ -3,9 +3,6 @@ name: Kratest — generate tests for PR
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - 'DSL/GET/*.yml'
-      - 'DSL/POST/*.yml'
 
 jobs:
   kratest:
@@ -14,10 +11,11 @@ jobs:
       - name: Checkout source repo
         uses: actions/checkout@v4
 
+      # Requires repository variable KRATEST_REPO: Settings → Secrets and variables → Actions → Variables
       - name: Checkout kratest
         uses: actions/checkout@v4
         with:
-          repository: KoortHendrik/kratest
+          repository: ${{ vars.KRATEST_REPO }}
           path: kratest-agent
           token: ${{ secrets.KRATEST_TOKEN }}
 

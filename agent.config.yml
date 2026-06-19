@@ -32,6 +32,9 @@ reporter:
 # Requires a running service at BASE_URL. Leave false in CI without a live env.
 run_tests: true
 
+# Path for the kratest run log written on each agent run (uploaded as a CI artifact).
+log_file: kratest.log
+
 generators:
   - name: api
     type: playwright_api
@@ -46,6 +49,10 @@ generators:
       in DSL/GET/ and DSL/POST/. All endpoints return {"response": value} JSON.
     extra_rules:
       - "Assert response body contains 'response' field"
+    # File-path-to-endpoint conventions for this repo (Ruuter DSL layout).
+    prompt_hints:
+      - "DSL/GET/messages.yml  →  GET /messages"
+      - "DSL/POST/send.yml     →  POST /send"
 
   - name: ui
     type: playwright_ui
