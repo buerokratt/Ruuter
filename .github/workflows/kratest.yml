@@ -86,3 +86,11 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           BASE_URL: http://localhost:8080
+
+      - name: Upload kratest log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kratest-log
+          path: kratest.log
+          if-no-files-found: ignore
