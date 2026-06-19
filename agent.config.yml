@@ -4,6 +4,8 @@ target_repo: KoortHendrik/TDD-Playwright
 source_branch: main
 # Base branch for generated test PRs opened against target_repo.
 target_branch: dev
+# Prefix used for all branches kratest creates (e.g. kratest/pr-42-...).
+branch_prefix: kratest
 
 llm:
   provider: groq          # provider options: groq | ollama | anthropic | openai | gemini
@@ -11,6 +13,7 @@ llm:
   temperature: 0.2
   timeout: 60             # API request timeout in seconds (increase for Ollama: 120+)
   retries: 2              # number of generation attempts on parse failure
+  max_tokens: 4096        # max tokens in LLM response (mainly relevant for Anthropic)
   # endpoint: ""          # override API URL (e.g. custom Ollama host or proxy)
 
 runner:
@@ -33,10 +36,11 @@ generators:
   - name: api
     type: playwright_api
     watch_patterns:
-      - "DSL/GET/**/*.yml"
-      - "DSL/POST/**/*.yml"
+      - "DSL/GET/*.yml"
+      - "DSL/POST/*.yml"
     target_path: tests/api/smoke/
     template_pattern: "*.smoke.js"
+    base_url: "http://localhost:3000"
     context: >
       Ruuter is a DSL orchestrator. Endpoints are defined as YAML files
       in DSL/GET/ and DSL/POST/. All endpoints return {"response": value} JSON.
@@ -49,4 +53,5 @@ generators:
       - "src/**/*.tsx"
     target_path: tests/admin/
     template_pattern: "*.spec.js"
+    base_url: "http://localhost:3000"
     context: "React admin components for Bürokratt admin interface."
