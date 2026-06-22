@@ -22,6 +22,26 @@ first_step:
 Expected result: "passedValue" 
 ```
 
+#### Path parameters
+
+Endpoints support path parameters, these values are inserted into
+incoming parameter list `incoming.params` under the key pathParams
+as a list in the same order:
+
+##### Example:
+
+```
+https://ruuter/scripting/passing-path-parameters/value3/value1/value2
+```
+
+```
+first_step:
+  return: ${incoming.params.pathParams}
+    
+--------------------------------------------
+Expected result: ["value3","value1","value2"] 
+```
+
 ### Example of using body
 
 ```

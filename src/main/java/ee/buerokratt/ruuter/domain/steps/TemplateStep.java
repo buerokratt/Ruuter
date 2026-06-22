@@ -3,6 +3,7 @@ package ee.buerokratt.ruuter.domain.steps;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,7 @@ public class TemplateStep extends DslStep {
     private Map<String, Object> headers = new HashMap<>();
 
     @Override
-    protected void executeStepAction(DslInstance di) {
+    protected void executeStepAction(DslInstance di) throws DSLExecutionException {
         ScriptingHelper scriptingHelper = di.getScriptingHelper();
         Map<String, Object> evaluatedBody = scriptingHelper.evaluateScripts(body, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());
         Map<String, Object> evaluatedQuery = scriptingHelper.evaluateScripts(query, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());

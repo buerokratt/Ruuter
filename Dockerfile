@@ -23,7 +23,7 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 ENV application.config-path=/DSL
 
 COPY .env /app/.env
-RUN echo BUILDTIME=`date +%s` >> /app/.env
+RUN echo BUILDTIME=`date +%s%N | cut -b1-13` >> /app/.env
 
 RUN adduser -D ruuter
 RUN mkdir logs

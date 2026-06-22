@@ -6,6 +6,7 @@ import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.helper.*;
 import ee.buerokratt.ruuter.helper.exception.LoadDslsException;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
 import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import ee.buerokratt.ruuter.util.FileUtils;
 import ee.buerokratt.ruuter.util.LoggingUtils;
@@ -17,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
 import static ee.buerokratt.ruuter.util.LoggingUtils.*;
+import static java.util.stream.Collectors.toConcurrentMap;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
@@ -74,14 +75,15 @@ public class DslService {
     }
 
     public Map<String, Map<String, Map<String, Dsl>>> getDsls(String configPath) {
-        openApiBuilder = new OpenApiBuilder("BYK", "1.0");
 
+        if (openApiBuilder == null)
+            openApiBuilder = new OpenApiBuilder("BYK", "1.0");
 
         Map<String, Map<String, Map<String, Dsl>>> _dsls =
                 Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory)))
                         .collect(toMap(File::getName, f -> getDslsForProject(configPath+"/" + f.getName()+"/")));
 
-        log.info("Built OpenAPI spec: " + Yaml.pretty(getOpenAPISpec()));
+        log.debug("Built OpenAPI spec (pretty): " + Yaml.pretty(getOpenAPISpec()));
 
         return _dsls;
     }
@@ -125,15 +127,13 @@ public class DslService {
         Map<String, Map<String, Map<String, Dsl>>> _dsls =
             Arrays.stream(Objects.requireNonNull(new File(configPath).listFiles(File::isDirectory)))
                 .collect(toMap(File::getName, f -> getGuardsForProject(configPath+"/" + f.getName()+"/")));
-        log.debug("Loaded Guards: " + mapDeepToString(_dsls));
+        log.info("Loaded Guards: " + mapDeepToString(_dsls));
         return _dsls;
     }
 
     public Map<String, Map<String, Dsl>> getGuardsForProject(String projectPath) {
-        Map<String, Map<String, Dsl>> _dsls =
-            Arrays.stream(Objects.requireNonNull(new File(projectPath).listFiles(File::isDirectory)))
+        return Arrays.stream(Objects.requireNonNull(new File(projectPath).listFiles(File::isDirectory)))
                 .collect(toMap(File::getName, this::extractGuard));
-        return _dsls;
     }
 
     private Map<String, Dsl> extractGuard(File directory) {
@@ -147,22 +147,40 @@ public class DslService {
         }
     }
 
-    public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin) {
-        return execute(dsl, requestType, requestBody, requestQuery, requestHeaders, requestOrigin, this.getClass().getName());
+    public DslInstance execute(String dsl,
+                               String requestType,
+                               Map<String, Object> requestBody,
+                               Map<String, Object> requestQuery,
+                               Map<String, String> requestHeaders,
+                               String requestOrigin)
+                throws DSLExecutionException {
+        try {
+            return execute(dsl, requestType, requestBody, requestQuery, requestHeaders,
+                requestOrigin, this.getClass().getName());
+        } catch (StepExecutionException stepEx) {
+            throw new DSLExecutionException(stepEx.getStepName(), dsl, stepEx.getCause());
+        } catch (StringIndexOutOfBoundsException stex) {
+            throw new DSLExecutionException("", dsl, stex);
+        }
     }
 
-    public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
+    public DslInstance execute(String dsl, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType)
+        throws StepExecutionException, DSLExecutionException {
         String project = dsl.substring(0, dsl.indexOf('/'));
         dsl = dsl.substring(dsl.indexOf('/')+1);
         return execute(project, dsl, requestType, requestBody, requestQuery,requestHeaders, requestOrigin, contentType);
     }
 
-    public DslInstance execute(String project, String dslName, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType) {
+    public DslInstance execute(String project, String dslName, String requestType, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String requestOrigin, String contentType)
+        throws StepExecutionException, DSLExecutionException {
         log.debug("Loading DSL: "+ dslName + " from project: " + project);
-        Dsl dsl = dsls.get(project).get(requestType.toUpperCase()).get(dslName);
+
+        String _dslName=requestType.toUpperCase()+"/"+dslName;
 
         log.debug("DSLs in project "+ project +" => " + LoggingUtils.mapDeepToString(dsls.get(project).get(requestType.toUpperCase())));
-        log.debug("DSL=> " + dsls.get(project).get(requestType.toUpperCase()).get(dslName));
+        log.debug("DSL=> " + dsls.get(project).get(requestType.toUpperCase()).get(_dslName));
+
+        Dsl dsl = dsls.get(project).get(requestType.toUpperCase()).get(_dslName);
 
         Map<String, DslStep> steps = null;
 
@@ -182,9 +200,26 @@ public class DslService {
             }
 
             log.debug("body after: "+ LoggingUtils.mapDeepToString(requestBody));
-        } else {
+        } else if (dslName.isBlank()){
             log.info("DSL in project "+ project+" not found: "+dslName);
-            steps = null;
+            return null;
+        } else {
+            // handle path parameters recursively
+            String lastParam = dslName.substring(dslName.lastIndexOf('/')+1);
+            try {
+                dslName = dslName.substring(0, dslName.lastIndexOf('/'));
+            } catch (StringIndexOutOfBoundsException e) {
+                throw new DSLExecutionException("Trying to access non-existent endpoint: %s".formatted(dsl), dslName, e);
+            }
+
+            if (requestQuery.get("pathParams") == null)
+                requestQuery.put("pathParams", new ArrayList<String>());
+
+            ((List<String>) requestQuery.get("pathParams")).add(0, lastParam);
+
+            log.debug("Executing " + dslName +
+                " with path parameters " + requestQuery.get("pathParams"));
+            return execute(project, dslName, requestType, requestBody, requestQuery, requestHeaders, requestOrigin, contentType);
         }
 
         DslInstance di = new DslInstance(dslName,
@@ -203,7 +238,7 @@ public class DslService {
             if ( !allowedToExecuteDSLFrom(di, requestOrigin, requestHeaders.get("referer"))) {
                 LoggingUtils.logError(log, "Internal DSL not allowed: %s (%s)".formatted(dslName, requestOrigin), requestOrigin, INCOMING_RESPONSE);
                 return di;
-            };
+            }
 
             Dsl _guard =  getGuard(project,requestType.toUpperCase(), dslName);
 
@@ -219,6 +254,7 @@ public class DslService {
                     properties, scriptingHelper, mappingHelper, httpHelper, tracer, openSearchSender);
 
                 LoggingUtils.logInfo(log, "Executing guard for DSL: %s".formatted(dslName), requestOrigin, INCOMING_REQUEST);
+
                 guard.execute();
 
                 // In case the guard does not specifically return a status code or throw an exception, it
@@ -261,10 +297,25 @@ public class DslService {
     }
 
     private Dsl getGuard(String project, String method, String dslPath) {
-        if (dslPath.length()<=1)
+
+        log.debug("Looking for guards: "+ method+ " "+ project + " " + dslPath);
+
+        if (guards == null || guards.isEmpty()
+            || guards.get(project) == null || guards.get(project).isEmpty()
+            || guards.get(project).get(method) == null || guards.get(project).get(method).isEmpty() )
             return null;
+
         String path = dslPath.contains("/") ? dslPath.substring(0, dslPath.lastIndexOf('/')) : "";
-        return guards.get(project).get(method).containsKey(path) ? guards.get(project).get(method).get(path) : getGuard(project, method, path);
+
+        if (guards.get(project).get(method).containsKey(method + "/" + path))
+            return guards.get(project).get(method).get(method + "/" + path);
+
+        if (path.isEmpty())
+            return guards.get(project).get(method).get(method);
+
+        log.info("No guard found for " + method + "/" + path);
+
+        return getGuard(project, method, path);
     }
 
 
@@ -273,20 +324,21 @@ public class DslService {
                         requestFields :
                         requestFields == null ?
                             null :
-                            requestFields.entrySet().stream().filter(e -> allowedFields.contains(e.getKey()))
-            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+                            requestFields.entrySet().stream()
+                                .filter(e -> allowedFields.contains(e.getKey()))
+                                .filter(e -> e.getValue() != null)
+                                .collect(toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     <V> void checkFields(Map<String, V> requestFields, List<String> requestedFields) {
+
+        // Skip check if no fields are requested
+        if (requestedFields == null)
+            return;
+
         requestedFields.forEach((field) -> {
                 if (!requestFields.containsKey(field)) {
-                    String message = "Field missing: %s".formatted(field);
-                    if (properties.getLogging().getPrintStackTrace() != null && properties.getLogging().getPrintStackTrace())
-                        throw new StepExecutionException("declare", new Exception(message));
-                    else {
-                        log.error(message);
-                        Thread.currentThread().interrupt();
-                    }
+                    log.warn("Request has errors: field(s) missing: %s".formatted(field));
                 }
             }
         );

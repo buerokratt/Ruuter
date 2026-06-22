@@ -62,12 +62,16 @@ So if a GET query is made to the DSL `messages`, Ruuter will try to execute `mes
 
 ### Request body
 
-Ruuter supports request body as formdata or JSON format. 
+Ruuter supports request object body as formdata or JSON format.
 If formdata is used, duplicate keys are ignored so the functionality is 
 kept the same as for JSON, which does not allow duplicate keys.
 
 For multipart (file) requests, all file data should be in field `file` which can be duplicate; 
 content of these files will be accessible through the array `body.file[]`.  
+
+Ruuter also supports POST requests with Content-type: text/*, in which
+case the body data will be put into relevant field in body object, for
+example for text/plain it will be `body.plain` etc.
 
 ### DSL query responses
 

@@ -8,6 +8,7 @@ import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.domain.steps.DslStep;
 import ee.buerokratt.ruuter.domain.Logging;
 import ee.buerokratt.ruuter.helper.MappingHelper;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
 import ee.buerokratt.ruuter.util.LoggingUtils;
 import io.netty.channel.ConnectTimeoutException;
 import lombok.*;
@@ -42,6 +43,7 @@ public abstract class HttpStep extends DslStep {
     protected Logging logging;
 
     protected Integer limit;
+    protected Integer timeout;
 
     @JsonAlias("error")
     protected String onErrorStep;
@@ -64,9 +66,8 @@ public abstract class HttpStep extends DslStep {
 
         if (!isAllowedHttpStatusCode(di, response.getStatusCodeValue())) {
             if (getOnErrorStep() != null) {
-                setNextStepName(getOnErrorStep());
-            }
-            else {
+                di.setGotoStep(getOnErrorStep());
+            } else {
                 di.setErrorStatus(HttpStatus.valueOf(response.getStatusCodeValue()));
                 di.setErrorMessage("HTTP returned with non-OK");
                 throw new IllegalArgumentException();
@@ -75,9 +76,9 @@ public abstract class HttpStep extends DslStep {
     }
 
     @Override
-    public void handleFailedResult(DslInstance di) {
+    public void handleFailedResult(DslInstance di) throws DSLExecutionException {
         super.handleFailedResult(di);
-        HttpStepResult stepResult = (HttpStepResult) di.getContext().get(resultName);
+        HttpStepResult stepResult = (HttpStepResult) di.getContext().get(                   resultName);
         if (stepResult != null && !isAllowedHttpStatusCode(di, stepResult.getResponse().getStatusCodeValue())) {
             DefaultHttpDsl globalHttpExceptionDsl = di.getProperties().getDefaultDslInCaseOfException();
             if (localHttpExceptionDslExists()) {
@@ -96,7 +97,9 @@ public abstract class HttpStep extends DslStep {
         String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) di.getContext().get(resultName)).getResponse().getBody());
         String responseContent = responseBody != null && displayResponseContent(properties) ? responseBody : "-";
         String requestContent = args.getBody() != null && displayRequestContent(properties) ? args.getBody().toString() : "-";
-        LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, args.getUrl(), requestContent, responseContent, String.valueOf(responseStatus));
+        String evaluatedBody = di.getScriptingHelper().evaluateScripts(requestContent, di).toString();
+
+        LoggingUtils.logStep(log, this, di.getRequestOrigin(), elapsedTime, args.getUrl(), evaluatedBody, responseContent, String.valueOf(responseStatus));
     }
 
     private boolean isAllowedHttpStatusCode(DslInstance di, Integer response) {

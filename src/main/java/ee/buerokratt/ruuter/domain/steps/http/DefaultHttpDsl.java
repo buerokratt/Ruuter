@@ -1,6 +1,7 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
 import ee.buerokratt.ruuter.domain.DslInstance;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.MDC;
@@ -18,7 +19,7 @@ public class DefaultHttpDsl {
     private Map<String, Object> headers = new HashMap<>();
     private String requestType;
 
-    public void executeHttpDefaultDsl(DslInstance di, String resultName) {
+    public void executeHttpDefaultDsl(DslInstance di, String resultName) throws DSLExecutionException {
         ResponseEntity<Object> response = ((HttpStepResult) di.getContext().get(resultName)).getResponse();
         body.put("statusCode", response.getStatusCodeValue());
         body.put("responseBody", di.getMappingHelper().convertObjectToString(response.getBody()));

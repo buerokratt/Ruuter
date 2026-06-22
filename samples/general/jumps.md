@@ -92,4 +92,42 @@ this_step_is_not_executed:
     url: https://example.com/callB
 ```
 
+### Example of an *ad hoc* loop
+
+It is possible to use jumping for an *ad hoc* looping. 
+This method does not keep stack and the end condition has to be 
+specifically added.
+
+```
+initialize_array:
+  assign:
+    array: []
+    index: 0
+
+process_next_index:
+  switch:
+    - condition: ${index < 5 && index === 0}
+      next: loop_first_index
+    - condition: ${index < 5 && index > 0}
+      next: loop_index  
+  next: return_array
+
+loop_first_index:
+  assign:
+    array: ${[array, index]}
+    index: ${index + 1}
+  next: process_next_index
+
+loop_index:
+  assign:
+    array: ${[...array, index]}
+    index: ${index + 1}
+  next: process_next_index 
+
+return_array:
+  return: ${array.splice(1 , array.length - 1)}
+  next: end
+```
+
+
 [Back to Guide](../GUIDE.md#Writing-DSL-files)

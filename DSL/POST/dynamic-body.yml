@@ -5,7 +5,7 @@ dynamicTest:
     dynamicParameters: true
     body:
       dynamicBody: ${incoming.body.input}
-    result: value
+  result: value
 
 returnStep:
   return: ${value}

@@ -25,10 +25,19 @@ public class SwitchStep extends DslStep {
 
     @Override
     protected void executeStepAction(DslInstance di) {
+/*
+        Optional<Condition> correctStatement =
+            conditions.stream()
+                .filter(condition -> condition.getConditionStatement().equals(di.getRequestQuery().get("metric")))
+    .findFirst();
+
+        System.out.println("METRIC: " + di.getRequestQuery().get("metric"));
+*/
         ScriptingHelper scriptingHelper = di.getScriptingHelper();
         Optional<Condition> correctStatement = conditions.stream()
             .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders())))
             .findFirst();
+
         correctStatement.ifPresentOrElse(condition -> this.setNextStepName(condition.getNextStepName()), () -> this.setNextStepName(elseNextStepName));
     }
 

@@ -4,11 +4,18 @@ application:
   logging:
     displayRequestContent: false
     displayResponseContent: false
+    printStackTrace: false
     meaningfulErrors: false
   incomingRequests:
     allowedMethodTypes: [ POST, GET ]
     headers:
       header: value
+
+  responseDefaultHeaders:
+    Cache-Control: no-cache, no-store, must-revalidate
+    Pragma: no-cache
+    Expires: 0
+
   httpCodesAllowList: [ 200, 201, 202 ]
   defaultDslInCaseOfException:
     dsl: default-dsl
@@ -36,6 +43,8 @@ application:
 #    url: http://host.docker.internal:9200
 #    index: ruuterlog
   httpResponseSizeLimit: 256
+
+  apiRequestTestingKey: voorshpellhappilo
 
 management:
   endpoints:
