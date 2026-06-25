@@ -10,7 +10,7 @@ third_step:
   args:
     response:
       test: value
-  next: end
+  next: fourth_step
 
 second_step:
   call: reflect.mock
@@ -19,3 +19,10 @@ second_step:
       test: value
   next: third_step
 
+fourth_step:
+  call: reflect.mock
+  args:
+    response:
+      status: completed
+      step: four
+  next: end
