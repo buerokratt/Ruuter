@@ -41,7 +41,7 @@ jobs:
           git config --global user.email ${{ secrets.ADMIN_EMAIL }}
           git add .
           git commit -m "docs: update version"
-          git push
+          git push || echo "not pushing"
 
       - name: Load environment variables
         run: |
