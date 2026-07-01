@@ -2,7 +2,10 @@ name: Check Version
 
 on:
   push:
-    branches: ["test", "stage", "main"]
+    branches:
+     - test
+     - 'v3.*'
+     - main
   workflow_dispatch:
 
 env:
