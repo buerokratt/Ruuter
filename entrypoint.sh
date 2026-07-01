@@ -3,26 +3,34 @@ set -ex
 
 KEYSTORE=/app/my-keystore.jks
 STOREPASS=mypassword
-
-echo "$CUSTOM_CA_CERTIFICATE" | sed 's/\\n/\n/g' > /tmp/ca-chain.pem
+DEFAULT_CACERTS=$(find $JAVA_HOME -name "cacerts" 2>/dev/null | head -1)
 
 if [ -n "$CUSTOM_CA_CERTIFICATE" ]; then
-	# Split and import each cert
-	i=0
-	csplit -z -f /tmp/cert- /tmp/ca-chain.pem '/-----BEGIN CERTIFICATE-----/' '{*}' 2>/dev/null
+    # Start from JVM's default cacerts so public HTTPS still works
+    cp "$DEFAULT_CACERTS" "$KEYSTORE"
 
-	for cert in /tmp/cert-*; do
-	    keytool -importcert \
-	        -noprompt \
-	        -alias "custom-ca-$i" \
-	        -keystore "$KEYSTORE" \
-	        -storepass "$STOREPASS" \
-	        -file "$cert"
-	    i=$((i + 1))
-	done
+    # Change default password ("changeit") to our password
+    keytool -storepasswd \
+        -keystore "$KEYSTORE" \
+        -storepass changeit \
+        -new "$STOREPASS"
 
-	echo "Imported $i certificate(s) into $KEYSTORE"
+    # Convert literal \n to real newlines and split into individual certs
+    echo "$CUSTOM_CA_CERTIFICATE" | sed 's/\\n/\n/g' > /tmp/ca-chain.pem
+    csplit -z -f /tmp/cert- /tmp/ca-chain.pem '/-----BEGIN CERTIFICATE-----/' '{*}' 2>/dev/null
 
+    i=0
+    for cert in /tmp/cert-*; do
+        keytool -importcert \
+            -noprompt \
+            -alias "custom-ca-$i" \
+            -keystore "$KEYSTORE" \
+            -storepass "$STOREPASS" \
+            -file "$cert"
+        i=$((i + 1))
+    done
+
+    echo "Imported $i certificate(s) into $KEYSTORE"
 fi
 
 exec "$@"
