@@ -22,6 +22,8 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
 ENV application.config-path=/DSL
 
+COPY entrypoint.sh ./entrypoint.sh
+
 COPY .env /app/.env
 RUN echo BUILDTIME=`date +%s%N | cut -b1-13` >> /app/.env
 
@@ -34,4 +36,7 @@ RUN chown -R ruuter:ruuter /DSL
 USER ruuter
 
 
-ENTRYPOINT ["java","-cp","app:app/lib/*","ee.buerokratt.ruuter.RuuterApplication"]
+# ENTRYPOINT ["java","-cp","app:app/lib/*","ee.buerokratt.ruuter.RuuterApplication"]
+
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["java", "-Djavax.net.ssl.trustStore=/app/my-keystore.jks", "-Djavax.net.ssl.trustStorePassword=mypassword", "-cp", "app:app/lib/*", "ee.buerokratt.ruuter.RuuterApplication"]
