@@ -125,24 +125,31 @@ public class DslInstance {
         throws DSLExecutionException,
         StepExecutionException{
         if (getGotoStep() != null) {
-            DslStep nextStep = steps.get(getGotoStep());
+            String gotoStepName = getGotoStep();
+            DslStep nextStep = steps.get(gotoStepName);
             setGotoStep(null);
-            executeNextStepWithoutMaxRecursionsExceeded(nextStep, stepNames);
+            executeNextStepWithoutMaxRecursionsExceeded(nextStep, gotoStepName, stepNames);
         } else if (Boolean.TRUE.equals(previousStep.getSkip()) || previousStep.getNextStepName() == null) {
             int nextStepIndex = stepNames.indexOf(previousStep.getName()) + 1;
             if (nextStepIndex >= stepNames.size()) {
                 return;
             }
-            DslStep nextStep = steps.get(stepNames.get(nextStepIndex));
-            executeNextStepWithoutMaxRecursionsExceeded(nextStep, stepNames);
+            String nextStepName = stepNames.get(nextStepIndex);
+            DslStep nextStep = steps.get(nextStepName);
+            executeNextStepWithoutMaxRecursionsExceeded(nextStep, nextStepName, stepNames);
         } else if (!previousStep.getNextStepName().equals("end")) {
-            DslStep nextStep = steps.get(previousStep.getNextStepName());
-            executeNextStepWithoutMaxRecursionsExceeded(nextStep, stepNames);
+            String nextStepName = previousStep.getNextStepName();
+            DslStep nextStep = steps.get(nextStepName);
+            executeNextStepWithoutMaxRecursionsExceeded(nextStep, nextStepName, stepNames);
         }
     }
 
-    private void executeNextStepWithoutMaxRecursionsExceeded(DslStep nextStep, List<String> stepNames)
+    private void executeNextStepWithoutMaxRecursionsExceeded(DslStep nextStep, String nextStepName, List<String> stepNames)
         throws DSLExecutionException, StepExecutionException {
+        if (nextStep == null) {
+            throw new StepExecutionException(nextStepName, new IllegalArgumentException(
+                "Referenced step '%s' does not exist in this DSL".formatted(nextStepName)));
+        }
         if (Objects.equals(recursions.get(nextStep.getName()), currentLoopMaxRecursions)) {
             int nextStepIndex = stepNames.indexOf(nextStep.getName());
             executeNextStepOutsideRecursion(nextStepIndex, stepNames);

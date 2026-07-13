@@ -2,6 +2,8 @@ package ee.buerokratt.ruuter.domain.steps;
 
 import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
+import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -34,7 +36,7 @@ class AssignStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldAssignVariableToContext() {
+    void execute_shouldAssignVariableToContext() throws StepExecutionException, DSLExecutionException {
         AssignStep<String> assignStep = new AssignStep<>() {{
             setAssign(new HashMap<>() {{
                 put("key", expectedResult);
@@ -47,7 +49,7 @@ class AssignStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldCallScriptingHelperWhenScriptFound() {
+    void execute_shouldCallScriptingHelperWhenScriptFound() throws StepExecutionException, DSLExecutionException {
         AssignStep<String> assignStep = new AssignStep<>() {{
             setAssign(new HashMap<>() {{
                 put("key", "${value}");

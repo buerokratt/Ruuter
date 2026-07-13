@@ -2,6 +2,7 @@ package ee.buerokratt.ruuter.helper;
 
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.domain.DslInstance;
+import ee.buerokratt.ruuter.helper.exception.SsrfGuardException;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -43,6 +44,8 @@ public class HttpHelper {
 
     final private ScriptingHelper scriptingHelper;
 
+    final private OutboundRequestGuard outboundRequestGuard;
+
     public ResponseEntity<Object> doPost(String url, Map<String, Object> body, Map<String, Object> query, Map<String, String> headers, DslInstance di, boolean dynamicBody, Integer timeout) {
         return doPost(url, body, query, headers, this.getClass().getName(), di, dynamicBody, timeout);
     }
@@ -80,6 +83,8 @@ public class HttpHelper {
                                            boolean blockResult,
                                            Integer timeout) {
         try {
+            outboundRequestGuard.assertAllowed(url);
+
             MultiValueMap<String, String> qp = new LinkedMultiValueMap<>(
                 query.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e-> Arrays.asList(e.getValue().toString()))));
 
@@ -159,7 +164,18 @@ public class HttpHelper {
                 Disposable dis = retrieve.subscribe();
                 return ResponseEntity.ok(null);
             }
+        } catch (SsrfGuardException e) {
+            log.warn("Blocked outbound request: {}", e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (WebClientResponseException e) {
+            if (e.getStatusCode().is2xxSuccessful()) {
+                // Spring wraps response body processing failures (e.g. exceeding the configured size
+                // limit) in a WebClientResponseException that still carries the upstream's original 2xx
+                // status - report it as the failure it is instead of masking it as a successful response.
+                log.error("Failed to process HTTP response body: ", e);
+                String cause = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+                return new ResponseEntity<>("Failed to process upstream response: " + cause, HttpStatus.BAD_GATEWAY);
+            }
             log.error("Failed HTTP request: ", e);
             log.error("CAUSE:" + e.getResponseBodyAsString());
             return new ResponseEntity<>(e.getStatusText(), e.getStatusCode());

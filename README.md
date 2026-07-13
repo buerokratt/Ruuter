@@ -23,6 +23,17 @@ To launch the application's tests, run:
 gradlew test
 ```
 
+This requires a local JDK matching the project's version (see `Dockerfile`). If your local JDK doesn't
+match, run the tests in Docker instead - no local JDK required:
+
+```
+docker build -f Dockerfile.test .
+```
+
+This builds and runs the full test suite inside a container matching the project's JDK version, and
+fails the build (non-zero exit code) if any test fails. It doesn't produce a runnable image - it's a
+test gate, not a deployment artifact.
+
 
 ## Building for production
 

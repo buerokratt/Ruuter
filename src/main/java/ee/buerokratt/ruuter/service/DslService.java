@@ -177,10 +177,21 @@ public class DslService {
 
         String _dslName=requestType.toUpperCase()+"/"+dslName;
 
-        log.debug("DSLs in project "+ project +" => " + LoggingUtils.mapDeepToString(dsls.get(project).get(requestType.toUpperCase())));
-        log.debug("DSL=> " + dsls.get(project).get(requestType.toUpperCase()).get(_dslName));
+        Map<String, Map<String, Dsl>> projectDsls = dsls.get(project);
+        if (projectDsls == null) {
+            throw new DSLExecutionException("", dslName, new IllegalArgumentException(
+                "Unknown DSL project '%s' - check that this project directory exists under the configured DSL path".formatted(project)));
+        }
+        Map<String, Dsl> methodDsls = projectDsls.get(requestType.toUpperCase());
+        if (methodDsls == null) {
+            throw new DSLExecutionException("", dslName, new IllegalArgumentException(
+                "No DSLs registered for method '%s' in project '%s'".formatted(requestType.toUpperCase(), project)));
+        }
 
-        Dsl dsl = dsls.get(project).get(requestType.toUpperCase()).get(_dslName);
+        log.debug("DSLs in project "+ project +" => " + LoggingUtils.mapDeepToString(methodDsls));
+        log.debug("DSL=> " + methodDsls.get(_dslName));
+
+        Dsl dsl = methodDsls.get(_dslName);
 
         Map<String, DslStep> steps = null;
 
@@ -336,8 +347,13 @@ public class DslService {
         if (requestedFields == null)
             return;
 
+        // A null requestFields means none of the requested fields are present (e.g. the incoming
+        // request had no body at all) - treat it as empty rather than crash, so every requested
+        // field is reported as missing, same as if the request had an empty body.
+        Map<String, V> fields = requestFields == null ? Map.of() : requestFields;
+
         requestedFields.forEach((field) -> {
-                if (!requestFields.containsKey(field)) {
+                if (!fields.containsKey(field)) {
                     log.warn("Request has errors: field(s) missing: %s".formatted(field));
                 }
             }

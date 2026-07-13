@@ -39,6 +39,10 @@ application:
 #    disabled: true
     allowedIPs: ["193.40.13.13"]
     allowedURLs: ["http://localhost/internalTest"]
+  outboundRequests:
+    enabled: true
+#    allowedHosts: ["some-internal-api.mynamespace.svc.cluster.local"]
+#    blockedNetworks: ["100.64.0.0/10"]
 #  openSearchConfiguration:
 #    url: http://host.docker.internal:9200
 #    index: ruuterlog

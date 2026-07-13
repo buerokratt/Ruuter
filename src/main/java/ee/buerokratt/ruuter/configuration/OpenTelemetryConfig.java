@@ -21,7 +21,7 @@ public class OpenTelemetryConfig {
 
         return OpenTelemetrySdk.builder()
             .setTracerProvider(tracerProvider)
-            .buildAndRegisterGlobal();
+            .build();
     }
 
     @Bean

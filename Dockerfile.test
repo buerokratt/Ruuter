@@ -1,0 +1,28 @@
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /workspace/app
+
+COPY gradlew .
+COPY gradlew.bat .
+COPY gradle gradle
+COPY build.gradle .
+COPY src src
+COPY .env .env
+
+# PackageVersionConfiguration hardcodes @PropertySource("file:/app/.env") - an absolute path that
+# only exists in the real deployed container (see Dockerfile). Any Spring context boot (i.e. every
+# *IT test extending BaseIntegrationTest) needs it there too, or context loading fails outright.
+COPY .env /app/.env
+
+# FileUtils.getFileNameWithPathWithoutSuffix() derives each DSL's lookup key from its *absolute*
+# path by skipping exactly 3 leading "/"-segments - it only produces the right key ("GET/weather")
+# because production mounts DSLs at /DSL (see docker-compose.yml / Dockerfile's
+# ENV application.config-path=/DSL), which happens to sit exactly that many segments deep. Mirroring
+# that same depth here (rather than fixing the underlying function) lets the IT fixtures resolve
+# correctly without touching production code.
+COPY src/test/resources/configuration/test /dsl-configuration/test
+COPY src/test/resources/domain/test /dsl-domain/test
+COPY src/test/resources/controller/test /dsl-controller/test
+COPY src/test/resources/helper/test /dsl-helper/test
+
+RUN chmod 754 ./gradlew
+RUN ./gradlew test --no-daemon
