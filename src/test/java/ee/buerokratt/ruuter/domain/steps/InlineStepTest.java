@@ -67,6 +67,66 @@ class InlineStepTest extends StepTestBase {
     }
 
     @Test
+    void execute_shouldStoreTrue_whenExtAuthAndNameMatchesSingleSegmentWildcard() throws StepExecutionException, DSLExecutionException {
+        properties.setExternalAuthAllowed(List.of("test/*"));
+        when(di.getName()).thenReturn("test/foo");
+
+        InlineStep step = new InlineStep();
+        step.setName("check_auth");
+        step.setInline("extAuth");
+        step.setResultName("is_authorized");
+
+        step.execute(di);
+
+        assertEquals(true, context.get("is_authorized"));
+    }
+
+    @Test
+    void execute_shouldStoreTrue_whenExtAuthAndNameMatchesMultiSegmentWildcard() throws StepExecutionException, DSLExecutionException {
+        properties.setExternalAuthAllowed(List.of("test/**"));
+        when(di.getName()).thenReturn("test/foo/bar");
+
+        InlineStep step = new InlineStep();
+        step.setName("check_auth");
+        step.setInline("extAuth");
+        step.setResultName("is_authorized");
+
+        step.execute(di);
+
+        assertEquals(true, context.get("is_authorized"));
+    }
+
+    @Test
+    void execute_shouldStoreFalse_whenExtAuthAndNameDoesNotMatchWildcard() throws StepExecutionException, DSLExecutionException {
+        properties.setExternalAuthAllowed(List.of("test/*"));
+        when(di.getName()).thenReturn("other/foo");
+
+        InlineStep step = new InlineStep();
+        step.setName("check_auth");
+        step.setInline("extAuth");
+        step.setResultName("is_authorized");
+
+        step.execute(di);
+
+        assertEquals(false, context.get("is_authorized"));
+    }
+
+    @Test
+    void execute_shouldStoreFalse_whenExtAuthAndSingleSegmentWildcardDoesNotMatchNestedPath() throws StepExecutionException, DSLExecutionException {
+        properties.setExternalAuthAllowed(List.of("test/*"));
+        when(di.getName()).thenReturn("test/foo/bar");
+
+        InlineStep step = new InlineStep();
+        step.setName("check_auth");
+        step.setInline("extAuth");
+        step.setResultName("is_authorized");
+
+        step.execute(di);
+
+        assertEquals(false, context.get("is_authorized"));
+    }
+
+    @Test
     void execute_shouldStoreFalse_whenExtAuthAndAllowedListIsNotConfigured() throws StepExecutionException, DSLExecutionException {
         properties.setExternalAuthAllowed(null);
         when(di.getName()).thenReturn("any-service");
