@@ -25,4 +25,4 @@ COPY src/test/resources/controller/test /dsl-controller/test
 COPY src/test/resources/helper/test /dsl-helper/test
 
 RUN chmod 754 ./gradlew
-RUN ./gradlew test --no-daemon
+RUN ./gradlew test jacocoTestReport --no-daemon

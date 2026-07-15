@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class StepTestBase {
@@ -29,8 +29,11 @@ public class StepTestBase {
 
     @BeforeEach
     protected void mockTracer() {
-        when(di.getTracer()).thenReturn(tracer);
-        when(tracer.spanBuilder(nullable(String.class))).thenReturn(spanBuilder);
-        when(spanBuilder.startSpan()).thenReturn(span);
+        // lenient: some subclasses mix trivial getter-only tests (which never call step.execute(),
+        // so never touch the tracer at all) with real execution tests in the same class - strict
+        // stubbing would flag this setup as unused for the former.
+        lenient().when(di.getTracer()).thenReturn(tracer);
+        lenient().when(tracer.spanBuilder(nullable(String.class))).thenReturn(spanBuilder);
+        lenient().when(spanBuilder.startSpan()).thenReturn(span);
     }
 }
