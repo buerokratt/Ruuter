@@ -1,5 +1,5 @@
 call_template:
-  template: template-to-call
+  template: test/template-to-call
   requestType: post
   body:
     element1: ${incoming.body.element1}

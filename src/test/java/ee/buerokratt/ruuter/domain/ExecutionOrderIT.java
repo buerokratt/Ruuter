@@ -2,16 +2,17 @@ package ee.buerokratt.ruuter.domain;
 
 import ee.buerokratt.ruuter.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/domain"})
+@TestPropertySource(properties = {"application.config-path=/dsl-domain"})
 class ExecutionOrderIT extends BaseIntegrationTest {
     public static final String EXPECTED_RESULT = "expected_result";
 
     @Test
     void shouldExecuteInOrder() {
         client.get()
-            .uri("/execute-in-order")
+            .uri("/test/execute-in-order")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -21,7 +22,7 @@ class ExecutionOrderIT extends BaseIntegrationTest {
     @Test
     void shouldExecuteInOrderUntilEnd() {
         client.get()
-            .uri("/execute-in-order-until-end")
+            .uri("/test/execute-in-order-until-end")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -31,7 +32,8 @@ class ExecutionOrderIT extends BaseIntegrationTest {
     @Test
     void shouldExecuteAccordingToNextStep() {
         client.post()
-            .uri("/execute-by-next")
+            .uri("/test/execute-by-next")
+            .contentType(MediaType.APPLICATION_JSON)
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -41,7 +43,8 @@ class ExecutionOrderIT extends BaseIntegrationTest {
     @Test
     void shouldExecuteAccordingToNextStepUntilEnd() {
         client.post()
-            .uri("/execute-by-next-until-end")
+            .uri("/test/execute-by-next-until-end")
+            .contentType(MediaType.APPLICATION_JSON)
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")

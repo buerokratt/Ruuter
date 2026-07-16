@@ -188,6 +188,32 @@ These can be accessed only from IPs that are specified in `allowedIPs` configura
 ```
 
 
+### External authentication
+
+Some DSLs need to bypass Ruuter's standard authentication guard (for example flows using one-time
+nonce tokens instead of TIM/JWT - see [external-auth.md](./external-auth.md)). A DSL step can check
+whether the currently executing DSL is allowed to do this via an `inline: extAuth` step, which is
+resolved against the `externalAuthAllowed` allowlist:
+
+* `externalAuthAllowed` - list of DSL name patterns allowed to use external (non-JWT) authentication.
+  Entries are matched against the DSL's name (its path relative to the project, e.g. `test/test`)
+  using Ant-style path patterns:
+  * a plain entry with no wildcard must match the DSL name exactly
+  * `*` matches any characters within a single path segment - `test/*` matches `test/foo`, but not `test/foo/bar`
+  * `**` matches across multiple path segments - `test/**` matches both `test/foo` and `test/foo/bar`
+
+```
+application:
+    externalAuthAllowed: ["test/test", "training/*", "public/**"]
+```
+
+Usage inside a DSL step:
+```
+check_auth:
+    inline: extAuth
+    result: is_authorized
+```
+
 ### Meaningful errors
 
 To help debugging different problems in Ruuter and other components some extra

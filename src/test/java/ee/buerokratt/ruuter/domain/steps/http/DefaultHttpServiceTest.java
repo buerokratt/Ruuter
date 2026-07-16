@@ -1,166 +1,136 @@
 package ee.buerokratt.ruuter.domain.steps.http;
 
-import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.DslService;
+import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@WireMockTest
+/**
+ * Covers HttpStep.handleFailedResult()'s default-DSL-on-exception logic specifically: when a step's
+ * response status isn't in the allowlist, a step-local defaultDsl (if set) takes precedence over the
+ * global application.defaultDslInCaseOfException config; if neither is set, no fallback DSL runs.
+ * Request-building itself (URL/query/body/header evaluation) is HttpGetStepTest/HttpPostStepTest's
+ * responsibility - this only exercises the failure/fallback path.
+ */
 class DefaultHttpServiceTest extends StepTestBase {
-
-/*
-    @Mock
-    private ApplicationProperties properties;
-
-    @Mock
-    private HttpHelper httpHelper;
-
-    @Mock
-    private MappingHelper mappingHelper;
 
     @Mock
     private ScriptingHelper scriptingHelper;
 
     @Mock
-    private DslService dslService;
+    private HttpHelper httpHelper;
 
     @Mock
-    private ApplicationProperties.HttpPost httpPost;
+    private DslService dslService;
 
-    private HttpQueryArgs getArgs;
-
-    private HttpStep getStep;
-
-    private HttpQueryArgs postArgs;
-
-    private HttpStep postStep;
+    private final ApplicationProperties properties = new ApplicationProperties();
+    private final MappingHelper mappingHelper = new MappingHelper(new ObjectMapper());
+    private HttpGetStep step;
 
     @BeforeEach
-    protected void mockDependencies() {
+    void setUp() {
+        properties.setHttpCodesAllowList(new ArrayList<>(List.of(200))); // only 200 is allowed
+
         when(di.getContext()).thenReturn(new HashMap<>());
-        when(di.getHttpHelper()).thenReturn(httpHelper);
-        when(di.getMappingHelper()).thenReturn(mappingHelper);
-        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
         when(di.getProperties()).thenReturn(properties);
-    }
+        when(di.getHttpHelper()).thenReturn(httpHelper);
+        when(di.getScriptingHelper()).thenReturn(scriptingHelper);
+        when(di.getMappingHelper()).thenReturn(mappingHelper);
+        lenient().when(di.getDslService()).thenReturn(dslService); // only used when a default DSL actually fires
+        when(di.getRequestBody()).thenReturn(new HashMap<>());
+        when(di.getRequestQuery()).thenReturn(new HashMap<>());
+        when(di.getRequestHeaders()).thenReturn(new HashMap<>());
 
-    @BeforeEach
-    protected void initializeObjects(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        getArgs = new HttpQueryArgs() {{
-            setQuery(new HashMap<>() {{
-                put("some_val", "Hello World");
-                put("another_val", 123);
-            }});
-            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-        }};
-        getStep = new HttpGetStep() {{
-            setName("get_message");
-            setArgs(getArgs);
-            setResultName("the_response");
-        }};
-        postArgs = new HttpQueryArgs() {{
-            setBody(new HashMap<>() {{
-                put("some_val", "Hello World");
-                put("another_val", 123);
-            }});
-            setUrl("http://localhost:%s/endpoint".formatted(wireMockRuntimeInfo.getHttpPort()));
-        }};
-        postStep = new HttpPostStep() {{
-            setName("post_message");
-            setArgs(postArgs);
-            setResultName("the_response");
-        }};
+        when(scriptingHelper.evaluateScripts(anyString(), anyMap(), anyMap(), anyMap(), anyMap()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(scriptingHelper.evaluateScripts(anyMap(), anyMap(), anyMap(), anyMap(), anyMap()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(scriptingHelper.evaluateScripts(anyString(), eq(di)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        HttpQueryArgs args = new HttpQueryArgs();
+        args.setUrl("http://example.com/endpoint");
+        step = new HttpGetStep();
+        step.setName("get_message");
+        step.setArgs(args);
+        step.setResultName("the_response");
+
+        lenient().when(httpHelper.doMethod(any(), anyString(), any(), any(), any(), any(), any(), any(), eq(di), anyBoolean(), anyBoolean(), any()))
+            .thenReturn(new ResponseEntity<>("boom", HttpStatus.INTERNAL_SERVER_ERROR)); // overridden by the "status allowed" test
     }
 
     @Test
-    void execute_getRequestShouldExecuteDefaultDslWhenResponseCodeIsNotInWhitelist() {
-        DefaultHttpDsl defaultHttpDsl = Mockito.spy(new DefaultHttpDsl() {{
-            setDsl("default-dsl");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-            setRequestType("POST");
-        }});
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
+    void execute_shouldExecuteGlobalDefaultDsl_whenResponseCodeNotAllowedAndNoLocalOverride() throws Exception {
+        var globalDefault = new DefaultHttpDsl();
+        globalDefault.setDsl("global-fallback");
+        globalDefault.setRequestType("POST");
+        properties.setDefaultDslInCaseOfException(globalDefault);
 
-        when(di.getDslService()).thenReturn(dslService);
-        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
-        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        when(properties.getDefaultDslInCaseOfException()).thenReturn(defaultHttpDsl);
-        getStep.execute(di);
+        assertThrows(StepExecutionException.class, () -> step.execute(di));
 
-        verify(dslService, times(1)).execute("default-dsl", "POST", new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
+        verify(dslService).execute(eq("global-fallback"), eq("POST"), anyMap(), anyMap(), anyMap(), any());
     }
 
     @Test
-    void execute_postRequestShouldExecuteDefaultDslWhenResponseCodeIsNotInWhitelist() {
-        DefaultHttpDsl defaultHttpDsl = Mockito.spy(new DefaultHttpDsl() {{
-            setDsl("default-dsl");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-            setRequestType("POST");
-        }});
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
+    void execute_shouldExecuteLocalDefaultDsl_insteadOfGlobal_whenBothAreConfigured() throws Exception {
+        var globalDefault = new DefaultHttpDsl();
+        globalDefault.setDsl("global-fallback");
+        globalDefault.setRequestType("POST");
+        properties.setDefaultDslInCaseOfException(globalDefault);
 
-        when(di.getDslService()).thenReturn(dslService);
-        when(httpHelper.doPost(postArgs.getUrl(), postArgs.getBody(), new HashMap<>(), new HashMap<>())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateScripts(postArgs.getBody(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(postArgs.getBody());
-        when(properties.getHttpPost()).thenReturn(httpPost);
-        when(properties.getDefaultDslInCaseOfException()).thenReturn(defaultHttpDsl);
-        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        postStep.execute(di);
+        var localDefault = new DefaultHttpDsl();
+        localDefault.setDsl("local-fallback");
+        localDefault.setRequestType("POST");
+        step.setLocalHttpExceptionDsl(localDefault);
 
-        verify(dslService, times(1)).execute("default-dsl", "POST", new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
+        assertThrows(StepExecutionException.class, () -> step.execute(di));
+
+        verify(dslService).execute(eq("local-fallback"), eq("POST"), anyMap(), anyMap(), anyMap(), any());
+        verify(dslService, never()).execute(eq("global-fallback"), anyString(), anyMap(), anyMap(), anyMap(), any());
     }
 
     @Test
-    void execute_shouldExecuteStepSpecificDefaultDslWhenResponseCodeIsNotInWhitelist() {
-        DefaultHttpDsl defaultHttpDsl2 = Mockito.spy(new DefaultHttpDsl() {{
-            setDsl("default-dsl2");
-            setBody(new HashMap<>());
-            setQuery(new HashMap<>());
-            setRequestType("POST");
-        }});
-        getStep.setLocalHttpExceptionDsl(defaultHttpDsl2);
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
+    void execute_shouldNotExecuteAnyDefaultDsl_whenNeitherLocalNorGlobalConfigured() throws Exception {
+        assertThrows(StepExecutionException.class, () -> step.execute(di));
 
-        when(di.getDslService()).thenReturn(dslService);
-        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
-        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        getStep.execute(di);
-
-        verify(dslService, times(1)).execute("default-dsl2", "POST", new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
+        verify(dslService, never()).execute(anyString(), anyString(), anyMap(), anyMap(), anyMap(), any());
     }
 
     @Test
-    void execute_shouldNotExecuteDefaultDslWhenRequestIsInvalidButDefaultDslIsNotDefined() {
-        ResponseEntity<Object> httpResponse = new ResponseEntity<>("body", null, HttpStatus.CREATED);
+    void execute_shouldNotExecuteDefaultDsl_whenResponseStatusIsAllowed() throws Exception {
+        var globalDefault = new DefaultHttpDsl();
+        globalDefault.setDsl("global-fallback");
+        properties.setDefaultDslInCaseOfException(globalDefault);
+        when(httpHelper.doMethod(any(), anyString(), any(), any(), any(), any(), any(), any(), eq(di), anyBoolean(), anyBoolean(), any()))
+            .thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
-        when(httpHelper.doGet(getArgs.getUrl(), getArgs.getQuery(), new HashMap<>())).thenReturn(httpResponse);
-        when(scriptingHelper.evaluateScripts(getArgs.getQuery(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())).thenReturn(getArgs.getQuery());
-        when(properties.getHttpCodesAllowList()).thenReturn(new ArrayList<>() {{add(HttpStatus.OK.value());}});
-        getStep.execute(di);
+        step.execute(di);
 
-        verify(dslService, times(0)).execute(anyString(), anyString(), anyMap(), anyMap(), anyMap(), anyString());
+        verify(dslService, never()).execute(anyString(), anyString(), anyMap(), anyMap(), anyMap(), any());
     }
-
- */
 }
