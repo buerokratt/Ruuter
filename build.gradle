@@ -42,8 +42,8 @@ dependencies {
     implementation 'io.opentelemetry:opentelemetry-exporter-logging'
 
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-    implementation 'org.graalvm.js:js:23.0.1'
-    implementation 'org.graalvm.js:js-scriptengine:23.0.1'
+    implementation 'org.graalvm.polyglot:js:25.0.3'
+    implementation 'org.graalvm.js:js-scriptengine:25.0.3'
     implementation 'org.ini4j:ini4j:0.5.4'
 
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.52' // For annotations approach
