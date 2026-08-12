@@ -293,7 +293,7 @@ public class DslService {
     private boolean allowedToExecuteDsl(String dsl, Map<String, Object> requestBody, Map<String, Object> requestQuery, Map<String, String> requestHeaders, String contentType, DslInstance di) {
         if (externalForwardingHelper.shouldForwardRequest()) {
             ResponseEntity<Object> response = externalForwardingHelper.forwardRequest(dsl, requestBody, requestQuery, requestHeaders, contentType, di);
-            return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCodeValue());
+            return externalForwardingHelper.isAllowedForwardingResponse(response.getStatusCode().value());
         }
         return true;
     }
