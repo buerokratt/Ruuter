@@ -1,15 +1,15 @@
 import org.springframework.boot.loader.tools.LoaderImplementation
 
 plugins {
-    id 'org.springframework.boot' version '3.2.5'
-    id 'io.spring.dependency-management' version '1.1.3'
+    id 'org.springframework.boot' version '3.5.16'
+    id 'io.spring.dependency-management' version '1.1.7'
     id 'java'
     id "org.sonarqube" version "3.5.0.2730"
     id 'jacoco'
 }
 
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = "0.8.14"
 }
 
 bootJar {
@@ -35,7 +35,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    implementation platform('io.opentelemetry:opentelemetry-bom:1.15.0')
+    implementation platform('io.opentelemetry:opentelemetry-bom:1.49.0')
     implementation 'io.opentelemetry:opentelemetry-api'
     implementation 'io.opentelemetry:opentelemetry-sdk'
     implementation 'io.opentelemetry:opentelemetry-context'
@@ -44,22 +44,20 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     implementation 'org.graalvm.js:js:23.0.1'
     implementation 'org.graalvm.js:js-scriptengine:23.0.1'
-    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.ini4j:ini4j:0.5.4'
 
-    implementation 'io.swagger.core.v3:swagger-annotations:2.2.21' // For annotations approach
-    implementation 'io.swagger.core.v3:swagger-core:2.2.21' // For programmatic approach
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.52' // For annotations approach
+    implementation 'io.swagger.core.v3:swagger-core:2.2.52' // For programmatic approach
 
-    implementation 'commons-codec:commons-codec:1.17.0'
-    
+    implementation 'commons-codec:commons-codec:1.18.0'
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'org.mockito:mockito-core:5.6.0'
-    testImplementation 'org.mockito:mockito-inline:4.9.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.6.0'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
     testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.1'
 }
 
