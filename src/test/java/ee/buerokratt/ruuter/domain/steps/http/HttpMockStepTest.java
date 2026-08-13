@@ -4,6 +4,7 @@ import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
 import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -38,7 +39,7 @@ class HttpMockStepTest extends StepTestBase {
         }};
         HttpStepResult expectedResult = new HttpStepResult() {{
             setRequest(mockStepRequest);
-            setResponse(new ResponseEntity<>(mockStepResponse, null, HttpStatus.OK));
+            setResponse(new ResponseEntity<>(mockStepResponse, (HttpHeaders) null, HttpStatus.OK));
         }};
 
         when(di.getContext()).thenReturn(testContext);
