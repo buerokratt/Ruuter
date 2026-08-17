@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.AntPathMatcher;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,8 @@ import java.util.Map;
 @ToString(callSuper = true)
 @NoArgsConstructor
 public class InlineStep extends DslStep {
+
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private String inline;
 
@@ -59,7 +62,8 @@ public class InlineStep extends DslStep {
         if (list == null || list.isEmpty())
             return false;
 
-        return list.contains(di.getName());
+        String name = di.getName();
+        return list.stream().anyMatch(allowedPattern -> PATH_MATCHER.match(allowedPattern, name));
     }
 
 }

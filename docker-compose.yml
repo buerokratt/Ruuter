@@ -4,6 +4,8 @@ services:
     container_name: ruuter
     build:
       context: .
+    env_file:
+      - .env      
     volumes:
       - ./DSL:/DSL
     ports:

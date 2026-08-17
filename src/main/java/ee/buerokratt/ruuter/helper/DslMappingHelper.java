@@ -142,7 +142,7 @@ public class DslMappingHelper {
      * @return Updated string
      */
     private String replaceDslParametersWithValues(String input) {
-        if (dslParameters == null || dslParameters.isEmpty()) {
+        if (dslParameters == null) {
             initDSLParameters();
         }
 
@@ -162,12 +162,13 @@ public class DslMappingHelper {
     }
 
     public void initDSLParameters() {
+        dslParameters = new Properties();
         try {
-            dslParameters = new Properties();
             dslParameters.load(new FileInputStream("/app/constants.ini"));
         } catch (IOException e) {
+            // constants.ini is optional - DSL parameter placeholders ("[#PARAMETER]") are only
+            // substituted when it's present; without it they're left as literal, unsubstituted text.
             log.warn("constants.ini not found or not accessible");
-            throw new RuntimeException(e);
         }
     }
 

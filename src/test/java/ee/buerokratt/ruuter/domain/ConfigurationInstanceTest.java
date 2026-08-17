@@ -1,16 +1,15 @@
 package ee.buerokratt.ruuter.domain;
 
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import ee.buerokratt.ruuter.configuration.ApplicationProperties;
 import ee.buerokratt.ruuter.helper.HttpHelper;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.DslService;
+import io.opentelemetry.api.trace.Tracer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.sleuth.Tracer;
 import static org.mockito.Mockito.*;
 
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@WireMockTest
 @ExtendWith(MockitoExtension.class)
 class ConfigurationInstanceTest {
 
