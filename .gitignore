@@ -41,3 +41,6 @@ out/
 /dist
 /node_modules
 /build
+
+# misc
+.env.image
