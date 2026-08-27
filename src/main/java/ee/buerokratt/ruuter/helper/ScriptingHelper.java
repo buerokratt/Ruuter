@@ -24,6 +24,13 @@ public class ScriptingHelper {
     private final MappingHelper mappingHelper;
     private final ScriptEngine engine;
 
+    // GraalJS's ScriptEngine backs each distinct Bindings instance with its own polyglot Context,
+    // which isn't reclaimed just because the Bindings becomes unreachable - creating a fresh one per
+    // evaluation (as this used to do) leaks a Context per DSL scripting call. Reusing one per thread
+    // bounds that to (thread pool size) instead of unbounded growth; clear() before each use so
+    // stale keys from a previous request/thread-reuse can't leak into a later evaluation.
+    private final ThreadLocal<Bindings> threadBindings = new ThreadLocal<>();
+
     private Pattern scriptPattern = Pattern.compile(SCRIPT_REGEX);
     private Pattern linePattern = Pattern.compile(SCRIPT_LINE_REGEX);
     private Pattern objectPattern = Pattern.compile(SCRIPT_LINE_OBJECT);
@@ -109,7 +116,13 @@ public class ScriptingHelper {
     }
 
     private Bindings createBindingsWithContext(Map<String, Object> evalContext) {
-        Bindings bindings = engine.createBindings();
+        Bindings bindings = threadBindings.get();
+        if (bindings == null) {
+            bindings = engine.createBindings();
+            threadBindings.set(bindings);
+        } else {
+            bindings.clear();
+        }
         bindings.putAll(evalContext);
         return bindings;
     }
