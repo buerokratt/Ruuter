@@ -21,7 +21,7 @@ public class DefaultHttpDsl {
 
     public void executeHttpDefaultDsl(DslInstance di, String resultName) throws DSLExecutionException {
         ResponseEntity<Object> response = ((HttpStepResult) di.getContext().get(resultName)).getResponse();
-        body.put("statusCode", response.getStatusCodeValue());
+        body.put("statusCode", response.getStatusCode().value());
         body.put("responseBody", di.getMappingHelper().convertObjectToString(response.getBody()));
         body.put("failedRequestId", MDC.get("spanId"));
         Map<String, Object> evaluatedBody = di.getScriptingHelper().evaluateScripts(body, di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders());

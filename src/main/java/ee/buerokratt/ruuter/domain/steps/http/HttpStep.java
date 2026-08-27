@@ -64,11 +64,11 @@ public abstract class HttpStep extends DslStep {
         }
         di.getContext().put(resultName, new HttpStepResult(args, response, MDC.get("spanId")));
 
-        if (!isAllowedHttpStatusCode(di, response.getStatusCodeValue())) {
+        if (!isAllowedHttpStatusCode(di, response.getStatusCode().value())) {
             if (getOnErrorStep() != null) {
                 di.setGotoStep(getOnErrorStep());
             } else {
-                di.setErrorStatus(HttpStatus.valueOf(response.getStatusCodeValue()));
+                di.setErrorStatus(HttpStatus.valueOf(response.getStatusCode().value()));
                 di.setErrorMessage("HTTP returned with non-OK");
                 throw new IllegalArgumentException();
             }
@@ -79,7 +79,7 @@ public abstract class HttpStep extends DslStep {
     public void handleFailedResult(DslInstance di) throws DSLExecutionException {
         super.handleFailedResult(di);
         HttpStepResult stepResult = (HttpStepResult) di.getContext().get(                   resultName);
-        if (stepResult != null && !isAllowedHttpStatusCode(di, stepResult.getResponse().getStatusCodeValue())) {
+        if (stepResult != null && !isAllowedHttpStatusCode(di, stepResult.getResponse().getStatusCode().value())) {
             DefaultHttpDsl globalHttpExceptionDsl = di.getProperties().getDefaultDslInCaseOfException();
             if (localHttpExceptionDslExists()) {
                 localHttpExceptionDsl.executeHttpDefaultDsl(di, resultName);
@@ -93,7 +93,7 @@ public abstract class HttpStep extends DslStep {
     protected void logStep(Long elapsedTime, DslInstance di) {
         ApplicationProperties properties = di.getProperties();
         MappingHelper mappingHelper = di.getMappingHelper();
-        Integer responseStatus = ((HttpStepResult) di.getContext().get(resultName)).getResponse().getStatusCodeValue();
+        Integer responseStatus = ((HttpStepResult) di.getContext().get(resultName)).getResponse().getStatusCode().value();
         String responseBody = mappingHelper.convertObjectToString(((HttpStepResult) di.getContext().get(resultName)).getResponse().getBody());
         String responseContent = responseBody != null && displayResponseContent(properties) ? responseBody : "-";
         String requestContent = args.getBody() != null && displayRequestContent(properties) ? args.getBody().toString() : "-";

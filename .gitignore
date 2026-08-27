@@ -6,6 +6,8 @@ build/
 !**/src/test/**/build/
 logs/
 
+.env
+
 ### STS ###
 .apt_generated
 .classpath

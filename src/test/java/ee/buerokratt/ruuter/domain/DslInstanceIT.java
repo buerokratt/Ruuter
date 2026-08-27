@@ -6,7 +6,6 @@ import ee.buerokratt.ruuter.BaseIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
@@ -130,8 +129,8 @@ class DslInstanceIT extends BaseIntegrationTest {
             .isEqualTo("http://localhost:8090/endpoint")
             .jsonPath("$..response.body")
             .isEqualTo(EXPECTED_RESULT)
-            .jsonPath("$..response.statusCodeValue")
-            .isEqualTo(HttpStatus.OK.value());
+            .jsonPath("$..response.statusCode")
+            .isEqualTo("200 OK");
     }
 
     @Test
