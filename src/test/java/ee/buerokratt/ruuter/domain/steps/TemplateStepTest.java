@@ -5,6 +5,8 @@ import ee.buerokratt.ruuter.domain.DslInstance;
 import ee.buerokratt.ruuter.helper.MappingHelper;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
 import ee.buerokratt.ruuter.service.DslService;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
+import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -35,7 +37,7 @@ class TemplateStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldCallTemplateWithNoInputAndStoreResult() {
+    void execute_shouldCallTemplateWithNoInputAndStoreResult() throws StepExecutionException, DSLExecutionException {
         HashMap<String, Object> testContext = new HashMap<>();
         String resultName = "result-name";
         String templateToCall = "call-me";

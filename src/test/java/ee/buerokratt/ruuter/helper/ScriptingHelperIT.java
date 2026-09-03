@@ -2,17 +2,18 @@ package ee.buerokratt.ruuter.helper;
 
 import ee.buerokratt.ruuter.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.HashMap;
 
-@TestPropertySource(properties = {"application.config-path=${user.dir}/src/test/resources/helper"})
+@TestPropertySource(properties = {"application.config-path=/dsl-helper"})
 class ScriptingHelperIT extends BaseIntegrationTest {
 
     @Test
     void shouldConcatenateStrings() {
         client.get()
-            .uri("/string-concatenation")
+            .uri("/test/string-concatenation")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -22,7 +23,8 @@ class ScriptingHelperIT extends BaseIntegrationTest {
     @Test
     void shouldConcatStringAndVariable() {
         client.post()
-            .uri("/concat-string-and-variable")
+            .uri("/test/concat-string-and-variable")
+            .contentType(MediaType.APPLICATION_JSON)
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -32,7 +34,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
     @Test
     void shouldCalculateWithIntegers() {
         client.get()
-            .uri("/integer-addition")
+            .uri("/test/integer-addition")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -42,7 +44,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
     @Test
     void shouldEvaluateBooleanValue() {
         client.get()
-            .uri("/boolean-or-evaluation")
+            .uri("/test/boolean-or-evaluation")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -52,7 +54,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
     @Test
     void shouldEvaluateBooleanValue2() {
         client.get()
-            .uri("/boolean-and-evaluation")
+            .uri("/test/boolean-and-evaluation")
             .exchange().expectStatus().isOk()
             .expectBody()
             .jsonPath("$.response")
@@ -65,7 +67,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
         postBody.put("element", "123");
 
         client.post()
-            .uri("/return-incoming?element=321")
+            .uri("/test/return-incoming?element=321")
             .bodyValue(postBody)
             .exchange().expectStatus().isOk()
             .expectBody()
@@ -81,7 +83,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
         String expectedValue = "%s & \";%s;\" & %s\";%s;\" & %s & \";%s;\" & %s\";%s;\"".replace("%s", expectedString);
 
         client.post()
-            .uri("/return-script-strings?script2=\";" + expectedString + ";\"")
+            .uri("/test/return-script-strings?script2=\";" + expectedString + ";\"")
             .bodyValue(postBody)
             .exchange().expectStatus().isOk()
             .expectBody()
@@ -94,7 +96,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
         String optionalString = "Hello";
 
         client.get()
-              .uri("/get-optional?optional_parameter=" + optionalString)
+              .uri("/test/get-optional?optional_parameter=" + optionalString)
               .exchange().expectStatus().isOk()
               .expectBody()
               .jsonPath("$.response")
@@ -104,7 +106,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
     @Test
     void evaluateScripts_shouldRespond_whenOptionalQueryParamNotFilled() {
         client.get()
-              .uri("/get-optional")
+              .uri("/test/get-optional")
               .exchange().expectStatus().isOk()
               .expectBody()
               .jsonPath("$.response")
@@ -120,7 +122,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
         postBody.put("optional_something", optional);
 
         client.post()
-            .uri("/post-with-optional")
+            .uri("/test/post-with-optional")
             .bodyValue(postBody)
             .exchange().expectStatus().isOk()
             .expectBody()
@@ -135,7 +137,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
         postBody.put("somethingRequired", required);
 
         client.post()
-              .uri("/post-with-optional")
+              .uri("/test/post-with-optional")
               .bodyValue(postBody)
               .exchange().expectStatus().isOk()
               .expectBody()
@@ -148,7 +150,7 @@ class ScriptingHelperIT extends BaseIntegrationTest {
         HashMap<String, String> postBody = new HashMap<>();
 
         client.post()
-              .uri("/post-with-optional")
+              .uri("/test/post-with-optional")
               .bodyValue(postBody)
               .exchange();
     }

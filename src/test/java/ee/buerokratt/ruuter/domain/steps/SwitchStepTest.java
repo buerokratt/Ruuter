@@ -4,6 +4,8 @@ import ee.buerokratt.ruuter.StepTestBase;
 import ee.buerokratt.ruuter.domain.steps.conditional.Condition;
 import ee.buerokratt.ruuter.domain.steps.conditional.SwitchStep;
 import ee.buerokratt.ruuter.helper.ScriptingHelper;
+import ee.buerokratt.ruuter.service.exception.DSLExecutionException;
+import ee.buerokratt.ruuter.service.exception.StepExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -27,7 +29,7 @@ class SwitchStepTest extends StepTestBase {
     }
 
     @Test
-    void execute_shouldJumpToCorrectStep() {
+    void execute_shouldJumpToCorrectStep() throws StepExecutionException, DSLExecutionException {
         HashMap<String, Object> testContext = new HashMap<>() {{
             put("currentTime", "Sunday");
         }};

@@ -20,6 +20,14 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
+# Spring Boot 4 removed the "classic" bootJar loader, so the fat jar's SPI registration now points
+# at org.springframework.boot.loader.nio.file.NestedFileSystemProvider - a class that lives outside
+# BOOT-INF (at the jar root) and is never copied into this exploded, flat-classpath layout. Left in
+# place, the first NIO FileSystemProvider lookup (e.g. from GraalJS) throws ServiceConfigurationError:
+# "Provider ...NestedFileSystemProvider not found". Nested-jar support isn't needed here since
+# BOOT-INF/lib is already unpacked to plain jars, so just drop the dangling registration.
+RUN rm -f /app/META-INF/services/java.nio.file.spi.FileSystemProvider
+
 ENV application.config-path=/DSL
 
 COPY entrypoint.sh ./entrypoint.sh

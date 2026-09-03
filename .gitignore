@@ -6,6 +6,8 @@ build/
 !**/src/test/**/build/
 logs/
 
+.env
+
 ### STS ###
 .apt_generated
 .classpath
@@ -41,3 +43,6 @@ out/
 /dist
 /node_modules
 /build
+
+# misc
+.env.image

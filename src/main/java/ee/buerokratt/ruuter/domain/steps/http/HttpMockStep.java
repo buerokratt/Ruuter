@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.slf4j.MDC;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -23,7 +24,7 @@ public class HttpMockStep extends DslStep {
 
     @Override
     public void executeStepAction(DslInstance di) {
-        ResponseEntity<Object> response = new ResponseEntity<>(args.getResponse(), null, HttpStatus.OK);
+        ResponseEntity<Object> response = new ResponseEntity<>(args.getResponse(), (HttpHeaders) null, HttpStatus.OK);
         di.getContext().put(resultName, new HttpStepResult(args.getRequest(), response, MDC.get("spanId")));
     }
 

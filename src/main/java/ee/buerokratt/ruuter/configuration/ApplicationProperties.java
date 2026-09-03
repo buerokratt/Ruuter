@@ -26,6 +26,7 @@ public class ApplicationProperties {
     private CORS cors;
     private DSL dsl;
     private InternalRequests internalRequests;
+    private OutboundRequests outboundRequests;
     private OpenSearchConfiguration openSearchConfiguration;
 
     private Integer httpResponseSizeLimit;
@@ -107,6 +108,14 @@ public class ApplicationProperties {
         private Boolean disabled;
         private List<String> allowedIPs;
         private List<String> allowedURLs;
+    }
+
+    @Getter
+    @Setter
+    public static class OutboundRequests {
+        private Boolean enabled;
+        private List<String> allowedHosts;
+        private List<String> blockedNetworks;
     }
 
     @Getter
