@@ -1,8 +1,10 @@
 #!/bin/sh
-set -ex
+
+# uncomment this to see debug log
+# set -ex
 
 KEYSTORE=/app/my-keystore.jks
-STOREPASS=mypassword
+STOREPASS="${KEYSTORE_PASSWORD:-mypassword}"
 DEFAULT_CACERTS=$(find $JAVA_HOME -name "cacerts" 2>/dev/null | head -1)
 
 if [ -n "$CUSTOM_CA_CERTIFICATE" ]; then
@@ -33,4 +35,4 @@ if [ -n "$CUSTOM_CA_CERTIFICATE" ]; then
     echo "Imported $i certificate(s) into $KEYSTORE"
 fi
 
-exec "$@"
+exec java -Djavax.net.ssl.trustStore="$KEYSTORE" -Djavax.net.ssl.trustStorePassword="$STOREPASS" "$@"

@@ -47,4 +47,4 @@ USER ruuter
 # ENTRYPOINT ["java","-cp","app:app/lib/*","ee.buerokratt.ruuter.RuuterApplication"]
 
 ENTRYPOINT ["./entrypoint.sh"]
-CMD ["java", "-Djavax.net.ssl.trustStore=/app/my-keystore.jks", "-Djavax.net.ssl.trustStorePassword=mypassword", "-cp", "app:app/lib/*", "ee.buerokratt.ruuter.RuuterApplication"]
+CMD ["-cp", "app:app/lib/*", "ee.buerokratt.ruuter.RuuterApplication"]

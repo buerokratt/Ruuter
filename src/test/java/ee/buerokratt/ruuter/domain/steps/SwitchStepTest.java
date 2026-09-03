@@ -13,9 +13,9 @@ import org.mockito.Mock;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class SwitchStepTest extends StepTestBase {
@@ -58,6 +58,8 @@ class SwitchStepTest extends StepTestBase {
         when(scriptingHelper.evaluateScripts(eq("${currentTime == \"Friday\"}"), eq(testContext), anyMap(), anyMap(), anyMap())).thenReturn(false);
         switchStep.execute(di);
 
-        assertEquals("fourth_step", switchStep.getNextStepName());
+        // The resolved branch must be recorded on the per-request DslInstance (gotoStep), not
+        // written back onto the shared SwitchStep object - see SwitchStep.executeStepAction.
+        verify(di).setGotoStep("fourth_step");
     }
 }
