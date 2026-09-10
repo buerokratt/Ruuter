@@ -154,6 +154,33 @@ class DslServiceTest {
     }
 
     @Test
+    void filterFields_shouldNotThrow_whenAllowedFieldsContainsANullEntry() {
+        // A malformed declare entry (missing "field:") resolves to a null allowed-field name -
+        // regression test for the NPE this caused once matching started lowercasing every entry.
+        Map<String, Object> requestFields = new HashMap<>();
+        requestFields.put("a", 1);
+
+        List<String> allowedFields = new ArrayList<>();
+        allowedFields.add(null);
+        allowedFields.add("a");
+
+        Map<String, Object> result = assertDoesNotThrow(() -> dslService.filterFields(requestFields, allowedFields));
+
+        assertEquals(Map.of("a", 1), result);
+    }
+
+    @Test
+    void filterFields_shouldMatchAllowedFields_ignoringCase() {
+        Map<String, Object> requestFields = new HashMap<>();
+        requestFields.put("Email", 1);
+        requestFields.put("other", 2);
+
+        Map<String, Object> result = dslService.filterFields(requestFields, List.of("email"));
+
+        assertEquals(Map.of("Email", 1), result);
+    }
+
+    @Test
     void checkFields_shouldNotThrow_whenRequestedFieldsIsNull() {
         assertDoesNotThrow(() -> dslService.checkFields(new HashMap<>(), null));
     }
@@ -169,6 +196,26 @@ class DslServiceTest {
     @Test
     void checkFields_shouldNotThrow_whenRequestedFieldsAreMissing() {
         assertDoesNotThrow(() -> dslService.checkFields(new HashMap<>(), List.of("missing")));
+    }
+
+    @Test
+    void checkFields_shouldNotThrow_whenRequestedFieldsContainsANullEntry() {
+        Map<String, Object> requestFields = new HashMap<>();
+        requestFields.put("a", 1);
+
+        List<String> requestedFields = new ArrayList<>();
+        requestedFields.add(null);
+        requestedFields.add("a");
+
+        assertDoesNotThrow(() -> dslService.checkFields(requestFields, requestedFields));
+    }
+
+    @Test
+    void checkFields_shouldNotThrow_whenRequestedFieldIsPresent_withDifferentCase() {
+        Map<String, Object> requestFields = new HashMap<>();
+        requestFields.put("Email", 1);
+
+        assertDoesNotThrow(() -> dslService.checkFields(requestFields, List.of("email")));
     }
 
     @Test

@@ -78,4 +78,35 @@ class DeclarationStepTest extends StepTestBase {
 
         assertEquals(List.of("id"), step.getAllowedParams());
     }
+
+    @Test
+    void getAllowedBody_shouldNotThrow_whenAFieldHasNoName() {
+        // A malformed declare entry (e.g. "- date_rows:" instead of "- field: date_rows") resolves
+        // to a null field name - regression test for the resulting NPE (Collectors.groupingBy's
+        // classifier calling toLowerCase() on that null) seen at startup via DeclarationStep's
+        // Lombok-generated toString(), which DslService's debug logging invokes eagerly.
+        DeclarationStep step = new DeclarationStep();
+        DeclarationStep.AllowList allowlist = step.new AllowList();
+        allowlist.body = List.of(new DslField(null, "string", null));
+        step.allowlist = allowlist;
+
+        List<String> result = assertDoesNotThrow(step::getAllowedBody);
+        assertEquals(1, result.size());
+        assertNull(result.get(0));
+    }
+
+    @Test
+    void getAllowedBody_shouldNotThrow_whenTwoFieldsDifferOnlyByCase() {
+        // Matching is case-insensitive (DslService.filterFields), so "Email" and "email" collapse
+        // into one effective allowlist entry - this must not throw, just warn (verified manually,
+        // since asserting on log output isn't done elsewhere in this suite).
+        DeclarationStep step = new DeclarationStep();
+        DeclarationStep.AllowList allowlist = step.new AllowList();
+        allowlist.body = List.of(
+            new DslField("Email", "string", null),
+            new DslField("email", "string", null));
+        step.allowlist = allowlist;
+
+        assertEquals(List.of("Email", "email"), step.getAllowedBody());
+    }
 }
