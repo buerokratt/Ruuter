@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ee.buerokratt.ruuter.util.FileUtils.getFolderPath;
@@ -331,14 +332,22 @@ public class DslService {
 
 
     <V> Map<String, V> filterFields(Map<String, V> requestFields, List<String> allowedFields) {
-        return allowedFields == null ?
-                        requestFields :
-                        requestFields == null ?
-                            null :
-                            requestFields.entrySet().stream()
-                                .filter(e -> allowedFields.contains(e.getKey()))
-                                .filter(e -> e.getValue() != null)
-                                .collect(toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (allowedFields == null)
+            return requestFields;
+        if (requestFields == null)
+            return null;
+
+        // A malformed declare entry (e.g. missing the "field:" key) resolves to a null name here -
+        // skip it rather than NPE on toLowerCase(); it can never match a real (non-null) request key.
+        Set<String> allowedFieldsLowerCase = allowedFields.stream()
+            .filter(Objects::nonNull)
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
+
+        return requestFields.entrySet().stream()
+            .filter(e -> allowedFieldsLowerCase.contains(e.getKey().toLowerCase()))
+            .filter(e -> e.getValue() != null)
+            .collect(toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     <V> void checkFields(Map<String, V> requestFields, List<String> requestedFields) {
@@ -352,8 +361,15 @@ public class DslService {
         // field is reported as missing, same as if the request had an empty body.
         Map<String, V> fields = requestFields == null ? Map.of() : requestFields;
 
+        Set<String> fieldsLowerCase = fields.keySet().stream()
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
+
         requestedFields.forEach((field) -> {
-                if (!fields.containsKey(field)) {
+                // A malformed declare entry can resolve to a null field name - treat that as missing,
+                // same as before this method compared names case-insensitively, rather than NPE.
+                boolean present = field != null && fieldsLowerCase.contains(field.toLowerCase());
+                if (!present) {
                     log.warn("Request has errors: field(s) missing: %s".formatted(field));
                 }
             }
