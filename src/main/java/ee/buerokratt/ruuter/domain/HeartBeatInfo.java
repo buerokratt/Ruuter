@@ -11,4 +11,5 @@ public class HeartBeatInfo {
     private long packagingTime;
     private long appStartTime;
     private long serverTime;
+    private String changelog;
 }

@@ -22,4 +22,11 @@ public class PackageVersionConfiguration {
     @Value("${PATCH}")
     private String patch;
 
+    // Base64-encoded by CI (see check-version.yml) to survive being embedded as a single Properties
+    // value - .env is loaded via the default PropertySourceFactory, i.e. as a plain Properties file,
+    // not shell syntax, so a raw multi-line changelog would need Properties escaping instead.
+    // Optional (defaults to empty) since local/non-CI .env files don't set it.
+    @Value("${CHANGELOG:}")
+    private String changelogBase64;
+
 }
