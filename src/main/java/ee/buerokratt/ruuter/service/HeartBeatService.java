@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import ee.buerokratt.ruuter.configuration.PackageInfoConfiguration;
 import ee.buerokratt.ruuter.domain.HeartBeatInfo;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 @Slf4j
 @Service
 public class HeartBeatService {
@@ -36,6 +39,19 @@ public class HeartBeatService {
     }
 
 
+    private String getChangelog() {
+        String changelogBase64 = packageVersionConfiguration.getChangelogBase64();
+        if (changelogBase64 == null || changelogBase64.isBlank())
+            return "";
+
+        try {
+            return new String(Base64.getDecoder().decode(changelogBase64), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            log.warn("Could not decode CHANGELOG from .env - expected base64: {}", e.getMessage());
+            return "";
+        }
+    }
+
     public HeartBeatInfo getData() {
         return HeartBeatInfo.builder()
             .appName(packageInfoConfiguration.getAppName())
@@ -43,6 +59,7 @@ public class HeartBeatService {
             .version(getVersion())
             .appStartTime(serverInfoService.getStartupTime())
             .serverTime(serverInfoService.getServerTime())
+            .changelog(getChangelog())
             .build();
     }
 

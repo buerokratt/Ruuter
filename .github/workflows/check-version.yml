@@ -23,6 +23,14 @@ jobs:
       - name: Generate Changelog
         run: npm run changelog
 
+      - name: Add changelog to .env
+        run: |
+          # CHANGELOG.md is embedded as one base64 value rather than raw text: .env is loaded via
+          # Spring's default PropertySourceFactory, i.e. parsed as a plain Properties file, and a
+          # multi-line changelog with ':'/'='/'#' characters would need Properties-style escaping
+          # to survive as a single value otherwise. See PackageVersionConfiguration.changelogBase64.
+          echo "CHANGELOG=$(base64 -w0 CHANGELOG.md)" >> .env
+
       - name: Load environment variables
         run: |
           awk -v branch="${{ env.BRANCH }}" ' /^[0-9a-zA-Z]+$/ { current_branch = $0; } current_branch == branch && /^[A-Z_]+=/{ print $0; }' release.env  | tee -a $GITHUB_ENV >> .env
