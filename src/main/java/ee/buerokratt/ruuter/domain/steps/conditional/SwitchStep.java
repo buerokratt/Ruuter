@@ -30,7 +30,9 @@ public class SwitchStep extends DslStep {
             .filter(condition -> Boolean.TRUE.equals(scriptingHelper.evaluateScripts(condition.getConditionStatement(), di.getContext(), di.getRequestBody(), di.getRequestQuery(), di.getRequestHeaders())))
             .findFirst();
 
-        correctStatement.ifPresent(condition -> di.setGotoStep(condition.getNextStepName()));
+        correctStatement.ifPresentOrElse(
+            condition -> di.setGotoStep(condition.getNextStepName()),
+            () -> di.setGotoStep(elseNextStepName));
     }
 
     @Override

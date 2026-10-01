@@ -73,6 +73,8 @@ public class DslController {
                                            @RequestParam(required = false) Map<String, Object> requestQuery,
                                            @RequestHeader(required = false) Map<String, String> requestHeaders,
                                            HttpServletRequest request) {
+        requestHeaders = requestHeaders == null ? new HashMap<>() : requestHeaders.entrySet().stream()
+            .collect(Collectors.toMap(e -> e.getKey().toLowerCase(), Map.Entry::getValue, (first, second) -> first, HashMap::new));
         String dsl = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
         // Remove '/' from beginning to read DSLs properly
         if (dsl.startsWith("/")) dsl = dsl.substring(1);

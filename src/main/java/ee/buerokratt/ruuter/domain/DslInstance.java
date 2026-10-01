@@ -128,6 +128,8 @@ public class DslInstance {
             String gotoStepName = getGotoStep();
             DslStep nextStep = steps.get(gotoStepName);
             setGotoStep(null);
+            if ("end".equals(gotoStepName))
+                return;
             executeNextStepWithoutMaxRecursionsExceeded(nextStep, gotoStepName, stepNames);
         } else if (Boolean.TRUE.equals(previousStep.getSkip()) || previousStep.getNextStepName() == null) {
             int nextStepIndex = stepNames.indexOf(previousStep.getName()) + 1;
