@@ -1,0 +1,19 @@
+
+# Central CI context hygiene
+.git
+**/.git
+**/node_modules
+**/__pycache__
+**/.venv
+.central-build
+.central-release
+installation-state
+**/operator-bindings.json
+**/published-images.json
+**/*.kubeconfig
+**/rit-byrokratt.yaml
+**/*.jks
+**/*.key
+**/evidence
+**/*.tar
+**/*.tar.gz

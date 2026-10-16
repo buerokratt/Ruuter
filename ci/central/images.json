@@ -1,0 +1,6 @@
+{
+  "ruuter": {
+    "dockerfile": "ci/central/ruuter.Dockerfile",
+    "context": "."
+  }
+}
