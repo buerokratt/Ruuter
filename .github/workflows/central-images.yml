@@ -55,4 +55,5 @@ jobs:
         with:
           name: central-image-${{ matrix.component }}-${{ github.sha }}
           path: .central-build/*.json
+          include-hidden-files: true
           if-no-files-found: error
